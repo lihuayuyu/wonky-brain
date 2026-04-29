@@ -756,7 +756,7 @@ main {
     <div class="section-label-line"></div>
   </div>
 
-  <div class="videos-grid">
+  <div class="videos-grid" id="yt-game">
     <a href="#" class="video-card v1">
       <div class="video-thumb">
         <span class="play-icon">▶</span>
@@ -896,5 +896,67 @@ main {
   <p class="footer-meta">© 2026 歪腦袋 · a wonky little corner</p>
 </footer>
 
+
+<script>
+// === YouTube 自動載入最新遊戲影片 ===
+const GAME_CHANNEL_ID = 'UCaJT8NS7ZIV8-qWCLI6X_rA'; // 蕨蕨・Casual Gameplay
+
+async function loadGameVideos() {
+  try {
+    const response = await fetch(`/api/youtube?channel=${GAME_CHANNEL_ID}`);
+    if (!response.ok) throw new Error('API failed');
+    const data = await response.json();
+    
+    if (!data.videos || data.videos.length === 0) {
+      console.log('No videos found');
+      return;
+    }
+    
+    const container = document.getElementById('yt-game');
+    if (!container) return;
+    
+    // 取前 6 部影片
+    const videos = data.videos.slice(0, 6);
+    container.innerHTML = videos.map((v, i) => {
+      const days = getDaysAgo(v.published);
+      return `
+        <a href="${v.url}" target="_blank" rel="noopener" class="video-card v${i + 1}" style="text-decoration: none;">
+          <div class="video-thumb" style="background-image: url('${v.thumbnail}'); background-size: cover; background-position: center;">
+            <span class="play-icon">▶</span>
+          </div>
+          <div class="video-content">
+            <h4 class="video-title">${escapeHtml(v.title)}</h4>
+            <p class="video-meta">YOUTUBE · ${days}</p>
+          </div>
+        </a>
+      `;
+    }).join('');
+  } catch (e) {
+    console.error('YouTube 影片載入失敗:', e);
+  }
+}
+
+function getDaysAgo(publishedDate) {
+  if (!publishedDate) return '';
+  const pub = new Date(publishedDate);
+  const now = new Date();
+  const diffMs = now - pub;
+  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  if (days === 0) return '今天';
+  if (days === 1) return '昨天';
+  if (days < 7) return days + ' 天前';
+  if (days < 30) return Math.floor(days / 7) + ' 週前';
+  if (days < 365) return Math.floor(days / 30) + ' 個月前';
+  return Math.floor(days / 365) + ' 年前';
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+document.addEventListener('DOMContentLoaded', loadGameVideos);
+</script>
 </body>
 </html>
