@@ -669,6 +669,24 @@ main {
   transform: translate(-1px, -1px);
   box-shadow: 5px 5px 0 var(--ink);
 }
+
+.youtube-embed-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  border: 2px solid var(--ink);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 4px 4px 0 var(--ink);
+  background: #000;
+}
+.youtube-embed-wrap iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
 </style>
 </head>
 <body>
@@ -756,72 +774,14 @@ main {
     <div class="section-label-line"></div>
   </div>
 
-  <div class="videos-grid" id="yt-game">
-    <a href="#" class="video-card v1">
-      <div class="video-thumb">
-        <span class="play-icon">▶</span>
-        <span class="video-duration">12:34</span>
-      </div>
-      <div class="video-content">
-        <h4 class="video-title">最新影片標題：遊戲試玩或攻略內容</h4>
-        <p class="video-meta">YOUTUBE · 2 天前</p>
-      </div>
-    </a>
-
-    <a href="#" class="video-card v2">
-      <div class="video-thumb">
-        <span class="play-icon">▶</span>
-        <span class="video-duration">8:21</span>
-      </div>
-      <div class="video-content">
-        <h4 class="video-title">第二支影片標題</h4>
-        <p class="video-meta">YOUTUBE · 1 週前</p>
-      </div>
-    </a>
-
-    <a href="#" class="video-card v3">
-      <div class="video-thumb">
-        <span class="play-icon">▶</span>
-        <span class="video-duration">15:42</span>
-      </div>
-      <div class="video-content">
-        <h4 class="video-title">第三支影片標題</h4>
-        <p class="video-meta">YOUTUBE · 2 週前</p>
-      </div>
-    </a>
-
-    <a href="#" class="video-card v4">
-      <div class="video-thumb">
-        <span class="play-icon">▶</span>
-        <span class="video-duration">10:05</span>
-      </div>
-      <div class="video-content">
-        <h4 class="video-title">第四支影片標題</h4>
-        <p class="video-meta">YOUTUBE · 3 週前</p>
-      </div>
-    </a>
-
-    <a href="#" class="video-card v5">
-      <div class="video-thumb">
-        <span class="play-icon">▶</span>
-        <span class="video-duration">7:18</span>
-      </div>
-      <div class="video-content">
-        <h4 class="video-title">第五支影片標題</h4>
-        <p class="video-meta">YOUTUBE · 1 個月前</p>
-      </div>
-    </a>
-
-    <a href="#" class="video-card v6">
-      <div class="video-thumb">
-        <span class="play-icon">▶</span>
-        <span class="video-duration">11:50</span>
-      </div>
-      <div class="video-content">
-        <h4 class="video-title">第六支影片標題</h4>
-        <p class="video-meta">YOUTUBE · 1 個月前</p>
-      </div>
-    </a>
+  <div class="youtube-embed-wrap" style="margin-bottom: 2.5rem;">
+    <iframe 
+      src="https://www.youtube.com/embed/videoseries?list=UUaJT8NS7ZIV8-qWCLI6X_rA" 
+      title="蕨蕨・Casual Gameplay 最新影片"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      referrerpolicy="strict-origin-when-cross-origin"
+      allowfullscreen></iframe>
   </div>
 
   <div class="load-more">
