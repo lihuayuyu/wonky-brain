@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>歪腦袋 — 什麼都想玩一下</title>
+<meta name="description" content="歪腦袋是一個亂七八糟但很歡樂的地方。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Dancing+Script:wght@400;500;600;700&family=ZCOOL+KuaiLe&family=Liu+Jian+Mao+Cao&family=Noto+Sans+TC:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+/* ============================================
+   歪腦袋 共用樣式（內嵌版，方便直接預覽）
+   ============================================ */
+
+:root {
+  --bg: #FFF5FA;
+  --bg-paper: #FFFFFF;
+  --ink: #4A3A5C;
+  --ink-soft: #8B7BA0;
+  --pink: #FF8FAF;
+  --pink-soft: #FFC8DD;
+  --pink-deep: #E8538A;
+  --blue: #A8C8FF;
+  --blue-soft: #D4E2FF;
+  --blue-deep: #6B9DFF;
+  --yellow: #FFE9A8;
+  --yellow-soft: #FFF5D1;
+  --green: #B8E5C8;
+  --purple: #D4C0FF;
+  --purple-deep: #B294E0;
+  --grid-line: rgba(232, 83, 138, 0.18);
+  --line: rgba(74, 58, 92, 0.15);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: linear-gradient(135deg, #FFE4F0 0%, #FFD6EA 50%, #F5DCFF 100%);
+  color: var(--ink);
+  font-family: 'Noto Sans TC', sans-serif;
+  font-weight: 400;
+  overflow-x: hidden;
+  position: relative;
+  min-height: 100vh;
+}
+
+/* 1. 夢幻雲朵漸層（粉色加重） */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(255, 150, 195, 0.7) 0%, transparent 35%),
+    radial-gradient(circle at 80% 15%, rgba(220, 200, 255, 0.65) 0%, transparent 40%),
+    radial-gradient(circle at 50% 60%, rgba(255, 195, 220, 0.7) 0%, transparent 45%),
+    radial-gradient(circle at 90% 75%, rgba(230, 200, 255, 0.65) 0%, transparent 35%),
+    radial-gradient(circle at 10% 85%, rgba(255, 180, 210, 0.7) 0%, transparent 40%);
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(2px);
+}
+
+/* 2. 淡格線（手帳紙感） */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: 
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 35px 35px;
+  pointer-events: none;
+  z-index: 1;
+  mix-blend-mode: multiply;
+}
+
+.page-stickers {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  overflow: hidden;
+}
+
+.sticker {
+  position: absolute;
+  user-select: none;
+  animation: floatSticker 6s ease-in-out infinite;
+}
+
+.sticker.flower {
+  font-size: 1.8rem;
+  color: var(--pink);
+  filter: drop-shadow(1px 1px 0 rgba(74, 58, 92, 0.3));
+}
+
+.sticker.heart {
+  font-size: 1.6rem;
+  color: var(--pink-deep);
+  filter: drop-shadow(1px 1px 0 rgba(74, 58, 92, 0.3));
+}
+
+.sticker.star {
+  font-size: 1.5rem;
+  color: var(--purple-deep);
+  filter: drop-shadow(1px 1px 0 rgba(74, 58, 92, 0.3));
+}
+
+.sticker.sparkle {
+  font-size: 1.4rem;
+  color: var(--blue-deep);
+  filter: drop-shadow(1px 1px 0 rgba(74, 58, 92, 0.3));
+}
+
+/* 緞帶造型 */
+.sticker.ribbon {
+  width: 50px;
+  height: 22px;
+  background: var(--pink);
+  border: 2px solid var(--ink);
+  border-radius: 4px;
+  filter: drop-shadow(2px 2px 0 rgba(74, 58, 92, 0.2));
+}
+.sticker.ribbon::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  right: -10px;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 12px 0 12px 10px;
+  border-color: transparent transparent transparent var(--pink);
+}
+
+/* 紙膠帶 */
+.sticker.tape {
+  width: 60px;
+  height: 22px;
+  background: rgba(196, 157, 255, 0.7);
+  border-left: 2px dashed rgba(0,0,0,0.2);
+  border-right: 2px dashed rgba(0,0,0,0.2);
+}
+
+.sticker.s1 { top: 8%; left: 4%; animation-delay: 0s; }
+.sticker.s2 { top: 18%; right: 6%; animation-delay: 1.2s; transform: rotate(15deg); }
+.sticker.s3 { top: 35%; left: 3%; animation-delay: 2s; }
+.sticker.s4 { top: 50%; right: 4%; animation-delay: 3s; transform: rotate(-12deg); }
+.sticker.s5 { top: 65%; left: 5%; animation-delay: 1.5s; }
+.sticker.s6 { top: 78%; right: 5%; animation-delay: 4s; transform: rotate(20deg); }
+.sticker.s7 { top: 25%; left: 8%; animation-delay: 2.5s; transform: rotate(-15deg); }
+.sticker.s8 { top: 88%; right: 8%; animation-delay: 0.8s; }
+
+@keyframes floatSticker {
+  0%, 100% { transform: translateY(0) rotate(-5deg); }
+  50% { transform: translateY(-10px) rotate(5deg); }
+}
+
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255, 228, 240, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 2px solid var(--ink);
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-family: 'ZCOOL KuaiLe', cursive;
+  font-size: 1.8rem;
+  letter-spacing: 0.05em;
+  color: var(--ink);
+  text-decoration: none;
+  position: relative;
+  display: inline-block;
+  transform: rotate(-2deg);
+}
+
+.logo::after {
+  content: '✦';
+  position: absolute;
+  top: -10px;
+  right: -15px;
+  font-size: 1rem;
+  color: var(--pink);
+}
+
+.logo .dot { color: var(--pink-deep); }
+
+.nav-links {
+  display: flex;
+  gap: 1.8rem;
+  font-family: 'Caveat', cursive;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.nav-links a {
+  color: var(--ink);
+  text-decoration: none;
+  transition: all 0.3s;
+  padding: 0.2rem 0.8rem;
+  border-radius: 999px;
+}
+
+.nav-links a:hover {
+  background: var(--pink);
+  color: white;
+  transform: rotate(-3deg);
+}
+
+.nav-links a.active {
+  background: var(--blue);
+  color: white;
+}
+
+@media (max-width: 640px) {
+  .nav-links { gap: 0.5rem; font-size: 1rem; }
+  .nav-links a { padding: 0.1rem 0.5rem; }
+}
+
+footer {
+  text-align: center;
+  padding: 5rem 2rem 3rem;
+  margin-top: 4rem;
+  position: relative;
+  z-index: 3;
+  border-top: 2px dashed var(--ink);
+}
+
+.footer-line {
+  font-family: 'Liu Jian Mao Cao', cursive;
+  font-size: 1.6rem;
+  margin-bottom: 0.8rem;
+  color: var(--ink);
+}
+
+.footer-meta {
+  font-family: 'Dancing Script', cursive;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+
+main {
+  position: relative;
+  z-index: 3;
+}
+</style>
+<style>
+/* === 頁面專屬樣式 === */
+
+/* 影片橫幅 */
+.media-section {
+  max-width: 1300px;
+  margin: 1rem auto 2rem;
+  padding: 0 2rem;
+  position: relative;
+  z-index: 3;
+}
+
+.media-frame {
+  position: relative;
+  aspect-ratio: 16/8;
+  border: 3px solid var(--ink);
+  border-radius: 24px;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--blue-soft) 0%, var(--pink-soft) 50%, var(--yellow-soft) 100%);
+  box-shadow: 7px 7px 0 var(--ink);
+}
+
+.media-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 2rem;
+}
+
+.media-icon {
+  font-family: 'Caveat', cursive;
+  font-weight: 600;
+  font-size: 2.5rem;
+  color: var(--ink);
+  margin-bottom: 0.3rem;
+  transform: rotate(-3deg);
+  background: white;
+  padding: 0.3rem 1.5rem;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.media-text {
+  font-family: 'Liu Jian Mao Cao', cursive;
+  font-size: 1.3rem;
+  color: var(--ink);
+  margin-top: 1rem;
+}
+
+/* 媒體區四角貼紙 */
+.media-frame::before {
+  content: '★';
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  font-size: 2rem;
+  color: var(--yellow);
+  text-shadow: 
+    -2px -2px 0 var(--ink),
+    2px -2px 0 var(--ink),
+    -2px 2px 0 var(--ink),
+    2px 2px 0 var(--ink);
+  z-index: 2;
+  transform: rotate(-15deg);
+}
+
+.media-frame::after {
+  content: '✿';
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  font-size: 2rem;
+  color: var(--pink);
+  text-shadow: 
+    -1px -1px 0 var(--ink),
+    1px -1px 0 var(--ink),
+    -1px 1px 0 var(--ink),
+    1px 1px 0 var(--ink);
+  z-index: 2;
+  transform: rotate(15deg);
+}
+
+/* === 大型品牌標題（最上方） === */
+.brand-hero {
+  text-align: center;
+  padding: 5rem 2rem 1rem;
+  position: relative;
+  z-index: 3;
+}
+
+.brand-hero-tag {
+  display: inline-block;
+  font-family: 'Caveat', cursive;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--yellow);
+  padding: 0.3rem 1.5rem;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  margin-bottom: 1.5rem;
+  transform: rotate(-3deg);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.brand-title {
+  font-family: 'ZCOOL KuaiLe', cursive;
+  font-weight: 400;
+  font-size: clamp(7rem, 18vw, 14rem);
+  line-height: 1;
+  letter-spacing: 0.08em;
+  margin-bottom: 1.5rem;
+  display: inline-block;
+}
+
+.brand-title .char {
+  display: inline-block;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  cursor: pointer;
+  text-shadow: 4px 4px 0 var(--ink);
+}
+
+.brand-title .char:nth-child(1) {
+  color: var(--pink);
+  transform: rotate(-6deg);
+}
+.brand-title .char:nth-child(2) {
+  color: var(--blue);
+  transform: rotate(4deg) translateY(-10px);
+}
+.brand-title .char:nth-child(3) {
+  color: var(--yellow);
+  transform: rotate(-3deg) translateY(2px);
+}
+
+.brand-title .char:hover:nth-child(1) {
+  transform: rotate(-15deg) scale(1.15);
+}
+.brand-title .char:hover:nth-child(2) {
+  transform: rotate(12deg) translateY(-18px) scale(1.15);
+}
+.brand-title .char:hover:nth-child(3) {
+  transform: rotate(-10deg) translateY(-5px) scale(1.15);
+}
+
+.brand-tagline {
+  font-family: 'Liu Jian Mao Cao', cursive;
+  font-size: clamp(1.4rem, 2.5vw, 2rem);
+  color: var(--ink);
+  margin-top: 0.5rem;
+  letter-spacing: 0.1em;
+}
+
+/* === 四個直條 === */
+.columns-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+  position: relative;
+  z-index: 3;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+}
+
+@media (max-width: 1024px) {
+  .columns { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  .columns { grid-template-columns: 1fr; }
+}
+
+.column {
+  background: white;
+  border: 2.5px solid var(--ink);
+  border-radius: 24px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 6px 6px 0 var(--ink);
+  position: relative;
+}
+
+.column:hover {
+  transform: translateY(-8px);
+  box-shadow: 10px 10px 0 var(--ink);
+}
+
+/* 每個直條的角落貼紙 */
+.column::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  width: 60px;
+  height: 20px;
+  background: var(--yellow);
+  border: 2px solid var(--ink);
+  transform: translateX(-50%) rotate(-5deg);
+  border-radius: 4px;
+  z-index: 5;
+}
+
+.col-cover {
+  aspect-ratio: 9/16;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1.5rem;
+  border-bottom: 2.5px solid var(--ink);
+}
+
+.col-music .col-cover { background: linear-gradient(160deg, var(--purple), #9966D4); }
+.col-game .col-cover { background: linear-gradient(160deg, var(--pink), var(--pink-deep)); }
+.col-blog .col-cover { background: linear-gradient(160deg, var(--yellow), #FFB833); }
+.col-tools .col-cover { background: linear-gradient(160deg, var(--green), #3FBD7F); }
+
+.col-cover::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: 
+    radial-gradient(circle at 30% 25%, rgba(255,255,255,0.5) 0%, transparent 50%),
+    radial-gradient(circle at 70% 75%, rgba(255,255,255,0.2) 0%, transparent 50%);
+}
+
+.col-number {
+  font-family: 'ZCOOL KuaiLe', cursive;
+  font-size: 5rem;
+  line-height: 1;
+  color: white;
+  position: relative;
+  z-index: 2;
+  text-shadow: 3px 3px 0 var(--ink);
+  transform: rotate(-5deg);
+  align-self: flex-start;
+}
+
+.col-cover-bottom {
+  position: relative;
+  z-index: 2;
+  background: white;
+  border: 2px solid var(--ink);
+  border-radius: 12px;
+  padding: 0.5rem 0.8rem;
+  align-self: flex-start;
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.col-cover-en {
+  font-family: 'Dancing Script', cursive;
+  font-style: italic;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* 角落小貼紙 */
+.col-cover-sticker {
+  position: absolute;
+  top: 0.8rem;
+  right: 0.8rem;
+  font-family: 'Caveat', cursive;
+  font-size: 1rem;
+  font-weight: 600;
+  background: white;
+  color: var(--ink);
+  padding: 0.15rem 0.7rem;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  z-index: 3;
+  transform: rotate(8deg);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.col-info {
+  padding: 1.5rem 1.3rem 1rem;
+  border-bottom: 1px dashed var(--ink);
+}
+
+.col-title {
+  font-family: 'ZCOOL KuaiLe', cursive;
+  font-size: 1.6rem;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.4rem;
+  color: var(--ink);
+}
+
+.col-subtitle {
+  font-family: 'Caveat', cursive;
+  font-size: 1.1rem;
+  color: var(--pink-deep);
+  font-weight: 600;
+  margin-bottom: 0.7rem;
+}
+
+.col-desc {
+  font-size: 0.88rem;
+  line-height: 1.7;
+  color: var(--ink);
+}
+
+.col-latest {
+  padding: 1.2rem 1.3rem;
+  flex: 1;
+}
+
+.col-latest-label {
+  font-family: 'Caveat', cursive;
+  font-size: 1rem;
+  color: var(--ink);
+  background: var(--yellow);
+  padding: 0.1rem 0.6rem;
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  display: inline-block;
+  margin-bottom: 0.7rem;
+  transform: rotate(-2deg);
+}
+
+.col-thumb {
+  aspect-ratio: 16/9;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--bg), white);
+  border: 2px dashed var(--ink);
+  margin-bottom: 0.7rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.col-thumb::after {
+  content: '▶';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 32px;
+  height: 32px;
+  background: var(--pink);
+  color: white;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  padding-left: 2px;
+}
+
+.col-latest-title {
+  font-family: 'Noto Sans TC', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--ink);
+  margin-bottom: 0.3rem;
+}
+
+.col-latest-meta {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--ink-soft);
+  letter-spacing: 0.1em;
+}
+
+.col-cta {
+  padding: 0.5rem 1.3rem 1.3rem;
+}
+
+.col-btn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'ZCOOL KuaiLe', cursive;
+  font-size: 1.05rem;
+  text-decoration: none;
+  color: white;
+  background: var(--ink);
+  padding: 0.7rem 1.2rem;
+  border-radius: 999px;
+  border: 2px solid var(--ink);
+  transition: all 0.2s;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.col-btn:hover {
+  background: var(--pink);
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.col-btn .arrow {
+  font-family: 'Dancing Script', cursive;
+  font-size: 1.4rem;
+}
+</style>
+</head>
+<body>
+
+<!-- 漂浮貼紙裝飾 -->
+<div class="page-stickers">
+  <span class="sticker flower s1">✿</span>
+  <span class="sticker ribbon s2"></span>
+  <span class="sticker heart s3">♡</span>
+  <span class="sticker flower s4">❀</span>
+  <span class="sticker sparkle s5">✦</span>
+  <span class="sticker tape s6"></span>
+  <span class="sticker star s7">✧</span>
+  <span class="sticker flower s8">✿</span>
+</div>
+
+<!-- 導覽列 -->
+<nav class="nav">
+  <a href="index.html" class="logo">歪腦袋<span class="dot">.</span></a>
+  <div class="nav-links">
+    <a href="index.html" class="active">首頁</a>
+    <a href="blog.html">部落格</a>
+    <a href="music.html">音樂</a>
+    <a href="game.html">遊戲</a>
+    <a href="tools.html">工具</a>
+  </div>
+</nav>
+
+<!-- 大型品牌標題 -->
+<header class="brand-hero">
+  <span class="brand-hero-tag">welcome to the chaos ✦</span>
+  <h1 class="brand-title">
+    <span class="char">歪</span><span class="char">腦</span><span class="char">袋</span>
+  </h1>
+  <p class="brand-tagline">什麼都想玩一下 ~</p>
+</header>
+
+<!-- 影片/媒體橫幅 -->
+<section class="media-section">
+  <div class="media-frame">
+    <div class="media-placeholder">
+      <div class="media-icon">↓ 之後放影片或 GIF ↓</div>
+      <p class="media-text">video · gif · image</p>
+    </div>
+  </div>
+</section>
+
+<main class="columns-container">
+  <!-- 區塊標題 -->
+  <div class="section-header">
+    <p class="section-eyebrow">~ what's inside ~</p>
+    <h2 class="section-title">這裡有什麼？</h2>
+  </div>
+
+  <!-- 四個直條 -->
+  <div class="columns">
+
+    <!-- 音樂 -->
+    <div class="column col-music">
+      <div class="col-cover">
+      </div>
+      <div class="col-info">
+        <h3 class="col-title">AI 音樂</h3>
+        <p class="col-subtitle">O.D.D. Frequencies</p>
+        <p class="col-desc">用 AI 做出來的奇怪好聽音樂。</p>
+      </div>
+      <div class="col-latest">
+        <span class="col-latest-label">~ 最新 ~</span>
+        <div class="col-thumb"></div>
+        <h4 class="col-latest-title">最新音樂作品</h4>
+        <p class="col-latest-meta">YOUTUBE · 待新增</p>
+      </div>
+      <div class="col-cta">
+        <a href="music.html" class="col-btn">
+          <span>查看更多</span>
+          <span class="arrow">→</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- 遊戲 -->
+    <div class="column col-game">
+      <div class="col-cover">
+      </div>
+      <div class="col-info">
+        <h3 class="col-title">遊戲頻道</h3>
+        <p class="col-subtitle">Casual Gameplay</p>
+        <p class="col-desc">遊戲試玩、新手攻略、各種有趣的分享。</p>
+      </div>
+      <div class="col-latest">
+        <span class="col-latest-label">~ 最新 ~</span>
+        <div class="col-thumb"></div>
+        <h4 class="col-latest-title">最新遊戲攻略</h4>
+        <p class="col-latest-meta">YOUTUBE · 待新增</p>
+      </div>
+      <div class="col-cta">
+        <a href="game.html" class="col-btn">
+          <span>查看更多</span>
+          <span class="arrow">→</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- 部落格 -->
+    <div class="column col-blog">
+      <div class="col-cover">
+      </div>
+      <div class="col-info">
+        <h3 class="col-title">部落格</h3>
+        <p class="col-subtitle">Daily Notes</p>
+        <p class="col-desc">書籍、家電、生活、保健，亂七八糟什麼都寫。</p>
+      </div>
+      <div class="col-latest">
+        <span class="col-latest-label">~ 最新 ~</span>
+        <div class="col-thumb"></div>
+        <h4 class="col-latest-title">最新文章標題</h4>
+        <p class="col-latest-meta">BLOG · 待新增</p>
+      </div>
+      <div class="col-cta">
+        <a href="blog.html" class="col-btn">
+          <span>查看更多</span>
+          <span class="arrow">→</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- 工具 -->
+    <div class="column col-tools">
+      <div class="col-cover">
+      </div>
+      <div class="col-info">
+        <h3 class="col-title">小工具</h3>
+        <p class="col-subtitle">Wonky Stuff</p>
+        <p class="col-desc">一些自己做來玩的小工具。</p>
+      </div>
+      <div class="col-latest">
+        <span class="col-latest-label">~ 最新 ~</span>
+        <div class="col-thumb"></div>
+        <h4 class="col-latest-title">隨機決策器</h4>
+        <p class="col-latest-meta">TOOLS · 待新增</p>
+      </div>
+      <div class="col-cta">
+        <a href="tools.html" class="col-btn">
+          <span>查看更多</span>
+          <span class="arrow">→</span>
+        </a>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  <p class="footer-line">~ 慢慢長大中 ~</p>
+  <p class="footer-meta">© 2026 歪腦袋 · a wonky little corner</p>
+</footer>
+
+</body>
+</html>

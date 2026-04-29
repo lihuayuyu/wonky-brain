@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>隨機決策輪盤 — 歪腦袋</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Dancing+Script:wght@400;500;600;700&family=ZCOOL+KuaiLe&family=Liu+Jian+Mao+Cao&family=Noto+Sans+TC:wght@400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #FFE4F0;
+  --bg-paper: #FFFFFF;
+  --ink: #4A3A5C;
+  --ink-soft: #8B7BA0;
+  --pink: #FF8FAF;
+  --pink-soft: #FFC8DD;
+  --pink-deep: #E8538A;
+  --blue: #A8C8FF;
+  --yellow: #FFE9A8;
+  --green: #B8E5C8;
+  --purple: #D4C0FF;
+  --grid-line: rgba(232, 83, 138, 0.18);
+  --purple-deep: #B294E0;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: linear-gradient(135deg, #FFE4F0 0%, #FFD6EA 50%, #F5DCFF 100%);
+  color: var(--ink);
+  font-family: 'Noto Sans TC', sans-serif;
+  overflow-x: hidden;
+  position: relative;
+  min-height: 100vh;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(255, 150, 195, 0.7) 0%, transparent 35%),
+    radial-gradient(circle at 80% 15%, rgba(220, 200, 255, 0.65) 0%, transparent 40%),
+    radial-gradient(circle at 50% 60%, rgba(255, 195, 220, 0.7) 0%, transparent 45%),
+    radial-gradient(circle at 90% 75%, rgba(230, 200, 255, 0.65) 0%, transparent 35%),
+    radial-gradient(circle at 10% 85%, rgba(255, 180, 210, 0.7) 0%, transparent 40%);
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(2px);
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: 
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 35px 35px;
+  pointer-events: none;
+  z-index: 1;
+  mix-blend-mode: multiply;
+}
+
+.page-stickers { position: fixed; inset: 0; pointer-events: none; z-index: 2; }
+.sticker { position: absolute; user-select: none; animation: floatSticker 6s ease-in-out infinite; }
+.sticker.flower { font-size: 1.8rem; color: var(--pink); filter: drop-shadow(1px 1px 0 rgba(74, 58, 92, 0.3)); }
+.sticker.heart { font-size: 1.6rem; color: var(--pink-deep); filter: drop-shadow(1px 1px 0 rgba(74, 58, 92, 0.3)); }
+.sticker.star { font-size: 1.5rem; color: var(--purple-deep); filter: drop-shadow(1px 1px 0 rgba(74, 58, 92, 0.3)); }
+.sticker.sparkle { font-size: 1.4rem; color: var(--blue-deep); filter: drop-shadow(1px 1px 0 rgba(74, 58, 92, 0.3)); }
+.sticker.ribbon { width: 50px; height: 22px; background: var(--pink); border: 2px solid var(--ink); border-radius: 4px; filter: drop-shadow(2px 2px 0 rgba(74, 58, 92, 0.2)); }
+.sticker.ribbon::after { content: ''; position: absolute; top: -2px; right: -10px; width: 0; height: 0; border-style: solid; border-width: 12px 0 12px 10px; border-color: transparent transparent transparent var(--pink); }
+.sticker.tape { width: 60px; height: 22px; background: rgba(196, 157, 255, 0.7); border-left: 2px dashed rgba(0,0,0,0.2); border-right: 2px dashed rgba(0,0,0,0.2); }
+.sticker.s1 { top: 8%; left: 4%; animation-delay: 0s; }
+.sticker.s2 { top: 18%; right: 6%; animation-delay: 1.2s; transform: rotate(15deg); }
+.sticker.s3 { top: 35%; left: 3%; animation-delay: 2s; }
+.sticker.s4 { top: 50%; right: 4%; animation-delay: 3s; transform: rotate(-12deg); }
+.sticker.s5 { top: 65%; left: 5%; animation-delay: 1.5s; }
+.sticker.s6 { top: 78%; right: 5%; animation-delay: 4s; transform: rotate(20deg); }
+.sticker.s7 { top: 25%; left: 8%; animation-delay: 2.5s; transform: rotate(-15deg); }
+.sticker.s8 { top: 88%; right: 8%; animation-delay: 0.8s; }
+
+@keyframes floatSticker {
+  0%, 100% { transform: translateY(0) rotate(-5deg); }
+  50% { transform: translateY(-15px) rotate(8deg); }
+}
+
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255, 228, 240, 0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 2px solid var(--ink);
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-family: 'ZCOOL KuaiLe', cursive;
+  font-size: 1.8rem;
+  color: var(--ink);
+  text-decoration: none;
+  display: inline-block;
+  transform: rotate(-2deg);
+  position: relative;
+}
+.logo::after { content: '✦'; position: absolute; top: -10px; right: -15px; font-size: 1rem; color: var(--pink); }
+.logo .dot { color: var(--pink-deep); }
+
+.nav-links {
+  display: flex;
+  gap: 1.8rem;
+  font-family: 'Caveat', cursive;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+.nav-links a {
+  color: var(--ink);
+  text-decoration: none;
+  padding: 0.2rem 0.8rem;
+  border-radius: 999px;
+  transition: all 0.3s;
+}
+.nav-links a:hover { background: var(--pink); color: white; transform: rotate(-3deg); }
+.nav-links a.active { background: var(--blue); color: white; }
+
+@media (max-width: 640px) {
+  .nav-links { gap: 0.5rem; font-size: 1rem; }
+  .nav-links a { padding: 0.1rem 0.5rem; }
+}
+
+footer {
+  text-align: center;
+  padding: 5rem 2rem 3rem;
+  margin-top: 2rem;
+  position: relative;
+  z-index: 3;
+  border-top: 2px dashed var(--ink);
+}
+.footer-line { font-family: 'Liu Jian Mao Cao', cursive; font-size: 1.6rem; margin-bottom: 0.8rem; color: var(--ink); }
+.footer-meta { font-family: 'Dancing Script', cursive; font-size: 0.95rem; color: var(--ink-soft); font-weight: 500; }
+
+.breadcrumb {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem 2rem 0;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+  letter-spacing: 0.1em;
+  position: relative;
+  z-index: 3;
+}
+.breadcrumb a { color: var(--ink-soft); text-decoration: none; }
+.breadcrumb a:hover { color: var(--pink-deep); }
+.breadcrumb .sep { margin: 0 0.5rem; opacity: 0.4; }
+
+.page-header {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 2rem 1rem;
+  position: relative;
+  z-index: 3;
+}
+
+.page-eyebrow {
+  display: inline-block;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--yellow);
+  padding: 0.3rem 1.2rem;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.2em;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.page-title {
+  font-family: 'ZCOOL KuaiLe', cursive;
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  letter-spacing: 0.05em;
+  color: var(--ink);
+  margin-bottom: 0.5rem;
+}
+
+.page-tagline {
+  font-family: 'Liu Jian Mao Cao', cursive;
+  font-size: 1.3rem;
+  color: var(--ink-soft);
+}
+
+main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  position: relative;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 2rem;
+}
+
+@media (max-width: 900px) {
+  main { grid-template-columns: 1fr; }
+}
+
+/* === 工具區（輪盤） === */
+.tool-area {
+  background: white;
+  border: 2.5px solid var(--ink);
+  border-radius: 28px;
+  padding: 2.5rem;
+  position: relative;
+  box-shadow: 6px 6px 0 var(--ink);
+}
+
+.tool-section-title {
+  font-family: 'ZCOOL KuaiLe', cursive;
+  font-size: 1.4rem;
+  margin-bottom: 1.2rem;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tool-section-title::before {
+  content: '★';
+  color: var(--pink-deep);
+  font-size: 1.5rem;
+  text-shadow: -1px -1px 0 var(--ink), 1px -1px 0 var(--ink), -1px 1px 0 var(--ink), 1px 1px 0 var(--ink);
+}
+
+.options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  margin-bottom: 1.5rem;
+}
+
+.option-row {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.option-input {
+  flex: 1;
+  padding: 0.8rem 1.2rem;
+  border: 2px solid var(--ink);
+  border-radius: 12px;
+  background: var(--bg);
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 1rem;
+  color: var(--ink);
+  transition: all 0.3s;
+}
+
+.option-input:focus {
+  outline: none;
+  background: white;
+  box-shadow: 3px 3px 0 var(--ink);
+  transform: translate(-1px, -1px);
+}
+
+.remove-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px solid var(--ink);
+  background: white;
+  color: var(--ink);
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 2px 2px 0 var(--ink);
+  flex-shrink: 0;
+}
+
+.remove-btn:hover {
+  background: var(--pink);
+  color: white;
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.add-btn {
+  width: 100%;
+  padding: 0.8rem;
+  border: 2px dashed var(--ink);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--ink);
+  font-family: 'ZCOOL KuaiLe', cursive;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-bottom: 2rem;
+}
+
+.add-btn:hover {
+  border-color: var(--pink-deep);
+  color: var(--pink-deep);
+  background: rgba(255, 105, 180, 0.08);
+}
+
+/* === 輪盤 === */
+.wheel-container {
+  margin-top: 2rem;
+  text-align: center;
+  position: relative;
+}
+
+.wheel-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto 1.5rem;
+}
+
+/* 指針 */
+.wheel-pointer {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 18px solid transparent;
+  border-right: 18px solid transparent;
+  border-top: 32px solid var(--pink-deep);
+  filter: drop-shadow(0 2px 0 var(--ink));
+  z-index: 10;
+}
+
+.wheel-pointer::after {
+  content: '';
+  position: absolute;
+  top: -36px;
+  left: -18px;
+  width: 0;
+  height: 0;
+  border-left: 18px solid transparent;
+  border-right: 18px solid transparent;
+  border-top: 32px solid var(--ink);
+  z-index: -1;
+}
+
+.wheel {
+  width: 100%;
+  aspect-ratio: 1/1;
+  border-radius: 50%;
+  border: 4px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--ink);
+  transition: transform 5s cubic-bezier(0.17, 0.67, 0.21, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.wheel-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: white;
+  border: 3px solid var(--ink);
+  box-shadow: 0 0 0 4px white, 0 0 0 7px var(--ink);
+  z-index: 5;
+}
+
+.spin-btn {
+  width: 100%;
+  max-width: 380px;
+  padding: 1.2rem;
+  border: 2.5px solid var(--ink);
+  border-radius: 999px;
+  background: var(--pink);
+  color: white;
+  font-family: 'ZCOOL KuaiLe', cursive;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.1em;
+  box-shadow: 5px 5px 0 var(--ink);
+}
+
+.spin-btn:hover {
+  background: var(--pink-deep);
+  transform: translate(-2px, -2px);
+  box-shadow: 7px 7px 0 var(--ink);
+}
+
+.spin-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 var(--ink);
+}
+
+.spin-btn:disabled {
+  background: var(--ink-soft);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 5px 5px 0 var(--ink);
+}
+
+.result-area {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background: var(--yellow);
+  border: 2.5px solid var(--ink);
+  border-radius: 20px;
+  text-align: center;
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.result-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.3em;
+  color: var(--pink-deep);
+  margin-bottom: 0.5rem;
+}
+
+.result-text {
+  font-family: 'Noto Sans TC', sans-serif;
+  font-weight: 900;
+  font-size: clamp(1.5rem, 3.5vw, 2.2rem);
+  color: var(--ink);
+  word-break: break-word;
+  line-height: 1.3;
+}
+
+.result-empty {
+  color: var(--ink-soft);
+  font-style: italic;
+  font-size: 1rem;
+}
+
+@keyframes pop {
+  0% { transform: scale(0.5); opacity: 0; }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.result-text.show {
+  animation: pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* === 側邊使用說明 === */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.guide-box {
+  background: white;
+  border: 2.5px solid var(--ink);
+  border-radius: 24px;
+  padding: 2rem;
+  box-shadow: 5px 5px 0 var(--ink);
+}
+
+.guide-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.3em;
+  color: var(--pink-deep);
+  margin-bottom: 0.5rem;
+}
+
+.guide-title {
+  font-family: 'ZCOOL KuaiLe', cursive;
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: var(--ink);
+}
+
+/* === 整齊對齊的步驟 === */
+.guide-steps {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  counter-reset: step;
+}
+
+.guide-steps li {
+  position: relative;
+  padding-left: 3.5rem;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--ink);
+  counter-increment: step;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+}
+
+.guide-steps li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  background: var(--pink);
+  color: white;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'ZCOOL KuaiLe', cursive;
+  font-size: 1.1rem;
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.tip-box {
+  background: var(--yellow);
+  border: 2.5px solid var(--ink);
+  border-radius: 16px;
+  padding: 1.3rem 1.5rem;
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.tip-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.3em;
+  color: var(--pink-deep);
+  margin-bottom: 0.4rem;
+}
+
+.tip-text {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--ink);
+}
+
+.use-cases {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.use-cases li {
+  font-family: 'Caveat', cursive;
+  font-size: 1.1rem;
+  padding: 0.2rem 0.9rem;
+  background: var(--bg);
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  color: var(--ink);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.back-area {
+  text-align: center;
+  margin: 4rem 0 2rem;
+  position: relative;
+  z-index: 3;
+}
+
+.back-btn {
+  font-family: 'ZCOOL KuaiLe', cursive;
+  font-size: 1.2rem;
+  padding: 0.8rem 2rem;
+  border-radius: 999px;
+  border: 2.5px solid var(--ink);
+  background: white;
+  color: var(--ink);
+  text-decoration: none;
+  display: inline-block;
+  box-shadow: 4px 4px 0 var(--ink);
+  transition: all 0.2s;
+}
+
+.back-btn:hover {
+  background: var(--blue);
+  color: white;
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+</style>
+</head>
+<body>
+
+<div class="page-stickers">
+  <span class="sticker flower s1">✿</span>
+  <span class="sticker ribbon s2"></span>
+  <span class="sticker heart s3">♡</span>
+  <span class="sticker flower s4">❀</span>
+  <span class="sticker sparkle s5">✦</span>
+  <span class="sticker tape s6"></span>
+  <span class="sticker star s7">✧</span>
+  <span class="sticker flower s8">✿</span>
+</div>
+
+<nav class="nav">
+  <a href="index.html" class="logo">歪腦袋<span class="dot">.</span></a>
+  <div class="nav-links">
+    <a href="index.html">首頁</a>
+    <a href="blog.html">部落格</a>
+    <a href="music.html">音樂</a>
+    <a href="game.html">遊戲</a>
+    <a href="tools.html" class="active">工具</a>
+  </div>
+</nav>
+
+<nav class="breadcrumb">
+  <a href="index.html">首頁</a>
+  <span class="sep">/</span>
+  <a href="tools.html">小工具</a>
+  <span class="sep">/</span>
+  隨機決策輪盤
+</nav>
+
+<header class="page-header">
+  <span class="page-eyebrow">RANDOM DECISION</span>
+  <h1 class="page-title">決策輪盤</h1>
+  <p class="page-tagline">猶豫不決的時候，讓輪盤幫你選</p>
+</header>
+
+<main>
+  <section class="tool-area">
+    <h2 class="tool-section-title">輸入選項</h2>
+
+    <div class="options-list" id="optionsList">
+      <div class="option-row">
+        <input type="text" class="option-input" placeholder="選項 1（例如：吃日式）" oninput="updateWheel()">
+        <button class="remove-btn" onclick="removeOption(this)">×</button>
+      </div>
+      <div class="option-row">
+        <input type="text" class="option-input" placeholder="選項 2（例如：吃中式）" oninput="updateWheel()">
+        <button class="remove-btn" onclick="removeOption(this)">×</button>
+      </div>
+      <div class="option-row">
+        <input type="text" class="option-input" placeholder="選項 3（例如：吃義式）" oninput="updateWheel()">
+        <button class="remove-btn" onclick="removeOption(this)">×</button>
+      </div>
+    </div>
+
+    <button class="add-btn" onclick="addOption()">+ 加入更多選項</button>
+
+    <!-- 輪盤 -->
+    <div class="wheel-container">
+      <div class="wheel-wrap">
+        <div class="wheel-pointer"></div>
+        <svg class="wheel" id="wheel" viewBox="0 0 400 400">
+          <!-- 輪盤會用 JS 動態產生 -->
+        </svg>
+        <div class="wheel-center"></div>
+      </div>
+
+      <button class="spin-btn" id="spinBtn" onclick="spin()">轉吧！輪盤 ✨</button>
+
+      <div class="result-area">
+        <p class="result-label">RESULT</p>
+        <div class="result-text result-empty" id="resultText">
+          填好選項，按下按鈕～
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <aside class="sidebar">
+
+    <div class="guide-box">
+      <p class="guide-eyebrow">HOW TO USE</p>
+      <h3 class="guide-title">使用方法</h3>
+      <ol class="guide-steps">
+        <li>輸入你猶豫的選項，至少要兩個</li>
+        <li>按「加入更多選項」可以無限新增</li>
+        <li>不要的選項按右邊的 × 刪掉</li>
+        <li>按下「轉吧！輪盤」就會開始轉</li>
+      </ol>
+    </div>
+
+    <div class="tip-box">
+      <p class="tip-label">TIP</p>
+      <p class="tip-text">
+        如果結果不滿意，代表你心裡其實已經有答案了 😉 那就選你心裡的那個吧！
+      </p>
+    </div>
+
+    <div class="guide-box">
+      <p class="guide-eyebrow">WHEN TO USE</p>
+      <h3 class="guide-title">什麼時候用得上？</h3>
+      <ul class="use-cases">
+        <li># 吃什麼</li>
+        <li># 看哪部電影</li>
+        <li># 去哪玩</li>
+        <li># 做哪件事</li>
+        <li># 抽獎</li>
+        <li># 開會誰先發言</li>
+        <li># 分組</li>
+      </ul>
+    </div>
+
+  </aside>
+</main>
+
+<div class="back-area">
+  <a href="tools.html" class="back-btn">← 回到工具列表</a>
+</div>
+
+<footer>
+  <p class="footer-line">~ 慢慢長大中 ~</p>
+  <p class="footer-meta">© 2026 歪腦袋 · a wonky little corner</p>
+</footer>
+
+<script>
+  const COLORS = ['#FF69B4', '#4A9EFF', '#FFE066', '#6FE2A0', '#C49DFF', '#FFB8D9', '#FF3D8A', '#B0D4FF', '#FFB833', '#3FBD7F'];
+  const CENTER = 200;
+  const RADIUS = 195;
+  let currentRotation = 0;
+  let isSpinning = false;
+
+  // 加入選項
+  function addOption() {
+    const list = document.getElementById('optionsList');
+    const count = list.children.length + 1;
+    const row = document.createElement('div');
+    row.className = 'option-row';
+    row.innerHTML = `
+      <input type="text" class="option-input" placeholder="選項 ${count}" oninput="updateWheel()">
+      <button class="remove-btn" onclick="removeOption(this)">×</button>
+    `;
+    list.appendChild(row);
+    row.querySelector('input').focus();
+    updateWheel();
+  }
+
+  // 刪除選項
+  function removeOption(btn) {
+    const list = document.getElementById('optionsList');
+    if (list.children.length > 2) {
+      btn.parentElement.remove();
+      updateWheel();
+    } else {
+      alert('至少要保留兩個選項喔！');
+    }
+  }
+
+  // 取得目前選項
+  function getOptions() {
+    const inputs = document.querySelectorAll('.option-input');
+    return Array.from(inputs).map((i, idx) => i.value.trim() || `選項 ${idx + 1}`);
+  }
+
+  // 更新輪盤
+  function updateWheel() {
+    const options = getOptions();
+    const wheel = document.getElementById('wheel');
+    const sliceAngle = 360 / options.length;
+    let svg = '';
+
+    options.forEach((option, i) => {
+      const startAngle = i * sliceAngle - 90;  // -90 讓第一塊從上方開始
+      const endAngle = (i + 1) * sliceAngle - 90;
+      const startRad = (startAngle * Math.PI) / 180;
+      const endRad = (endAngle * Math.PI) / 180;
+
+      const x1 = CENTER + RADIUS * Math.cos(startRad);
+      const y1 = CENTER + RADIUS * Math.sin(startRad);
+      const x2 = CENTER + RADIUS * Math.cos(endRad);
+      const y2 = CENTER + RADIUS * Math.sin(endRad);
+
+      const largeArc = sliceAngle > 180 ? 1 : 0;
+      const color = COLORS[i % COLORS.length];
+
+      // 扇形
+      svg += `<path d="M ${CENTER} ${CENTER} L ${x1} ${y1} A ${RADIUS} ${RADIUS} 0 ${largeArc} 1 ${x2} ${y2} Z" 
+              fill="${color}" stroke="#2A3A6B" stroke-width="2"/>`;
+
+      // 文字
+      const midAngle = startAngle + sliceAngle / 2;
+      const midRad = (midAngle * Math.PI) / 180;
+      const textRadius = RADIUS * 0.65;
+      const tx = CENTER + textRadius * Math.cos(midRad);
+      const ty = CENTER + textRadius * Math.sin(midRad);
+      const textRotate = midAngle + 90 > 90 && midAngle + 90 < 270 ? midAngle + 180 : midAngle;
+      
+      // 限制文字長度顯示
+      const displayText = option.length > 8 ? option.substring(0, 7) + '…' : option;
+      
+      svg += `<text x="${tx}" y="${ty}" 
+              text-anchor="middle" 
+              dominant-baseline="middle"
+              transform="rotate(${textRotate}, ${tx}, ${ty})"
+              fill="#2A3A6B"
+              font-family="'Noto Sans TC', sans-serif"
+              font-weight="700"
+              font-size="${options.length > 8 ? '14' : '18'}"
+              style="user-select: none;">${displayText}</text>`;
+    });
+
+    wheel.innerHTML = svg;
+  }
+
+  // 轉輪盤
+  function spin() {
+    if (isSpinning) return;
+    
+    const inputs = document.querySelectorAll('.option-input');
+    const filledOptions = Array.from(inputs).map(i => i.value.trim()).filter(v => v.length > 0);
+    
+    if (filledOptions.length < 2) {
+      const resultEl = document.getElementById('resultText');
+      resultEl.textContent = '至少填兩個選項才能轉喔！';
+      resultEl.classList.remove('result-empty');
+      return;
+    }
+
+    isSpinning = true;
+    document.getElementById('spinBtn').disabled = true;
+    document.getElementById('spinBtn').textContent = '轉動中...';
+
+    const options = getOptions();
+    const sliceAngle = 360 / options.length;
+    
+    // 隨機選一個
+    const winnerIndex = Math.floor(Math.random() * options.length);
+    
+    // 計算需要旋轉到哪個角度（讓中獎扇形對準上方指針）
+    // 5 圈以上 + 對準角度
+    const baseRotations = 5;
+    const targetAngle = -(winnerIndex * sliceAngle + sliceAngle / 2);
+    const totalRotation = currentRotation + (baseRotations * 360) + targetAngle - (currentRotation % 360);
+    
+    currentRotation = totalRotation;
+    document.getElementById('wheel').style.transform = `rotate(${totalRotation}deg)`;
+
+    // 等動畫結束
+    setTimeout(() => {
+      const resultEl = document.getElementById('resultText');
+      const winner = options[winnerIndex];
+      resultEl.textContent = winner;
+      resultEl.classList.remove('result-empty', 'show');
+      void resultEl.offsetWidth;
+      resultEl.classList.add('show');
+
+      isSpinning = false;
+      document.getElementById('spinBtn').disabled = false;
+      document.getElementById('spinBtn').textContent = '再轉一次！✨';
+    }, 5000);
+  }
+
+  // 初始化
+  updateWheel();
+</script>
+
+</body>
+</html>

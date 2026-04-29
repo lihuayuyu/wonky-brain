@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>文章標題 — 歪腦袋</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Dancing+Script:wght@400;500;600;700&family=ZCOOL+KuaiLe&family=Liu+Jian+Mao+Cao&family=Noto+Sans+TC:wght@400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #FFE4F0;
+  --bg-paper: #FFFFFF;
+  --ink: #4A3A5C;
+  --ink-soft: #8B7BA0;
+  --pink: #FF8FAF;
+  --pink-soft: #FFC8DD;
+  --pink-deep: #E8538A;
+  --blue: #A8C8FF;
+  --blue-soft: #B0D4FF;
+  --yellow: #FFE9A8;
+  --green: #B8E5C8;
+  --purple: #D4C0FF;
+  --grid-line: rgba(232, 83, 138, 0.18);
+  --purple-deep: #B294E0;
+  --line: rgba(42, 58, 107, 0.15);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: linear-gradient(135deg, #FFE4F0 0%, #FFD6EA 50%, #F5DCFF 100%);
+  color: var(--ink);
+  font-family: 'Noto Sans TC', sans-serif;
+  overflow-x: hidden;
+  position: relative;
+  min-height: 100vh;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(255, 150, 195, 0.7) 0%, transparent 35%),
+    radial-gradient(circle at 80% 15%, rgba(220, 200, 255, 0.65) 0%, transparent 40%),
+    radial-gradient(circle at 50% 60%, rgba(255, 195, 220, 0.7) 0%, transparent 45%),
+    radial-gradient(circle at 90% 75%, rgba(230, 200, 255, 0.65) 0%, transparent 35%),
+    radial-gradient(circle at 10% 85%, rgba(255, 180, 210, 0.7) 0%, transparent 40%);
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(2px);
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: 
+    radial-gradient(circle at 15% 15%, rgba(255, 105, 180, 0.15) 0%, transparent 35%),
+    radial-gradient(circle at 85% 50%, rgba(74, 158, 255, 0.18) 0%, transparent 40%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.page-stickers { position: fixed; inset: 0; pointer-events: none; z-index: 2; }
+.sticker { position: absolute; user-select: none; animation: floatSticker 6s ease-in-out infinite; }
+.sticker.flower { font-size: 1.8rem; color: var(--pink); filter: drop-shadow(1px 1px 0 rgba(74, 58, 92, 0.3)); }
+.sticker.heart { font-size: 1.6rem; color: var(--pink-deep); filter: drop-shadow(1px 1px 0 rgba(74, 58, 92, 0.3)); }
+.sticker.star { font-size: 1.5rem; color: var(--purple-deep); filter: drop-shadow(1px 1px 0 rgba(74, 58, 92, 0.3)); }
+.sticker.sparkle { font-size: 1.4rem; color: var(--blue-deep); filter: drop-shadow(1px 1px 0 rgba(74, 58, 92, 0.3)); }
+.sticker.ribbon { width: 50px; height: 22px; background: var(--pink); border: 2px solid var(--ink); border-radius: 4px; filter: drop-shadow(2px 2px 0 rgba(74, 58, 92, 0.2)); }
+.sticker.ribbon::after { content: ''; position: absolute; top: -2px; right: -10px; width: 0; height: 0; border-style: solid; border-width: 12px 0 12px 10px; border-color: transparent transparent transparent var(--pink); }
+.sticker.tape { width: 60px; height: 22px; background: rgba(196, 157, 255, 0.7); border-left: 2px dashed rgba(0,0,0,0.2); border-right: 2px dashed rgba(0,0,0,0.2); }
+.sticker.s1 { top: 8%; left: 4%; animation-delay: 0s; }
+.sticker.s2 { top: 18%; right: 6%; animation-delay: 1.2s; transform: rotate(15deg); }
+.sticker.s3 { top: 35%; left: 3%; animation-delay: 2s; }
+.sticker.s4 { top: 50%; right: 4%; animation-delay: 3s; transform: rotate(-12deg); }
+.sticker.s5 { top: 65%; left: 5%; animation-delay: 1.5s; }
+.sticker.s6 { top: 78%; right: 5%; animation-delay: 4s; transform: rotate(20deg); }
+.sticker.s7 { top: 25%; left: 8%; animation-delay: 2.5s; transform: rotate(-15deg); }
+.sticker.s8 { top: 88%; right: 8%; animation-delay: 0.8s; }
+
+@keyframes floatSticker {
+  0%, 100% { transform: translateY(0) rotate(-5deg); }
+  50% { transform: translateY(-15px) rotate(8deg); }
+}
+
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255, 228, 240, 0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 2px solid var(--ink);
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.logo {
+  font-family: 'ZCOOL KuaiLe', cursive;
+  font-size: 1.8rem;
+  color: var(--ink);
+  text-decoration: none;
+  display: inline-block;
+  transform: rotate(-2deg);
+  position: relative;
+}
+.logo::after { content: '✦'; position: absolute; top: -10px; right: -15px; font-size: 1rem; color: var(--pink); }
+.logo .dot { color: var(--pink-deep); }
+
+.nav-links {
+  display: flex;
+  gap: 1.8rem;
+  font-family: 'Caveat', cursive;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+.nav-links a {
+  color: var(--ink);
+  text-decoration: none;
+  transition: all 0.3s;
+  padding: 0.2rem 0.8rem;
+  border-radius: 999px;
+}
+.nav-links a:hover {
+  background: var(--pink);
+  color: white;
+  transform: rotate(-3deg);
+}
+.nav-links a.active { background: var(--blue); color: white; }
+
+@media (max-width: 640px) {
+  .nav-links { gap: 0.5rem; font-size: 1rem; }
+  .nav-links a { padding: 0.1rem 0.5rem; }
+}
+
+footer {
+  text-align: center;
+  padding: 5rem 2rem 3rem;
+  margin-top: 4rem;
+  position: relative;
+  z-index: 3;
+  border-top: 2px dashed var(--ink);
+}
+.footer-line {
+  font-family: 'Liu Jian Mao Cao', cursive;
+  font-size: 1.6rem;
+  margin-bottom: 0.8rem;
+  color: var(--ink);
+}
+.footer-meta {
+  font-family: 'Dancing Script', cursive;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+
+/* === 文章專屬 === */
+.article-wrapper {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 2rem;
+  position: relative;
+  z-index: 3;
+}
+
+.breadcrumb {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+  letter-spacing: 0.1em;
+  margin-bottom: 2rem;
+  margin-top: 1rem;
+}
+
+.breadcrumb a { color: var(--ink-soft); text-decoration: none; }
+.breadcrumb a:hover { color: var(--pink-deep); }
+.breadcrumb .sep { margin: 0 0.5rem; opacity: 0.4; }
+
+.article-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.tag {
+  display: inline-block;
+  font-family: 'ZCOOL KuaiLe', cursive;
+  font-size: 1rem;
+  padding: 0.3rem 1.2rem;
+  background: var(--pink);
+  color: white;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  margin-bottom: 1.5rem;
+  text-decoration: none;
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.article-title {
+  font-family: 'Noto Sans TC', sans-serif;
+  font-weight: 900;
+  font-size: clamp(2rem, 5vw, 3rem);
+  line-height: 1.3;
+  color: var(--ink);
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.01em;
+}
+
+.article-meta {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  flex-wrap: wrap;
+}
+
+.article-meta span::before { content: '·'; margin-right: 1.5rem; color: var(--pink-deep); }
+.article-meta span:first-child::before { display: none; margin: 0; }
+
+.cover-image {
+  aspect-ratio: 16/9;
+  border: 2.5px solid var(--ink);
+  border-radius: 24px;
+  background: linear-gradient(135deg, var(--pink), var(--purple));
+  margin-bottom: 3rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 5px 5px 0 var(--ink);
+}
+
+.cover-image::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: 
+    radial-gradient(circle at 30% 25%, rgba(255,255,255,0.5) 0%, transparent 50%);
+}
+
+.cover-sticker {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.2rem;
+  font-family: 'ZCOOL KuaiLe', cursive;
+  font-size: 1.1rem;
+  background: var(--yellow);
+  color: var(--ink);
+  padding: 0.3rem 1rem;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  z-index: 2;
+  transform: rotate(8deg);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.article-content {
+  font-size: 1.05rem;
+  line-height: 1.9;
+  color: var(--ink);
+}
+
+.article-content p {
+  margin-bottom: 1.5rem;
+}
+
+.article-content h2 {
+  font-family: 'Noto Sans TC', sans-serif;
+  font-weight: 900;
+  font-size: 1.6rem;
+  margin: 3rem 0 1rem;
+  color: var(--ink);
+  position: relative;
+  padding-left: 1rem;
+  border-left: 4px solid var(--pink-deep);
+}
+
+.article-content h3 {
+  font-family: 'Noto Sans TC', sans-serif;
+  font-weight: 700;
+  font-size: 1.25rem;
+  margin: 2rem 0 0.8rem;
+  color: var(--ink);
+}
+
+.article-content ul, .article-content ol {
+  margin-bottom: 1.5rem;
+  padding-left: 1.5rem;
+}
+
+.article-content li {
+  margin-bottom: 0.5rem;
+}
+
+.article-content blockquote {
+  background: white;
+  border: 2.5px solid var(--ink);
+  border-left: 8px solid var(--pink-deep);
+  border-radius: 12px;
+  padding: 1.2rem 1.5rem;
+  margin: 1.8rem 0;
+  font-family: 'Liu Jian Mao Cao', cursive;
+  font-size: 1.2rem;
+  color: var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.article-content a {
+  color: var(--pink-deep);
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+}
+
+.article-content strong {
+  color: var(--ink);
+  font-weight: 700;
+  background: linear-gradient(transparent 60%, var(--yellow) 60%);
+}
+
+/* 聯盟行銷推薦框 */
+.affiliate-box {
+  background: white;
+  border: 2.5px solid var(--ink);
+  border-radius: 20px;
+  padding: 1.8rem;
+  margin: 2.5rem 0;
+  position: relative;
+  box-shadow: 5px 5px 0 var(--ink);
+}
+
+.affiliate-label {
+  position: absolute;
+  top: -14px;
+  left: 1.5rem;
+  background: var(--pink);
+  color: white;
+  font-family: 'ZCOOL KuaiLe', cursive;
+  font-size: 1rem;
+  padding: 0.2rem 1rem;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.affiliate-title {
+  font-family: 'Noto Sans TC', sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  color: var(--ink);
+  margin-top: 0.5rem;
+}
+
+.affiliate-desc {
+  font-size: 0.92rem;
+  color: var(--ink-soft);
+  line-height: 1.7;
+  margin-bottom: 1rem;
+}
+
+.affiliate-btn {
+  display: inline-block;
+  font-family: 'ZCOOL KuaiLe', cursive;
+  font-size: 1.1rem;
+  padding: 0.6rem 1.8rem;
+  background: var(--ink);
+  color: white;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  text-decoration: none;
+  transition: all 0.2s;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.affiliate-btn:hover {
+  background: var(--pink);
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+/* 文章底部 */
+.article-footer {
+  margin-top: 4rem;
+  padding-top: 2rem;
+  border-top: 2px dashed var(--ink);
+}
+
+.tags-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+
+.tag-mini {
+  font-family: 'Caveat', cursive;
+  font-size: 1rem;
+  padding: 0.2rem 0.9rem;
+  background: white;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  color: var(--ink);
+  text-decoration: none;
+  transition: all 0.2s;
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.tag-mini:hover {
+  background: var(--pink);
+  color: white;
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.author-card {
+  background: white;
+  border: 2.5px solid var(--ink);
+  border-radius: 20px;
+  padding: 1.8rem;
+  display: flex;
+  gap: 1.2rem;
+  align-items: center;
+  margin-top: 2rem;
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.author-avatar {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--pink), var(--purple));
+  border: 2px solid var(--ink);
+  flex-shrink: 0;
+}
+
+.author-name {
+  font-family: 'ZCOOL KuaiLe', cursive;
+  font-size: 1.5rem;
+  color: var(--ink);
+  margin-bottom: 0.3rem;
+}
+
+.author-bio {
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+
+/* 相關文章 */
+.related-section {
+  max-width: 1200px;
+  margin: 5rem auto 0;
+  padding: 0 2rem;
+  position: relative;
+  z-index: 3;
+}
+
+.section-label {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.section-label-line {
+  flex: 1;
+  height: 2px;
+  background: var(--ink);
+  border-radius: 2px;
+}
+
+.section-label-text {
+  font-family: 'ZCOOL KuaiLe', cursive;
+  font-size: 1.5rem;
+  color: var(--ink);
+  background: var(--yellow);
+  padding: 0.3rem 1.5rem;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  box-shadow: 3px 3px 0 var(--ink);
+  transform: rotate(-2deg);
+}
+
+.related-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .related-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  .related-grid { grid-template-columns: 1fr; }
+}
+
+.related-card {
+  background: white;
+  border: 2.5px solid var(--ink);
+  border-radius: 20px;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.3s;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.related-card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+
+.related-card .thumb {
+  aspect-ratio: 16/10;
+  border-bottom: 2.5px solid var(--ink);
+}
+
+.related-card.c1 .thumb { background: linear-gradient(135deg, var(--yellow), #FFB833); }
+.related-card.c2 .thumb { background: linear-gradient(135deg, var(--green), #3FBD7F); }
+.related-card.c3 .thumb { background: linear-gradient(135deg, var(--purple), #9966D4); }
+
+.related-card .content {
+  padding: 1.2rem;
+}
+
+.related-card .post-title {
+  font-family: 'Noto Sans TC', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--ink);
+  margin-bottom: 0.4rem;
+}
+
+.related-card .post-meta {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--ink-soft);
+  letter-spacing: 0.1em;
+}
+
+.back-to-blog {
+  text-align: center;
+  margin: 4rem 0 2rem;
+  position: relative;
+  z-index: 3;
+}
+
+.back-btn {
+  font-family: 'ZCOOL KuaiLe', cursive;
+  font-size: 1.2rem;
+  padding: 0.8rem 2rem;
+  border-radius: 999px;
+  border: 2.5px solid var(--ink);
+  background: white;
+  color: var(--ink);
+  text-decoration: none;
+  transition: all 0.2s;
+  display: inline-block;
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.back-btn:hover {
+  background: var(--blue);
+  color: white;
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+</style>
+</head>
+<body>
+
+<div class="page-stickers">
+  <span class="sticker flower s1">✿</span>
+  <span class="sticker ribbon s2"></span>
+  <span class="sticker heart s3">♡</span>
+  <span class="sticker flower s4">❀</span>
+  <span class="sticker sparkle s5">✦</span>
+  <span class="sticker tape s6"></span>
+  <span class="sticker star s7">✧</span>
+  <span class="sticker flower s8">✿</span>
+</div>
+
+<nav class="nav">
+  <a href="index.html" class="logo">歪腦袋<span class="dot">.</span></a>
+  <div class="nav-links">
+    <a href="index.html">首頁</a>
+    <a href="blog.html" class="active">部落格</a>
+    <a href="music.html">音樂</a>
+    <a href="game.html">遊戲</a>
+    <a href="tools.html">工具</a>
+  </div>
+</nav>
+
+<article class="article-wrapper">
+
+  <nav class="breadcrumb">
+    <a href="index.html">首頁</a>
+    <span class="sep">/</span>
+    <a href="blog.html">部落格</a>
+    <span class="sep">/</span>
+    <a href="#">推薦</a>
+  </nav>
+
+  <header class="article-header">
+    <a href="#" class="tag">推薦</a>
+    <h1 class="article-title">這裡放文章標題：吸引人的好標題決定點擊率</h1>
+    <div class="article-meta">
+      <span>2026.04.27</span>
+      <span>5 MIN READ</span>
+      <span>BY 歪腦袋</span>
+    </div>
+  </header>
+
+  <div class="cover-image">
+  </div>
+
+  <div class="article-content">
+    <p>這是文章的開頭段落，通常會用一個吸引人的故事或場景開場，讓讀者願意繼續往下讀。第一段是整篇文章最重要的地方，要在這裡告訴讀者為什麼這篇文章值得花時間看完。</p>
+
+    <p>第二段可以延伸第一段的內容，把背景交代清楚，讓讀者知道你接下來要分享什麼東西、為什麼你有資格分享這個主題。</p>
+
+    <h2>第一個重點段落標題</h2>
+
+    <p>這裡可以放主要內容的第一個重點。每個段落不要太長，<strong>重要的關鍵字可以加重點</strong>，這樣讀者掃讀的時候比較容易抓到重點。</p>
+
+    <ul>
+      <li>列出第一個要點，簡短說明</li>
+      <li>列出第二個要點，補充細節</li>
+      <li>列出第三個要點，舉例說明</li>
+    </ul>
+
+    <blockquote>
+      用引言塊放重要的金句或讀者會印象深刻的話，這樣可以讓文章看起來更有節奏感。
+    </blockquote>
+
+    <h2>第二個重點段落標題</h2>
+
+    <p>繼續分享內容，文章長度建議至少 800 字以上，對 SEO 比較友善。Google 比較喜歡有深度的內容，太短的文章排名會比較吃虧。</p>
+
+    <h3>小標題：細項說明</h3>
+
+    <p>用三級標題可以把內容切得更細，讓讀者容易找到自己想看的部分。</p>
+
+    <ol>
+      <li>第一步：先做什麼</li>
+      <li>第二步：再做什麼</li>
+      <li>第三步：最後做什麼</li>
+    </ol>
+
+    <!-- 聯盟行銷區塊 -->
+    <div class="affiliate-box">
+      <span class="affiliate-label">~ 推薦商品 ~</span>
+      <h4 class="affiliate-title">這裡放聯盟商品名稱</h4>
+      <p class="affiliate-desc">簡短說明為什麼推薦這個商品，自己用過覺得哪裡好，幫讀者做決定的關鍵資訊都放在這裡。</p>
+      <a href="#" class="affiliate-btn">蝦皮看看 →</a>
+    </div>
+
+    <h2>結論</h2>
+
+    <p>用一段話總結整篇文章的重點，提醒讀者最重要的 take-away。如果有相關文章可以推薦，也可以在這裡放連結，讓讀者繼續看下去。</p>
+  </div>
+
+  <footer class="article-footer">
+    <div class="tags-row">
+      <a href="#" class="tag-mini"># 標籤一</a>
+      <a href="#" class="tag-mini"># 標籤二</a>
+      <a href="#" class="tag-mini"># 標籤三</a>
+      <a href="#" class="tag-mini"># 標籤四</a>
+    </div>
+
+    <div class="author-card">
+      <div class="author-avatar"></div>
+      <div>
+        <h4 class="author-name">歪腦袋</h4>
+        <p class="author-bio">什麼都想玩一下的雜食型創作者。AI 音樂、遊戲、生活什麼都聊。</p>
+      </div>
+    </div>
+  </footer>
+
+</article>
+
+<section class="related-section">
+  <div class="section-label">
+    <div class="section-label-line"></div>
+    <p class="section-label-text">~ 你可能也會喜歡 ~</p>
+    <div class="section-label-line"></div>
+  </div>
+
+  <div class="related-grid">
+    <a href="post.html" class="related-card c1">
+      <div class="thumb"></div>
+      <div class="content">
+        <h3 class="post-title">相關文章標題一</h3>
+        <p class="post-meta">2026.04.20 · 推薦</p>
+      </div>
+    </a>
+
+    <a href="post.html" class="related-card c2">
+      <div class="thumb"></div>
+      <div class="content">
+        <h3 class="post-title">相關文章標題二</h3>
+        <p class="post-meta">2026.04.18 · 開箱</p>
+      </div>
+    </a>
+
+    <a href="post.html" class="related-card c3">
+      <div class="thumb"></div>
+      <div class="content">
+        <h3 class="post-title">相關文章標題三</h3>
+        <p class="post-meta">2026.04.15 · 教學</p>
+      </div>
+    </a>
+  </div>
+
+  <div class="back-to-blog">
+    <a href="blog.html" class="back-btn">← 回到部落格</a>
+  </div>
+</section>
+
+<footer>
+  <p class="footer-line">~ 慢慢長大中 ~</p>
+  <p class="footer-meta">© 2026 歪腦袋 · a wonky little corner</p>
+</footer>
+
+</body>
+</html>

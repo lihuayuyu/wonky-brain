@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>遊戲攻略 — 歪腦袋</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Dancing+Script:wght@400;500;600;700&family=ZCOOL+KuaiLe&family=Liu+Jian+Mao+Cao&family=Noto+Sans+TC:wght@400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #FFE4F0;
+  --bg-paper: #FFFFFF;
+  --ink: #4A3A5C;
+  --ink-soft: #8B7BA0;
+  --pink: #FF8FAF;
+  --pink-soft: #FFC8DD;
+  --pink-deep: #E8538A;
+  --blue: #A8C8FF;
+  --yellow: #FFE9A8;
+  --green: #B8E5C8;
+  --purple: #D4C0FF;
+  --grid-line: rgba(232, 83, 138, 0.18);
+  --purple-deep: #B294E0;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: linear-gradient(135deg, #FFE4F0 0%, #FFD6EA 50%, #F5DCFF 100%);
+  color: var(--ink);
+  font-family: 'Noto Sans TC', sans-serif;
+  overflow-x: hidden;
+  position: relative;
+  min-height: 100vh;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(255, 150, 195, 0.7) 0%, transparent 35%),
+    radial-gradient(circle at 80% 15%, rgba(220, 200, 255, 0.65) 0%, transparent 40%),
+    radial-gradient(circle at 50% 60%, rgba(255, 195, 220, 0.7) 0%, transparent 45%),
+    radial-gradient(circle at 90% 75%, rgba(230, 200, 255, 0.65) 0%, transparent 35%),
+    radial-gradient(circle at 10% 85%, rgba(255, 180, 210, 0.7) 0%, transparent 40%);
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(2px);
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: 
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 35px 35px;
+  pointer-events: none;
+  z-index: 1;
+  mix-blend-mode: multiply;
+}
+
+.page-stickers { position: fixed; inset: 0; pointer-events: none; z-index: 2; }
+.sticker { position: absolute; user-select: none; animation: floatSticker 6s ease-in-out infinite; }
+.sticker.flower { font-size: 1.8rem; color: var(--pink); filter: drop-shadow(1px 1px 0 rgba(74, 58, 92, 0.3)); }
+.sticker.heart { font-size: 1.6rem; color: var(--pink-deep); filter: drop-shadow(1px 1px 0 rgba(74, 58, 92, 0.3)); }
+.sticker.star { font-size: 1.5rem; color: var(--purple-deep); filter: drop-shadow(1px 1px 0 rgba(74, 58, 92, 0.3)); }
+.sticker.sparkle { font-size: 1.4rem; color: var(--blue-deep); filter: drop-shadow(1px 1px 0 rgba(74, 58, 92, 0.3)); }
+.sticker.ribbon { width: 50px; height: 22px; background: var(--pink); border: 2px solid var(--ink); border-radius: 4px; filter: drop-shadow(2px 2px 0 rgba(74, 58, 92, 0.2)); }
+.sticker.ribbon::after { content: ''; position: absolute; top: -2px; right: -10px; width: 0; height: 0; border-style: solid; border-width: 12px 0 12px 10px; border-color: transparent transparent transparent var(--pink); }
+.sticker.tape { width: 60px; height: 22px; background: rgba(196, 157, 255, 0.7); border-left: 2px dashed rgba(0,0,0,0.2); border-right: 2px dashed rgba(0,0,0,0.2); }
+.sticker.s1 { top: 8%; left: 4%; animation-delay: 0s; }
+.sticker.s2 { top: 18%; right: 6%; animation-delay: 1.2s; transform: rotate(15deg); }
+.sticker.s3 { top: 35%; left: 3%; animation-delay: 2s; }
+.sticker.s4 { top: 50%; right: 4%; animation-delay: 3s; transform: rotate(-12deg); }
+.sticker.s5 { top: 65%; left: 5%; animation-delay: 1.5s; }
+.sticker.s6 { top: 78%; right: 5%; animation-delay: 4s; transform: rotate(20deg); }
+.sticker.s7 { top: 25%; left: 8%; animation-delay: 2.5s; transform: rotate(-15deg); }
+.sticker.s8 { top: 88%; right: 8%; animation-delay: 0.8s; }
+
+@keyframes floatSticker {
+  0%, 100% { transform: translateY(0) rotate(-5deg); }
+  50% { transform: translateY(-15px) rotate(8deg); }
+}
+
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255, 228, 240, 0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 2px solid var(--ink);
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-family: 'ZCOOL KuaiLe', cursive;
+  font-size: 1.8rem;
+  color: var(--ink);
+  text-decoration: none;
+  display: inline-block;
+  transform: rotate(-2deg);
+  position: relative;
+}
+.logo::after { content: '✦'; position: absolute; top: -10px; right: -15px; font-size: 1rem; color: var(--pink); }
+.logo .dot { color: var(--pink-deep); }
+
+.nav-links {
+  display: flex;
+  gap: 1.8rem;
+  font-family: 'Caveat', cursive;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+.nav-links a {
+  color: var(--ink);
+  text-decoration: none;
+  padding: 0.2rem 0.8rem;
+  border-radius: 999px;
+  transition: all 0.3s;
+}
+.nav-links a:hover { background: var(--pink); color: white; transform: rotate(-3deg); }
+.nav-links a.active { background: var(--blue); color: white; }
+
+@media (max-width: 640px) {
+  .nav-links { gap: 0.5rem; font-size: 1rem; }
+  .nav-links a { padding: 0.1rem 0.5rem; }
+}
+
+footer {
+  text-align: center;
+  padding: 5rem 2rem 3rem;
+  margin-top: 4rem;
+  position: relative;
+  z-index: 3;
+  border-top: 2px dashed var(--ink);
+}
+.footer-line { font-family: 'Liu Jian Mao Cao', cursive; font-size: 1.6rem; margin-bottom: 0.8rem; color: var(--ink); }
+.footer-meta { font-family: 'Dancing Script', cursive; font-size: 0.95rem; color: var(--ink-soft); font-weight: 500; }
+
+.page-header {
+  text-align: center;
+  padding: 3rem 2rem 1.5rem;
+  position: relative;
+  z-index: 3;
+}
+
+.page-eyebrow {
+  display: inline-block;
+  font-family: 'Caveat', cursive;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--yellow);
+  padding: 0.2rem 1.2rem;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  margin-bottom: 1rem;
+  transform: rotate(-3deg);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.page-title {
+  font-family: 'ZCOOL KuaiLe', cursive;
+  font-size: clamp(3rem, 8vw, 5rem);
+  letter-spacing: 0.05em;
+  color: var(--ink);
+  margin-bottom: 0.8rem;
+}
+
+.page-subtitle {
+  font-family: 'Dancing Script', cursive;
+  font-size: 1.6rem;
+  color: var(--pink-deep);
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+
+.page-tagline {
+  font-family: 'Liu Jian Mao Cao', cursive;
+  font-size: 1.3rem;
+  color: var(--ink-soft);
+}
+
+main {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 2rem;
+  position: relative;
+  z-index: 3;
+}
+
+/* === 區塊標題 === */
+.section-label {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 4rem 0 2rem;
+}
+
+.section-label-line {
+  flex: 1;
+  height: 2px;
+  background: var(--ink);
+  border-radius: 2px;
+}
+
+.section-label-text {
+  font-family: 'ZCOOL KuaiLe', cursive;
+  font-size: 1.5rem;
+  color: var(--ink);
+  background: var(--yellow);
+  padding: 0.3rem 1.5rem;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  box-shadow: 3px 3px 0 var(--ink);
+  transform: rotate(-2deg);
+}
+
+/* === 代儲橫條 === */
+.aff-banner {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 1.5rem;
+  align-items: center;
+  background: white;
+  border: 2.5px solid var(--ink);
+  border-radius: 20px;
+  padding: 1.5rem 2rem;
+  margin: 2rem 0 0;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s;
+  box-shadow: 5px 5px 0 var(--ink);
+  position: relative;
+  overflow: hidden;
+}
+
+.aff-banner::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -10%;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, var(--pink) 0%, transparent 70%);
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.aff-banner:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0 var(--ink);
+}
+
+.aff-banner-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: var(--pink);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Dancing Script', cursive;
+  font-size: 1.6rem;
+  font-weight: 700;
+  border: 2px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+  position: relative;
+  z-index: 2;
+}
+
+.aff-banner-content {
+  position: relative;
+  z-index: 2;
+  min-width: 0;
+}
+
+.aff-banner-eyebrow {
+  font-family: 'Caveat', cursive;
+  font-size: 1rem;
+  color: var(--pink-deep);
+  margin-bottom: 0.1rem;
+}
+
+.aff-banner-title {
+  font-family: 'ZCOOL KuaiLe', cursive;
+  font-size: 1.3rem;
+  color: var(--ink);
+  margin-bottom: 0.2rem;
+}
+
+.aff-banner-desc {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+.aff-banner-arrow {
+  font-family: 'ZCOOL KuaiLe', cursive;
+  font-size: 1.5rem;
+  color: var(--pink-deep);
+  transition: transform 0.3s;
+  position: relative;
+  z-index: 2;
+}
+
+.aff-banner:hover .aff-banner-arrow {
+  transform: translateX(6px);
+}
+
+@media (max-width: 600px) {
+  .aff-banner { padding: 1.2rem 1.3rem; gap: 1rem; }
+  .aff-banner-arrow { display: none; }
+  .aff-banner-icon { width: 48px; height: 48px; font-size: 1.3rem; }
+  .aff-banner-title { font-size: 1.1rem; }
+}
+
+/* === 精選遊戲區 === */
+.featured-games {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .featured-games { grid-template-columns: 1fr; }
+}
+
+.game-feature {
+  background: white;
+  border: 2.5px solid var(--ink);
+  border-radius: 24px;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 5px 5px 0 var(--ink);
+}
+
+.game-feature:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0 var(--ink);
+}
+
+.game-feature .cover {
+  aspect-ratio: 16/9;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 2.5px solid var(--ink);
+}
+
+.game-feature.g1 .cover { background: linear-gradient(135deg, var(--pink), var(--pink-deep)); }
+.game-feature.g2 .cover { background: linear-gradient(135deg, var(--purple), #9966D4); }
+
+.game-feature .cover::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: 
+    radial-gradient(circle at 30% 25%, rgba(255,255,255,0.4) 0%, transparent 50%);
+}
+
+.game-feature .game-cover-tag {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  font-family: 'ZCOOL KuaiLe', cursive;
+  font-size: 1rem;
+  padding: 0.3rem 1rem;
+  background: var(--yellow);
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  color: var(--ink);
+  z-index: 2;
+  transform: rotate(-3deg);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.game-feature .content {
+  padding: 1.8rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.game-feature .game-name {
+  font-family: 'ZCOOL KuaiLe', cursive;
+  font-size: 1.6rem;
+  margin-bottom: 0.5rem;
+  color: var(--ink);
+}
+
+.game-feature .game-desc {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--ink-soft);
+  margin-bottom: 1rem;
+  flex: 1;
+}
+
+.game-feature .meta-row {
+  display: flex;
+  gap: 1rem;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--ink-soft);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.game-feature .meta-row span::before {
+  content: '·';
+  margin-right: 0.5rem;
+  color: var(--pink-deep);
+}
+.game-feature .meta-row span:first-child::before { display: none; }
+
+/* === YouTube 影片卡片 === */
+.videos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .videos-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  .videos-grid { grid-template-columns: 1fr; }
+}
+
+.video-card {
+  background: white;
+  border: 2.5px solid var(--ink);
+  border-radius: 20px;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.3s;
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.video-card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+
+.video-thumb {
+  aspect-ratio: 16/9;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 2.5px solid var(--ink);
+}
+
+.video-card.v1 .video-thumb { background: linear-gradient(135deg, var(--yellow), #FFB833); }
+.video-card.v2 .video-thumb { background: linear-gradient(135deg, var(--green), #3FBD7F); }
+.video-card.v3 .video-thumb { background: linear-gradient(135deg, var(--pink-soft), var(--pink)); }
+.video-card.v4 .video-thumb { background: linear-gradient(135deg, var(--purple), #9966D4); }
+.video-card.v5 .video-thumb { background: linear-gradient(135deg, var(--blue), #2D7FE5); }
+.video-card.v6 .video-thumb { background: linear-gradient(135deg, var(--green), var(--blue)); }
+
+.play-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60px;
+  height: 60px;
+  background: rgba(0, 0, 0, 0.7);
+  border: 2px solid white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: white;
+  z-index: 2;
+}
+
+.video-duration {
+  position: absolute;
+  bottom: 0.6rem;
+  right: 0.8rem;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.7rem;
+  padding: 0.2rem 0.6rem;
+  background: var(--ink);
+  color: white;
+  border-radius: 6px;
+  z-index: 2;
+}
+
+.video-content {
+  padding: 1.2rem;
+}
+
+.video-title {
+  font-family: 'Noto Sans TC', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--ink);
+  margin-bottom: 0.4rem;
+}
+
+.video-meta {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--ink-soft);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* === 攻略列表 === */
+.guides-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.guide-item {
+  background: white;
+  border: 2.5px solid var(--ink);
+  border-radius: 20px;
+  padding: 1.5rem 2rem;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 1.5rem;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s;
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.guide-item:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--ink);
+  background: var(--yellow);
+}
+
+.guide-num {
+  font-family: 'ZCOOL KuaiLe', cursive;
+  font-size: 2.5rem;
+  color: var(--pink-deep);
+  line-height: 1;
+  min-width: 60px;
+  text-shadow: 2px 2px 0 var(--ink);
+}
+
+.guide-content { min-width: 0; }
+
+.guide-tag {
+  display: inline-block;
+  font-family: 'ZCOOL KuaiLe', cursive;
+  font-size: 0.9rem;
+  padding: 0.15rem 0.7rem;
+  background: var(--pink);
+  color: white;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  margin-bottom: 0.4rem;
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.guide-tag.beginner { background: var(--green); color: var(--ink); }
+.guide-tag.advanced { background: var(--purple); color: white; }
+.guide-tag.tips { background: var(--yellow); color: var(--ink); }
+
+.guide-title {
+  font-family: 'Noto Sans TC', sans-serif;
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: var(--ink);
+  margin-bottom: 0.3rem;
+  line-height: 1.4;
+}
+
+.guide-meta {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--ink-soft);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.guide-arrow {
+  font-family: 'ZCOOL KuaiLe', cursive;
+  font-size: 1.3rem;
+  color: var(--pink-deep);
+}
+
+@media (max-width: 600px) {
+  .guide-item { grid-template-columns: auto 1fr; padding: 1.2rem; gap: 1rem; }
+  .guide-arrow { display: none; }
+  .guide-num { font-size: 2rem; }
+}
+
+.load-more {
+  text-align: center;
+  margin: 2.5rem 0 4rem;
+}
+
+.load-more-btn {
+  font-family: 'ZCOOL KuaiLe', cursive;
+  font-size: 1.2rem;
+  padding: 0.8rem 2.5rem;
+  border-radius: 999px;
+  border: 2.5px solid var(--ink);
+  background: white;
+  color: var(--ink);
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  box-shadow: 4px 4px 0 var(--ink);
+  transition: all 0.2s;
+}
+
+.load-more-btn:hover {
+  background: var(--pink);
+  color: white;
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+</style>
+</head>
+<body>
+
+<div class="page-stickers">
+  <span class="sticker flower s1">✿</span>
+  <span class="sticker ribbon s2"></span>
+  <span class="sticker heart s3">♡</span>
+  <span class="sticker flower s4">❀</span>
+  <span class="sticker sparkle s5">✦</span>
+  <span class="sticker tape s6"></span>
+  <span class="sticker star s7">✧</span>
+  <span class="sticker flower s8">✿</span>
+</div>
+
+<nav class="nav">
+  <a href="index.html" class="logo">歪腦袋<span class="dot">.</span></a>
+  <div class="nav-links">
+    <a href="index.html">首頁</a>
+    <a href="blog.html">部落格</a>
+    <a href="music.html">音樂</a>
+    <a href="game.html" class="active">遊戲</a>
+    <a href="tools.html">工具</a>
+  </div>
+</nav>
+
+<header class="page-header">
+  <span class="page-eyebrow">~ game zone ~</span>
+  <h1 class="page-title">遊戲頻道</h1>
+  <p class="page-subtitle">Casual Gameplay</p>
+  <p class="page-tagline">遊戲試玩 · 新手攻略 · 各種有趣的遊戲分享</p>
+</header>
+
+<main>
+
+  <!-- 代儲推薦 -->
+  <a href="#" target="_blank" rel="noopener" class="aff-banner">
+    <div class="aff-banner-icon">$</div>
+    <div class="aff-banner-content">
+      <p class="aff-banner-eyebrow">~ recommended ~</p>
+      <h3 class="aff-banner-title">遊戲代儲・禮品卡</h3>
+      <p class="aff-banner-desc">熱門遊戲都能儲值，也買得到 iTunes、Steam、PlayStation 禮品卡</p>
+    </div>
+    <span class="aff-banner-arrow">→</span>
+  </a>
+
+  <!-- 精選遊戲 -->
+  <div class="section-label">
+    <div class="section-label-line"></div>
+    <p class="section-label-text">精選遊戲</p>
+    <div class="section-label-line"></div>
+  </div>
+
+  <div class="featured-games">
+    <a href="#" class="game-feature g1">
+      <div class="cover">
+      </div>
+      <div class="content">
+        <h3 class="game-name">遊戲名稱 1</h3>
+        <p class="game-desc">這款遊戲的簡介，介紹遊戲類型、玩法特色，吸引玩家點進去看詳細攻略。</p>
+        <div class="meta-row">
+          <span>12 篇攻略</span>
+          <span>8 部影片</span>
+        </div>
+      </div>
+    </a>
+
+    <a href="#" class="game-feature g2">
+      <div class="cover">
+      </div>
+      <div class="content">
+        <h3 class="game-name">遊戲名稱 2</h3>
+        <p class="game-desc">這款遊戲的簡介，介紹遊戲類型、玩法特色，吸引玩家點進去看詳細攻略。</p>
+        <div class="meta-row">
+          <span>9 篇攻略</span>
+          <span>5 部影片</span>
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <!-- 最新影片 -->
+  <div class="section-label">
+    <div class="section-label-line"></div>
+    <p class="section-label-text">▶ 最新影片</p>
+    <div class="section-label-line"></div>
+  </div>
+
+  <div class="videos-grid">
+    <a href="#" class="video-card v1">
+      <div class="video-thumb">
+        <span class="play-icon">▶</span>
+        <span class="video-duration">12:34</span>
+      </div>
+      <div class="video-content">
+        <h4 class="video-title">最新影片標題：遊戲試玩或攻略內容</h4>
+        <p class="video-meta">YOUTUBE · 2 天前</p>
+      </div>
+    </a>
+
+    <a href="#" class="video-card v2">
+      <div class="video-thumb">
+        <span class="play-icon">▶</span>
+        <span class="video-duration">8:21</span>
+      </div>
+      <div class="video-content">
+        <h4 class="video-title">第二支影片標題</h4>
+        <p class="video-meta">YOUTUBE · 1 週前</p>
+      </div>
+    </a>
+
+    <a href="#" class="video-card v3">
+      <div class="video-thumb">
+        <span class="play-icon">▶</span>
+        <span class="video-duration">15:42</span>
+      </div>
+      <div class="video-content">
+        <h4 class="video-title">第三支影片標題</h4>
+        <p class="video-meta">YOUTUBE · 2 週前</p>
+      </div>
+    </a>
+
+    <a href="#" class="video-card v4">
+      <div class="video-thumb">
+        <span class="play-icon">▶</span>
+        <span class="video-duration">10:05</span>
+      </div>
+      <div class="video-content">
+        <h4 class="video-title">第四支影片標題</h4>
+        <p class="video-meta">YOUTUBE · 3 週前</p>
+      </div>
+    </a>
+
+    <a href="#" class="video-card v5">
+      <div class="video-thumb">
+        <span class="play-icon">▶</span>
+        <span class="video-duration">7:18</span>
+      </div>
+      <div class="video-content">
+        <h4 class="video-title">第五支影片標題</h4>
+        <p class="video-meta">YOUTUBE · 1 個月前</p>
+      </div>
+    </a>
+
+    <a href="#" class="video-card v6">
+      <div class="video-thumb">
+        <span class="play-icon">▶</span>
+        <span class="video-duration">11:50</span>
+      </div>
+      <div class="video-content">
+        <h4 class="video-title">第六支影片標題</h4>
+        <p class="video-meta">YOUTUBE · 1 個月前</p>
+      </div>
+    </a>
+  </div>
+
+  <div class="load-more">
+    <a href="#" class="load-more-btn">看更多影片 ~</a>
+  </div>
+
+  <!-- 最新攻略 -->
+  <div class="section-label">
+    <div class="section-label-line"></div>
+    <p class="section-label-text">最新攻略</p>
+    <div class="section-label-line"></div>
+  </div>
+
+  <div class="guides-list">
+
+    <a href="#" class="guide-item">
+      <div class="guide-num">01</div>
+      <div class="guide-content">
+        <span class="guide-tag beginner">新手攻略</span>
+        <h3 class="guide-title">最新攻略文章標題：新手必看的入門指南</h3>
+        <p class="guide-meta">2026.04.27 · 8 MIN READ · 遊戲名稱</p>
+      </div>
+      <span class="guide-arrow">→</span>
+    </a>
+
+    <a href="#" class="guide-item">
+      <div class="guide-num">02</div>
+      <div class="guide-content">
+        <span class="guide-tag advanced">進階技巧</span>
+        <h3 class="guide-title">高手必學的進階操作技巧整理</h3>
+        <p class="guide-meta">2026.04.25 · 12 MIN READ · 遊戲名稱</p>
+      </div>
+      <span class="guide-arrow">→</span>
+    </a>
+
+    <a href="#" class="guide-item">
+      <div class="guide-num">03</div>
+      <div class="guide-content">
+        <span class="guide-tag tips">小技巧</span>
+        <h3 class="guide-title">這些隱藏小技巧 90% 玩家都不知道</h3>
+        <p class="guide-meta">2026.04.22 · 5 MIN READ · 遊戲名稱</p>
+      </div>
+      <span class="guide-arrow">→</span>
+    </a>
+
+    <a href="#" class="guide-item">
+      <div class="guide-num">04</div>
+      <div class="guide-content">
+        <span class="guide-tag beginner">新手攻略</span>
+        <h3 class="guide-title">新手最容易犯的 5 個錯誤</h3>
+        <p class="guide-meta">2026.04.20 · 6 MIN READ · 遊戲名稱</p>
+      </div>
+      <span class="guide-arrow">→</span>
+    </a>
+
+    <a href="#" class="guide-item">
+      <div class="guide-num">05</div>
+      <div class="guide-content">
+        <span class="guide-tag advanced">進階技巧</span>
+        <h3 class="guide-title">高難度關卡通關完整流程</h3>
+        <p class="guide-meta">2026.04.18 · 15 MIN READ · 遊戲名稱</p>
+      </div>
+      <span class="guide-arrow">→</span>
+    </a>
+
+  </div>
+
+  <div class="load-more">
+    <a href="#" class="load-more-btn">看更多攻略 ~</a>
+  </div>
+
+</main>
+
+<footer>
+  <p class="footer-line">~ 慢慢長大中 ~</p>
+  <p class="footer-meta">© 2026 歪腦袋 · a wonky little corner</p>
+</footer>
+
+</body>
+</html>

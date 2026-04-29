@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 音樂 — 歪腦袋</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Dancing+Script:wght@400;500;600;700&family=ZCOOL+KuaiLe&family=Liu+Jian+Mao+Cao&family=Noto+Sans+TC:wght@400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #FFE4F0;
+  --bg-paper: #FFFFFF;
+  --ink: #4A3A5C;
+  --ink-soft: #8B7BA0;
+  --pink: #FF8FAF;
+  --pink-soft: #FFC8DD;
+  --pink-deep: #E8538A;
+  --blue: #A8C8FF;
+  --yellow: #FFE9A8;
+  --green: #B8E5C8;
+  --purple: #D4C0FF;
+  --grid-line: rgba(232, 83, 138, 0.18);
+  --purple-deep: #B294E0;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: linear-gradient(135deg, #FFE4F0 0%, #FFD6EA 50%, #F5DCFF 100%);
+  color: var(--ink);
+  font-family: 'Noto Sans TC', sans-serif;
+  overflow-x: hidden;
+  position: relative;
+  min-height: 100vh;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(255, 150, 195, 0.7) 0%, transparent 35%),
+    radial-gradient(circle at 80% 15%, rgba(220, 200, 255, 0.65) 0%, transparent 40%),
+    radial-gradient(circle at 50% 60%, rgba(255, 195, 220, 0.7) 0%, transparent 45%),
+    radial-gradient(circle at 90% 75%, rgba(230, 200, 255, 0.65) 0%, transparent 35%),
+    radial-gradient(circle at 10% 85%, rgba(255, 180, 210, 0.7) 0%, transparent 40%);
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(2px);
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: 
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 35px 35px;
+  pointer-events: none;
+  z-index: 1;
+  mix-blend-mode: multiply;
+}
+
+.page-stickers { position: fixed; inset: 0; pointer-events: none; z-index: 2; }
+.sticker { position: absolute; user-select: none; animation: floatSticker 6s ease-in-out infinite; }
+.sticker.flower { font-size: 1.8rem; color: var(--pink); filter: drop-shadow(1px 1px 0 rgba(74, 58, 92, 0.3)); }
+.sticker.heart { font-size: 1.6rem; color: var(--pink-deep); filter: drop-shadow(1px 1px 0 rgba(74, 58, 92, 0.3)); }
+.sticker.star { font-size: 1.5rem; color: var(--purple-deep); filter: drop-shadow(1px 1px 0 rgba(74, 58, 92, 0.3)); }
+.sticker.sparkle { font-size: 1.4rem; color: var(--blue-deep); filter: drop-shadow(1px 1px 0 rgba(74, 58, 92, 0.3)); }
+.sticker.ribbon { width: 50px; height: 22px; background: var(--pink); border: 2px solid var(--ink); border-radius: 4px; filter: drop-shadow(2px 2px 0 rgba(74, 58, 92, 0.2)); }
+.sticker.ribbon::after { content: ''; position: absolute; top: -2px; right: -10px; width: 0; height: 0; border-style: solid; border-width: 12px 0 12px 10px; border-color: transparent transparent transparent var(--pink); }
+.sticker.tape { width: 60px; height: 22px; background: rgba(196, 157, 255, 0.7); border-left: 2px dashed rgba(0,0,0,0.2); border-right: 2px dashed rgba(0,0,0,0.2); }
+.sticker.s1 { top: 8%; left: 4%; animation-delay: 0s; }
+.sticker.s2 { top: 18%; right: 6%; animation-delay: 1.2s; transform: rotate(15deg); }
+.sticker.s3 { top: 35%; left: 3%; animation-delay: 2s; }
+.sticker.s4 { top: 50%; right: 4%; animation-delay: 3s; transform: rotate(-12deg); }
+.sticker.s5 { top: 65%; left: 5%; animation-delay: 1.5s; }
+.sticker.s6 { top: 78%; right: 5%; animation-delay: 4s; transform: rotate(20deg); }
+.sticker.s7 { top: 25%; left: 8%; animation-delay: 2.5s; transform: rotate(-15deg); }
+.sticker.s8 { top: 88%; right: 8%; animation-delay: 0.8s; }
+
+@keyframes floatSticker {
+  0%, 100% { transform: translateY(0) rotate(-5deg); }
+  50% { transform: translateY(-15px) rotate(8deg); }
+}
+
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255, 228, 240, 0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 2px solid var(--ink);
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-family: 'ZCOOL KuaiLe', cursive;
+  font-size: 1.8rem;
+  color: var(--ink);
+  text-decoration: none;
+  display: inline-block;
+  transform: rotate(-2deg);
+  position: relative;
+}
+.logo::after { content: '✦'; position: absolute; top: -10px; right: -15px; font-size: 1rem; color: var(--pink); }
+.logo .dot { color: var(--pink-deep); }
+
+.nav-links {
+  display: flex;
+  gap: 1.8rem;
+  font-family: 'Caveat', cursive;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+.nav-links a {
+  color: var(--ink);
+  text-decoration: none;
+  padding: 0.2rem 0.8rem;
+  border-radius: 999px;
+  transition: all 0.3s;
+}
+.nav-links a:hover { background: var(--pink); color: white; transform: rotate(-3deg); }
+.nav-links a.active { background: var(--blue); color: white; }
+
+@media (max-width: 640px) {
+  .nav-links { gap: 0.5rem; font-size: 1rem; }
+  .nav-links a { padding: 0.1rem 0.5rem; }
+}
+
+footer {
+  text-align: center;
+  padding: 5rem 2rem 3rem;
+  margin-top: 5rem;
+  position: relative;
+  z-index: 3;
+  border-top: 2px dashed var(--ink);
+}
+.footer-line { font-family: 'Liu Jian Mao Cao', cursive; font-size: 1.6rem; margin-bottom: 0.8rem; color: var(--ink); }
+.footer-meta { font-family: 'Dancing Script', cursive; font-size: 0.95rem; color: var(--ink-soft); font-weight: 500; }
+
+/* Hero */
+.hero {
+  text-align: center;
+  padding: 4rem 2rem 1rem;
+  position: relative;
+  z-index: 3;
+}
+
+.hero-eyebrow {
+  display: inline-block;
+  font-family: 'Caveat', cursive;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--yellow);
+  padding: 0.2rem 1.2rem;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  margin-bottom: 1rem;
+  transform: rotate(-3deg);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.hero-title {
+  font-family: 'ZCOOL KuaiLe', cursive;
+  font-size: clamp(3rem, 8vw, 5rem);
+  letter-spacing: 0.05em;
+  color: var(--ink);
+  margin-bottom: 0.8rem;
+}
+
+.hero-subtitle {
+  font-family: 'Dancing Script', cursive;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  color: var(--pink-deep);
+  margin-bottom: 0.8rem;
+  font-weight: 700;
+}
+
+.hero-tagline {
+  font-family: 'Liu Jian Mao Cao', cursive;
+  font-size: 1.3rem;
+  color: var(--ink-soft);
+}
+
+/* 平台連結列 */
+.platforms {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.8rem;
+  max-width: 800px;
+  margin: 2rem auto 0;
+  padding: 0 2rem;
+  position: relative;
+  z-index: 3;
+}
+
+.platform-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.4rem;
+  background: white;
+  border: 2.5px solid var(--ink);
+  border-radius: 999px;
+  text-decoration: none;
+  color: var(--ink);
+  font-family: 'ZCOOL KuaiLe', cursive;
+  font-size: 1rem;
+  transition: all 0.2s;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.platform-btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+
+.platform-btn .platform-icon {
+  font-family: 'Dancing Script', cursive;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.platform-btn.youtube:hover { background: #FF0000; color: white; }
+.platform-btn.youtube-music:hover { background: #FF0000; color: white; }
+.platform-btn.spotify:hover { background: #1DB954; color: white; }
+.platform-btn.apple:hover { background: #FA243C; color: white; }
+
+main {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 2rem;
+  position: relative;
+  z-index: 3;
+}
+
+/* 創作理念區 */
+.about-section {
+  background: white;
+  border: 2.5px solid var(--ink);
+  border-radius: 28px;
+  padding: 2.5rem 2rem;
+  margin: 2rem 0 4rem;
+  text-align: center;
+  position: relative;
+  box-shadow: 6px 6px 0 var(--ink);
+}
+
+.about-section::before {
+  content: '✦';
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-10deg);
+  font-size: 2rem;
+  color: var(--yellow);
+  background: var(--bg);
+  padding: 0 1rem;
+  text-shadow: -2px -2px 0 var(--ink), 2px -2px 0 var(--ink), -2px 2px 0 var(--ink), 2px 2px 0 var(--ink);
+}
+
+.about-eyebrow {
+  font-family: 'Caveat', cursive;
+  font-size: 1.4rem;
+  color: var(--pink-deep);
+  margin-bottom: 0.3rem;
+  display: inline-block;
+  transform: rotate(-2deg);
+}
+
+.about-title {
+  font-family: 'ZCOOL KuaiLe', cursive;
+  font-size: 2rem;
+  color: var(--ink);
+  margin-bottom: 1rem;
+}
+
+.about-text {
+  font-family: 'Liu Jian Mao Cao', cursive;
+  font-size: 1.3rem;
+  line-height: 1.8;
+  color: var(--ink);
+  max-width: 600px;
+  margin: 0 auto;
+  letter-spacing: 0.05em;
+}
+
+/* === 兩條（中文/韓文）=== */
+.lang-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .lang-row { grid-template-columns: 1fr; }
+}
+
+.lang-col {
+  background: white;
+  border: 2.5px solid var(--ink);
+  border-radius: 24px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 5px 5px 0 var(--ink);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.lang-col:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0 var(--ink);
+}
+
+.lang-cover {
+  aspect-ratio: 9/16;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 2.5px solid var(--ink);
+}
+
+.lang-col.zh .lang-cover {
+  background: linear-gradient(135deg, var(--purple), var(--pink), #B294FF);
+}
+
+.lang-col.kr .lang-cover {
+  background: linear-gradient(135deg, var(--green), var(--yellow), #FFB833);
+}
+
+.lang-cover::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: 
+    radial-gradient(circle at 30% 25%, rgba(255,255,255,0.5) 0%, transparent 50%);
+}
+
+.lang-tag {
+  position: absolute;
+  top: 1.2rem;
+  left: 1.2rem;
+  font-family: 'ZCOOL KuaiLe', cursive;
+  font-size: 1rem;
+  padding: 0.3rem 1rem;
+  background: white;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  color: var(--ink);
+  z-index: 2;
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.lang-big-name {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 1.5rem;
+  font-family: 'ZCOOL KuaiLe', cursive;
+  font-size: 2.5rem;
+  color: white;
+  z-index: 2;
+  text-shadow: 3px 3px 0 var(--ink);
+}
+
+.lang-info {
+  padding: 1.8rem;
+  border-bottom: 2px dashed var(--ink);
+}
+
+.lang-info-eyebrow {
+  font-family: 'Caveat', cursive;
+  font-size: 1.1rem;
+  color: var(--pink-deep);
+  margin-bottom: 0.3rem;
+  display: inline-block;
+  transform: rotate(-1deg);
+}
+
+.lang-info-text {
+  font-family: 'Liu Jian Mao Cao', cursive;
+  font-size: 1.2rem;
+  line-height: 1.8;
+  color: var(--ink);
+  letter-spacing: 0.03em;
+}
+
+.youtube-section, .spotify-section {
+  padding: 1.5rem 1.8rem;
+}
+
+.spotify-section { padding-top: 0.5rem; }
+
+.section-mini-label {
+  font-family: 'ZCOOL KuaiLe', cursive;
+  font-size: 1.1rem;
+  color: var(--ink);
+  margin-bottom: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.section-mini-label .tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.7rem;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  color: white;
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.section-mini-label .tag.yt { background: #FF0000; }
+.section-mini-label .tag.sp { background: #1DB954; }
+
+.youtube-row, .spotify-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.8rem;
+}
+
+.youtube-frame {
+  aspect-ratio: 16/9;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #1a1a1a, #333);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid var(--ink);
+  transition: all 0.3s;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.youtube-frame:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.youtube-play-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50px;
+  height: 35px;
+  background: rgba(255, 0, 0, 0.9);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.youtube-play-btn::after {
+  content: '';
+  border-style: solid;
+  border-width: 7px 0 7px 11px;
+  border-color: transparent transparent transparent white;
+  margin-left: 2px;
+}
+
+.youtube-note {
+  position: absolute;
+  bottom: 0.5rem;
+  left: 0.6rem;
+  right: 0.6rem;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 0.1em;
+  text-align: center;
+  z-index: 2;
+}
+
+.spotify-frame {
+  background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+  border: 2px solid var(--ink);
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  color: white;
+  position: relative;
+  box-shadow: 3px 3px 0 var(--ink);
+  transition: all 0.3s;
+}
+
+.spotify-frame:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.spotify-frame::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 90% 10%, rgba(29, 185, 84, 0.2) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.spotify-top {
+  display: flex;
+  gap: 0.7rem;
+  align-items: center;
+  margin-bottom: 0.7rem;
+  position: relative;
+  z-index: 2;
+}
+
+.spotify-album-cover {
+  width: 38px;
+  height: 38px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.1);
+  border: 1px dashed rgba(255,255,255,0.3);
+  flex-shrink: 0;
+}
+
+.spotify-info {
+  min-width: 0;
+  flex: 1;
+}
+
+.spotify-track {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.spotify-logo-mini {
+  font-family: 'Dancing Script', cursive;
+  font-weight: 700;
+  font-size: 0.85rem;
+  background: #1DB954;
+  color: white;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.spotify-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  position: relative;
+  z-index: 2;
+}
+
+.spotify-play-mini {
+  width: 30px;
+  height: 30px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.spotify-play-mini::after {
+  content: '';
+  border-style: solid;
+  border-width: 5px 0 5px 8px;
+  border-color: transparent transparent transparent #1a1a1a;
+  margin-left: 2px;
+}
+
+.spotify-bar {
+  flex: 1;
+  height: 3px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 999px;
+}
+
+.spotify-time-mini {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem;
+  color: rgba(255,255,255,0.4);
+  flex-shrink: 0;
+}
+</style>
+</head>
+<body>
+
+<div class="page-stickers">
+  <span class="sticker flower s1">✿</span>
+  <span class="sticker ribbon s2"></span>
+  <span class="sticker heart s3">♡</span>
+  <span class="sticker flower s4">❀</span>
+  <span class="sticker sparkle s5">✦</span>
+  <span class="sticker tape s6"></span>
+  <span class="sticker star s7">✧</span>
+  <span class="sticker flower s8">✿</span>
+</div>
+
+<nav class="nav">
+  <a href="index.html" class="logo">歪腦袋<span class="dot">.</span></a>
+  <div class="nav-links">
+    <a href="index.html">首頁</a>
+    <a href="blog.html">部落格</a>
+    <a href="music.html" class="active">音樂</a>
+    <a href="game.html">遊戲</a>
+    <a href="tools.html">工具</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <span class="hero-eyebrow">AI MUSIC</span>
+  <h1 class="hero-title">AI 音樂</h1>
+  <p class="hero-subtitle">O.D.D. Frequencies</p>
+  <p class="hero-tagline">用 AI 做出來的奇怪好聽音樂</p>
+</header>
+
+<div class="platforms">
+  <a href="#" target="_blank" rel="noopener" class="platform-btn youtube">
+    <span class="platform-icon">YT</span> YouTube
+  </a>
+  <a href="#" target="_blank" rel="noopener" class="platform-btn youtube-music">
+    <span class="platform-icon">YTM</span> YouTube Music
+  </a>
+  <a href="#" target="_blank" rel="noopener" class="platform-btn spotify">
+    <span class="platform-icon">Sp</span> Spotify
+  </a>
+  <a href="#" target="_blank" rel="noopener" class="platform-btn apple">
+    <span class="platform-icon">Am</span> Apple Music
+  </a>
+</div>
+
+<main>
+  <section class="about-section">
+    <p class="about-eyebrow">ABOUT</p>
+    <h2 class="about-title">關於 O.D.D. Frequencies</h2>
+    <p class="about-text">
+      用 AI 探索聲音的可能性。每一首歌都是一段心情、一個故事、一場小小的實驗。
+      奇怪的、好聽的、不那麼一樣的，都歡迎來聽聽看。
+    </p>
+  </section>
+
+  <div class="lang-row">
+
+    <article class="lang-col zh">
+      <div class="lang-cover">
+      </div>
+      <div class="lang-info">
+        <p class="lang-info-eyebrow">about</p>
+        <p class="lang-info-text">用中文寫下的故事，那些說不出口的心情，用旋律訴說。</p>
+      </div>
+      <div class="youtube-section">
+        <p class="section-mini-label"><span class="tag yt">YouTube</span> 精選影片</p>
+        <div class="youtube-row">
+          <div class="youtube-frame">
+            <div class="youtube-play-btn"></div>
+            <p class="youtube-note">// 影片 1</p>
+          </div>
+          <div class="youtube-frame">
+            <div class="youtube-play-btn"></div>
+            <p class="youtube-note">// 影片 2</p>
+          </div>
+        </div>
+      </div>
+      <div class="spotify-section">
+        <p class="section-mini-label"><span class="tag sp">Spotify</span> 試聽</p>
+        <div class="spotify-row">
+          <div class="spotify-frame">
+            <div class="spotify-top">
+              <div class="spotify-album-cover"></div>
+              <div class="spotify-info">
+                <p class="spotify-track">// 歌曲 1</p>
+              </div>
+              <span class="spotify-logo-mini">Sp</span>
+            </div>
+            <div class="spotify-controls">
+              <div class="spotify-play-mini"></div>
+              <div class="spotify-bar"></div>
+              <span class="spotify-time-mini">--:--</span>
+            </div>
+          </div>
+          <div class="spotify-frame">
+            <div class="spotify-top">
+              <div class="spotify-album-cover"></div>
+              <div class="spotify-info">
+                <p class="spotify-track">// 歌曲 2</p>
+              </div>
+              <span class="spotify-logo-mini">Sp</span>
+            </div>
+            <div class="spotify-controls">
+              <div class="spotify-play-mini"></div>
+              <div class="spotify-bar"></div>
+              <span class="spotify-time-mini">--:--</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="lang-col kr">
+      <div class="lang-cover">
+      </div>
+      <div class="lang-info">
+        <p class="lang-info-eyebrow">about</p>
+        <p class="lang-info-text">한국어로 부르는 이야기，用另一種語言訴說的旋律與感受。</p>
+      </div>
+      <div class="youtube-section">
+        <p class="section-mini-label"><span class="tag yt">YouTube</span> 精選影片</p>
+        <div class="youtube-row">
+          <div class="youtube-frame">
+            <div class="youtube-play-btn"></div>
+            <p class="youtube-note">// 影片 1</p>
+          </div>
+          <div class="youtube-frame">
+            <div class="youtube-play-btn"></div>
+            <p class="youtube-note">// 影片 2</p>
+          </div>
+        </div>
+      </div>
+      <div class="spotify-section">
+        <p class="section-mini-label"><span class="tag sp">Spotify</span> 試聽</p>
+        <div class="spotify-row">
+          <div class="spotify-frame">
+            <div class="spotify-top">
+              <div class="spotify-album-cover"></div>
+              <div class="spotify-info">
+                <p class="spotify-track">// 歌曲 1</p>
+              </div>
+              <span class="spotify-logo-mini">Sp</span>
+            </div>
+            <div class="spotify-controls">
+              <div class="spotify-play-mini"></div>
+              <div class="spotify-bar"></div>
+              <span class="spotify-time-mini">--:--</span>
+            </div>
+          </div>
+          <div class="spotify-frame">
+            <div class="spotify-top">
+              <div class="spotify-album-cover"></div>
+              <div class="spotify-info">
+                <p class="spotify-track">// 歌曲 2</p>
+              </div>
+              <span class="spotify-logo-mini">Sp</span>
+            </div>
+            <div class="spotify-controls">
+              <div class="spotify-play-mini"></div>
+              <div class="spotify-bar"></div>
+              <span class="spotify-time-mini">--:--</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+  </div>
+</main>
+
+<footer>
+  <p class="footer-line">~ 慢慢長大中 ~</p>
+  <p class="footer-meta">© 2026 歪腦袋 · a wonky little corner</p>
+</footer>
+
+</body>
+</html>
