@@ -3,10 +3,48 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI 音樂 — 歪腦袋</title>
+<title>音樂 — 歪腦袋</title>
+<meta name="description" content="O.D.D. Frequencies 的音樂作品。寫給孤單夜晚的旋律與故事。中文與韓文歌曲，YouTube、Spotify、Apple Music 全平台收聽。">
+<meta name="keywords" content="音樂, O.D.D. Frequencies, 中文歌, 韓文歌, YouTube Music, Spotify">
+<meta name="author" content="歪腦袋 Wonky Brain">
+<link rel="canonical" href="https://wonky-brain.vercel.app/music.html">
+
+<!-- Open Graph (Facebook, LINE) -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://wonky-brain.vercel.app/music.html">
+<meta property="og:title" content="音樂 — 歪腦袋">
+<meta property="og:description" content="O.D.D. Frequencies 的音樂作品。寫給孤單夜晚的旋律與故事。中文與韓文歌曲，YouTube、Spotify、Apple Music 全平台收聽。">
+<meta property="og:site_name" content="歪腦袋">
+<meta property="og:locale" content="zh_TW">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="音樂 — 歪腦袋">
+<meta name="twitter:description" content="O.D.D. Frequencies 的音樂作品。寫給孤單夜晚的旋律與故事。中文與韓文歌曲，YouTube、Spotify、Apple Music 全平台收聽。">
+
+<!-- Favicon -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9C%BF%3C/text%3E%3C/svg%3E">
+
+<!-- Schema.org -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "歪腦袋",
+  "alternateName": "Wonky Brain",
+  "url": "https://wonky-brain.vercel.app/",
+  "description": "O.D.D. Frequencies 的音樂作品。寫給孤單夜晚的旋律與故事。中文與韓文歌曲，YouTube、Spotify、Apple Music 全平台收聽。",
+  "inLanguage": "zh-TW",
+  "author": {
+    "@type": "Person",
+    "name": "歪腦袋"
+  }
+}
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Dancing+Script:wght@400;500;600;700&family=ZCOOL+KuaiLe&family=Liu+Jian+Mao+Cao&family=Noto+Sans+TC:wght@400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Dancing+Script:wght@400;500;600;700&family=Kaisei+Decol:wght@400;500;700&family=Zen+Maru+Gothic:wght@400;500;700;900&family=Noto+Sans+TC:wght@400;500;700;900&family=Liu+Jian+Mao+Cao&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg: #FFE4F0;
@@ -30,7 +68,7 @@ html { scroll-behavior: smooth; }
 body {
   background: linear-gradient(135deg, #FFE4F0 0%, #FFD6EA 50%, #F5DCFF 100%);
   color: var(--ink);
-  font-family: 'Noto Sans TC', sans-serif;
+  font-family: 'Kaisei Decol', 'Noto Sans TC', serif;
   overflow-x: hidden;
   position: relative;
   min-height: 100vh;
@@ -70,8 +108,6 @@ body::after {
 .sticker.heart { font-size: 1.6rem; color: var(--pink-deep); filter: drop-shadow(1px 1px 0 rgba(74, 58, 92, 0.3)); }
 .sticker.star { font-size: 1.5rem; color: var(--purple-deep); filter: drop-shadow(1px 1px 0 rgba(74, 58, 92, 0.3)); }
 .sticker.sparkle { font-size: 1.4rem; color: var(--blue-deep); filter: drop-shadow(1px 1px 0 rgba(74, 58, 92, 0.3)); }
-.sticker.ribbon { width: 50px; height: 22px; background: var(--pink); border: 2px solid var(--ink); border-radius: 4px; filter: drop-shadow(2px 2px 0 rgba(74, 58, 92, 0.2)); }
-.sticker.ribbon::after { content: ''; position: absolute; top: -2px; right: -10px; width: 0; height: 0; border-style: solid; border-width: 12px 0 12px 10px; border-color: transparent transparent transparent var(--pink); }
 .sticker.tape { width: 60px; height: 22px; background: rgba(196, 157, 255, 0.7); border-left: 2px dashed rgba(0,0,0,0.2); border-right: 2px dashed rgba(0,0,0,0.2); }
 .sticker.s1 { top: 8%; left: 4%; animation-delay: 0s; }
 .sticker.s2 { top: 18%; right: 6%; animation-delay: 1.2s; transform: rotate(15deg); }
@@ -101,7 +137,7 @@ body::after {
 }
 
 .logo {
-  font-family: 'ZCOOL KuaiLe', cursive;
+  font-family: 'Zen Maru Gothic', sans-serif; font-weight: 700;
   font-size: 1.8rem;
   color: var(--ink);
   text-decoration: none;
@@ -142,7 +178,7 @@ footer {
   z-index: 3;
   border-top: 2px dashed var(--ink);
 }
-.footer-line { font-family: 'Liu Jian Mao Cao', cursive; font-size: 1.6rem; margin-bottom: 0.8rem; color: var(--ink); }
+.footer-line { font-family: 'Kaisei Decol', 'Noto Sans TC', serif; font-size: 1.6rem; margin-bottom: 0.8rem; color: var(--ink); }
 .footer-meta { font-family: 'Dancing Script', cursive; font-size: 0.95rem; color: var(--ink-soft); font-weight: 500; }
 
 /* Hero */
@@ -169,7 +205,7 @@ footer {
 }
 
 .hero-title {
-  font-family: 'ZCOOL KuaiLe', cursive;
+  font-family: 'Zen Maru Gothic', sans-serif; font-weight: 700;
   font-size: clamp(3rem, 8vw, 5rem);
   letter-spacing: 0.05em;
   color: var(--ink);
@@ -185,7 +221,7 @@ footer {
 }
 
 .hero-tagline {
-  font-family: 'Liu Jian Mao Cao', cursive;
+  font-family: 'Kaisei Decol', 'Noto Sans TC', serif;
   font-size: 1.3rem;
   color: var(--ink-soft);
 }
@@ -213,7 +249,7 @@ footer {
   border-radius: 999px;
   text-decoration: none;
   color: var(--ink);
-  font-family: 'ZCOOL KuaiLe', cursive;
+  font-family: 'Zen Maru Gothic', sans-serif; font-weight: 700;
   font-size: 1rem;
   transition: all 0.2s;
   box-shadow: 3px 3px 0 var(--ink);
@@ -278,14 +314,14 @@ main {
 }
 
 .about-title {
-  font-family: 'ZCOOL KuaiLe', cursive;
+  font-family: 'Zen Maru Gothic', sans-serif; font-weight: 700;
   font-size: 2rem;
   color: var(--ink);
   margin-bottom: 1rem;
 }
 
 .about-text {
-  font-family: 'Liu Jian Mao Cao', cursive;
+  font-family: 'Kaisei Decol', 'Noto Sans TC', serif;
   font-size: 1.3rem;
   line-height: 1.8;
   color: var(--ink);
@@ -348,7 +384,7 @@ main {
   position: absolute;
   top: 1.2rem;
   left: 1.2rem;
-  font-family: 'ZCOOL KuaiLe', cursive;
+  font-family: 'Zen Maru Gothic', sans-serif; font-weight: 700;
   font-size: 1rem;
   padding: 0.3rem 1rem;
   background: white;
@@ -363,7 +399,7 @@ main {
   position: absolute;
   bottom: 1.5rem;
   left: 1.5rem;
-  font-family: 'ZCOOL KuaiLe', cursive;
+  font-family: 'Zen Maru Gothic', sans-serif; font-weight: 700;
   font-size: 2.5rem;
   color: white;
   z-index: 2;
@@ -385,7 +421,7 @@ main {
 }
 
 .lang-info-text {
-  font-family: 'Liu Jian Mao Cao', cursive;
+  font-family: 'Kaisei Decol', 'Noto Sans TC', serif;
   font-size: 1.2rem;
   line-height: 1.8;
   color: var(--ink);
@@ -399,7 +435,7 @@ main {
 .spotify-section { padding-top: 0.5rem; }
 
 .section-mini-label {
-  font-family: 'ZCOOL KuaiLe', cursive;
+  font-family: 'Zen Maru Gothic', sans-serif; font-weight: 700;
   font-size: 1.1rem;
   color: var(--ink);
   margin-bottom: 0.8rem;
@@ -594,7 +630,6 @@ main {
 
 <div class="page-stickers">
   <span class="sticker flower s1">✿</span>
-  <span class="sticker ribbon s2"></span>
   <span class="sticker heart s3">♡</span>
   <span class="sticker flower s4">❀</span>
   <span class="sticker sparkle s5">✦</span>
@@ -615,10 +650,10 @@ main {
 </nav>
 
 <header class="hero">
-  <span class="hero-eyebrow">AI MUSIC</span>
-  <h1 class="hero-title">AI 音樂</h1>
+  <span class="hero-eyebrow">MUSIC</span>
+  <h1 class="hero-title">音樂</h1>
   <p class="hero-subtitle">O.D.D. Frequencies</p>
-  <p class="hero-tagline">用 AI 做出來的奇怪好聽音樂</p>
+  <p class="hero-tagline">寫給孤單夜晚的旋律與故事</p>
 </header>
 
 <div class="platforms">
@@ -641,7 +676,8 @@ main {
     <p class="about-eyebrow">ABOUT</p>
     <h2 class="about-title">關於 O.D.D. Frequencies</h2>
     <p class="about-text">
-      用 AI 探索聲音的可能性。每一首歌都是一段心情、一個故事、一場小小的實驗。
+      探索聲音的可能性。<br>
+      每一首歌都是一段心情、一個故事、一場小小的實驗。<br>
       奇怪的、好聽的、不那麼一樣的，都歡迎來聽聽看。
     </p>
   </section>

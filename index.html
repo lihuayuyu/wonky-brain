@@ -4,10 +4,47 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>歪腦袋 — 什麼都想玩一下</title>
-<meta name="description" content="歪腦袋是一個亂七八糟但很歡樂的地方。">
+<meta name="description" content="歪腦袋是一個亂七八糟但很歡樂的個人創作角落。音樂、遊戲試玩、部落格、自製小工具，什麼都想玩一下。">
+<meta name="keywords" content="歪腦袋, 個人網站, 音樂, 遊戲攻略, 部落格, 小工具">
+<meta name="author" content="歪腦袋 Wonky Brain">
+<link rel="canonical" href="https://wonky-brain.vercel.app/">
+
+<!-- Open Graph (Facebook, LINE) -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://wonky-brain.vercel.app/">
+<meta property="og:title" content="歪腦袋 — 什麼都想玩一下">
+<meta property="og:description" content="歪腦袋是一個亂七八糟但很歡樂的個人創作角落。音樂、遊戲試玩、部落格、自製小工具，什麼都想玩一下。">
+<meta property="og:site_name" content="歪腦袋">
+<meta property="og:locale" content="zh_TW">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="歪腦袋 — 什麼都想玩一下">
+<meta name="twitter:description" content="歪腦袋是一個亂七八糟但很歡樂的個人創作角落。音樂、遊戲試玩、部落格、自製小工具，什麼都想玩一下。">
+
+<!-- Favicon -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9C%BF%3C/text%3E%3C/svg%3E">
+
+<!-- Schema.org -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "歪腦袋",
+  "alternateName": "Wonky Brain",
+  "url": "https://wonky-brain.vercel.app/",
+  "description": "歪腦袋是一個亂七八糟但很歡樂的個人創作角落。音樂、遊戲試玩、部落格、自製小工具，什麼都想玩一下。",
+  "inLanguage": "zh-TW",
+  "author": {
+    "@type": "Person",
+    "name": "歪腦袋"
+  }
+}
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Dancing+Script:wght@400;500;600;700&family=ZCOOL+KuaiLe&family=Liu+Jian+Mao+Cao&family=Noto+Sans+TC:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Dancing+Script:wght@400;500;600;700&family=Kaisei+Decol:wght@400;500;700&family=Zen+Maru+Gothic:wght@400;500;700;900&family=Noto+Sans+TC:wght@400;500;700;900&family=Liu+Jian+Mao+Cao&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <style>
 /* ============================================
@@ -40,7 +77,7 @@ html { scroll-behavior: smooth; }
 body {
   background: linear-gradient(135deg, #FFE4F0 0%, #FFD6EA 50%, #F5DCFF 100%);
   color: var(--ink);
-  font-family: 'Noto Sans TC', sans-serif;
+  font-family: 'Kaisei Decol', 'Noto Sans TC', serif;
   font-weight: 400;
   overflow-x: hidden;
   position: relative;
@@ -115,27 +152,6 @@ body::after {
   filter: drop-shadow(1px 1px 0 rgba(74, 58, 92, 0.3));
 }
 
-/* 緞帶造型 */
-.sticker.ribbon {
-  width: 50px;
-  height: 22px;
-  background: var(--pink);
-  border: 2px solid var(--ink);
-  border-radius: 4px;
-  filter: drop-shadow(2px 2px 0 rgba(74, 58, 92, 0.2));
-}
-.sticker.ribbon::after {
-  content: '';
-  position: absolute;
-  top: -2px;
-  right: -10px;
-  width: 0;
-  height: 0;
-  border-style: solid;
-  border-width: 12px 0 12px 10px;
-  border-color: transparent transparent transparent var(--pink);
-}
-
 /* 紙膠帶 */
 .sticker.tape {
   width: 60px;
@@ -174,7 +190,7 @@ body::after {
 }
 
 .logo {
-  font-family: 'ZCOOL KuaiLe', cursive;
+  font-family: 'Zen Maru Gothic', sans-serif; font-weight: 700;
   font-size: 1.8rem;
   letter-spacing: 0.05em;
   color: var(--ink);
@@ -237,7 +253,7 @@ footer {
 }
 
 .footer-line {
-  font-family: 'Liu Jian Mao Cao', cursive;
+  font-family: 'Kaisei Decol', 'Noto Sans TC', serif;
   font-size: 1.6rem;
   margin-bottom: 0.8rem;
   color: var(--ink);
@@ -303,7 +319,7 @@ main {
 }
 
 .media-text {
-  font-family: 'Liu Jian Mao Cao', cursive;
+  font-family: 'Kaisei Decol', 'Noto Sans TC', serif;
   font-size: 1.3rem;
   color: var(--ink);
   margin-top: 1rem;
@@ -366,7 +382,7 @@ main {
 }
 
 .brand-title {
-  font-family: 'ZCOOL KuaiLe', cursive;
+  font-family: 'Zen Maru Gothic', sans-serif; font-weight: 700;
   font-weight: 400;
   font-size: clamp(7rem, 18vw, 14rem);
   line-height: 1;
@@ -406,7 +422,7 @@ main {
 }
 
 .brand-tagline {
-  font-family: 'Liu Jian Mao Cao', cursive;
+  font-family: 'Kaisei Decol', 'Noto Sans TC', serif;
   font-size: clamp(1.4rem, 2.5vw, 2rem);
   color: var(--ink);
   margin-top: 0.5rem;
@@ -493,7 +509,7 @@ main {
 }
 
 .col-number {
-  font-family: 'ZCOOL KuaiLe', cursive;
+  font-family: 'Zen Maru Gothic', sans-serif; font-weight: 700;
   font-size: 5rem;
   line-height: 1;
   color: white;
@@ -544,10 +560,13 @@ main {
 .col-info {
   padding: 1.5rem 1.3rem 1rem;
   border-bottom: 1px dashed var(--ink);
+  min-height: 175px;
+  display: flex;
+  flex-direction: column;
 }
 
 .col-title {
-  font-family: 'ZCOOL KuaiLe', cursive;
+  font-family: 'Zen Maru Gothic', sans-serif; font-weight: 700;
   font-size: 1.6rem;
   letter-spacing: 0.05em;
   margin-bottom: 0.4rem;
@@ -571,19 +590,30 @@ main {
 .col-latest {
   padding: 1.2rem 1.3rem;
   flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .col-latest-label {
-  font-family: 'Caveat', cursive;
-  font-size: 1rem;
-  color: var(--ink);
-  background: var(--yellow);
-  padding: 0.1rem 0.6rem;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: white;
+  background: var(--pink-deep);
+  padding: 0.15rem 0.6rem;
   border: 1.5px solid var(--ink);
   border-radius: 999px;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
   margin-bottom: 0.7rem;
-  transform: rotate(-2deg);
+  box-shadow: 1.5px 1.5px 0 var(--ink);
+}
+
+.col-latest-label::before {
+  content: '🎀';
+  font-size: 0.85rem;
 }
 
 .col-thumb {
@@ -616,7 +646,7 @@ main {
 }
 
 .col-latest-title {
-  font-family: 'Noto Sans TC', sans-serif;
+  font-family: 'Kaisei Decol', 'Noto Sans TC', serif;
   font-weight: 700;
   font-size: 0.9rem;
   line-height: 1.5;
@@ -639,7 +669,7 @@ main {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-family: 'ZCOOL KuaiLe', cursive;
+  font-family: 'Zen Maru Gothic', sans-serif; font-weight: 700;
   font-size: 1.05rem;
   text-decoration: none;
   color: white;
@@ -668,7 +698,6 @@ main {
 <!-- 漂浮貼紙裝飾 -->
 <div class="page-stickers">
   <span class="sticker flower s1">✿</span>
-  <span class="sticker ribbon s2"></span>
   <span class="sticker heart s3">♡</span>
   <span class="sticker flower s4">❀</span>
   <span class="sticker sparkle s5">✦</span>
@@ -695,7 +724,7 @@ main {
   <h1 class="brand-title">
     <span class="char">歪</span><span class="char">腦</span><span class="char">袋</span>
   </h1>
-  <p class="brand-tagline">什麼都想玩一下 ~</p>
+  <p class="brand-tagline">歡迎光臨歪腦袋，裝著各種喜歡的小角落</p>
 </header>
 
 <!-- 影片/媒體橫幅 -->
@@ -723,15 +752,15 @@ main {
       <div class="col-cover">
       </div>
       <div class="col-info">
-        <h3 class="col-title">AI 音樂</h3>
-        <p class="col-subtitle">O.D.D. Frequencies</p>
-        <p class="col-desc">用 AI 做出來的奇怪好聽音樂。</p>
+        <h3 class="col-title">音樂</h3>
+        <p class="col-subtitle">Music</p>
+        <p class="col-desc">寫給孤單夜晚的旋律與故事。</p>
       </div>
       <div class="col-latest">
-        <span class="col-latest-label">~ 最新 ~</span>
+        <span class="col-latest-label">NEW</span>
         <div class="col-thumb"></div>
         <h4 class="col-latest-title">最新音樂作品</h4>
-        <p class="col-latest-meta">YOUTUBE · 待新增</p>
+        <p class="col-latest-meta">YOUTUBE · COMING SOON</p>
       </div>
       <div class="col-cta">
         <a href="music.html" class="col-btn">
@@ -746,15 +775,15 @@ main {
       <div class="col-cover">
       </div>
       <div class="col-info">
-        <h3 class="col-title">遊戲頻道</h3>
-        <p class="col-subtitle">Casual Gameplay</p>
-        <p class="col-desc">遊戲試玩、新手攻略、各種有趣的分享。</p>
+        <h3 class="col-title">遊戲</h3>
+        <p class="col-subtitle">Gameplay</p>
+        <p class="col-desc">遊戲試玩、新手攻略、隨意分享。</p>
       </div>
       <div class="col-latest">
-        <span class="col-latest-label">~ 最新 ~</span>
+        <span class="col-latest-label">NEW</span>
         <div class="col-thumb"></div>
         <h4 class="col-latest-title">最新遊戲攻略</h4>
-        <p class="col-latest-meta">YOUTUBE · 待新增</p>
+        <p class="col-latest-meta">YOUTUBE · COMING SOON</p>
       </div>
       <div class="col-cta">
         <a href="game.html" class="col-btn">
@@ -770,14 +799,14 @@ main {
       </div>
       <div class="col-info">
         <h3 class="col-title">部落格</h3>
-        <p class="col-subtitle">Daily Notes</p>
-        <p class="col-desc">書籍、家電、生活、保健，亂七八糟什麼都寫。</p>
+        <p class="col-subtitle">Blog</p>
+        <p class="col-desc">生活、心得、開箱。</p>
       </div>
       <div class="col-latest">
-        <span class="col-latest-label">~ 最新 ~</span>
+        <span class="col-latest-label">NEW</span>
         <div class="col-thumb"></div>
         <h4 class="col-latest-title">最新文章標題</h4>
-        <p class="col-latest-meta">BLOG · 待新增</p>
+        <p class="col-latest-meta">BLOG · COMING SOON</p>
       </div>
       <div class="col-cta">
         <a href="blog.html" class="col-btn">
@@ -793,14 +822,14 @@ main {
       </div>
       <div class="col-info">
         <h3 class="col-title">小工具</h3>
-        <p class="col-subtitle">Wonky Stuff</p>
+        <p class="col-subtitle">Tools</p>
         <p class="col-desc">一些自己做來玩的小工具。</p>
       </div>
       <div class="col-latest">
-        <span class="col-latest-label">~ 最新 ~</span>
+        <span class="col-latest-label">NEW</span>
         <div class="col-thumb"></div>
-        <h4 class="col-latest-title">隨機決策器</h4>
-        <p class="col-latest-meta">TOOLS · 待新增</p>
+        <h4 class="col-latest-title">隨機決策輪盤</h4>
+        <p class="col-latest-meta">TOOLS · 馬上玩玩看</p>
       </div>
       <div class="col-cta">
         <a href="tools.html" class="col-btn">

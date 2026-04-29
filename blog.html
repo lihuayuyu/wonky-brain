@@ -4,10 +4,47 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>部落格 — 歪腦袋</title>
-<meta name="description" content="日常碎碎念。書籍、家電、保健、生活，亂七八糟什麼都寫。">
+<meta name="description" content="生活雜記、家電評測、書籍心得、保健分享。在歪腦袋的部落格，紀錄日常的種種。">
+<meta name="keywords" content="部落格, 生活, 評測, 心得, 書籍推薦, 家電開箱, 歪腦袋">
+<meta name="author" content="歪腦袋 Wonky Brain">
+<link rel="canonical" href="https://wonky-brain.vercel.app/blog.html">
+
+<!-- Open Graph (Facebook, LINE) -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://wonky-brain.vercel.app/blog.html">
+<meta property="og:title" content="部落格 — 歪腦袋">
+<meta property="og:description" content="生活雜記、家電評測、書籍心得、保健分享。在歪腦袋的部落格，紀錄日常的種種。">
+<meta property="og:site_name" content="歪腦袋">
+<meta property="og:locale" content="zh_TW">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="部落格 — 歪腦袋">
+<meta name="twitter:description" content="生活雜記、家電評測、書籍心得、保健分享。在歪腦袋的部落格，紀錄日常的種種。">
+
+<!-- Favicon -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9C%BF%3C/text%3E%3C/svg%3E">
+
+<!-- Schema.org -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "歪腦袋",
+  "alternateName": "Wonky Brain",
+  "url": "https://wonky-brain.vercel.app/",
+  "description": "生活雜記、家電評測、書籍心得、保健分享。在歪腦袋的部落格，紀錄日常的種種。",
+  "inLanguage": "zh-TW",
+  "author": {
+    "@type": "Person",
+    "name": "歪腦袋"
+  }
+}
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Dancing+Script:wght@400;500;600;700&family=ZCOOL+KuaiLe&family=Liu+Jian+Mao+Cao&family=Noto+Sans+TC:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Dancing+Script:wght@400;500;600;700&family=Kaisei+Decol:wght@400;500;700&family=Zen+Maru+Gothic:wght@400;500;700;900&family=Noto+Sans+TC:wght@400;500;700;900&family=Liu+Jian+Mao+Cao&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg: #FFE4F0;
@@ -35,7 +72,7 @@ html { scroll-behavior: smooth; }
 body {
   background: linear-gradient(135deg, #FFE4F0 0%, #FFD6EA 50%, #F5DCFF 100%);
   color: var(--ink);
-  font-family: 'Noto Sans TC', sans-serif;
+  font-family: 'Kaisei Decol', 'Noto Sans TC', serif;
   overflow-x: hidden;
   position: relative;
   min-height: 100vh;
@@ -122,7 +159,7 @@ body::after {
 }
 
 .logo {
-  font-family: 'ZCOOL KuaiLe', cursive;
+  font-family: 'Zen Maru Gothic', sans-serif; font-weight: 700;
   font-size: 1.8rem;
   letter-spacing: 0.05em;
   color: var(--ink);
@@ -179,7 +216,7 @@ footer {
   border-top: 2px dashed var(--ink);
 }
 .footer-line {
-  font-family: 'Liu Jian Mao Cao', cursive;
+  font-family: 'Kaisei Decol', 'Noto Sans TC', serif;
   font-size: 1.6rem;
   margin-bottom: 0.8rem;
   color: var(--ink);
@@ -217,7 +254,7 @@ main { position: relative; z-index: 3; }
 }
 
 .blog-title {
-  font-family: 'ZCOOL KuaiLe', cursive;
+  font-family: 'Zen Maru Gothic', sans-serif; font-weight: 700;
   font-size: clamp(3rem, 8vw, 5rem);
   letter-spacing: 0.05em;
   color: var(--ink);
@@ -247,7 +284,7 @@ main { position: relative; z-index: 3; }
 }
 
 .blog-tagline {
-  font-family: 'Liu Jian Mao Cao', cursive;
+  font-family: 'Kaisei Decol', 'Noto Sans TC', serif;
   font-size: 1.4rem;
   color: var(--ink);
   letter-spacing: 0.1em;
@@ -275,7 +312,7 @@ main.container {
 }
 
 .section-label-text {
-  font-family: 'ZCOOL KuaiLe', cursive;
+  font-family: 'Zen Maru Gothic', sans-serif; font-weight: 700;
   font-size: 1.5rem;
   color: var(--ink);
   background: var(--yellow);
@@ -344,7 +381,7 @@ main.container {
   position: absolute;
   top: 1rem;
   right: 1rem;
-  font-family: 'ZCOOL KuaiLe', cursive;
+  font-family: 'Zen Maru Gothic', sans-serif; font-weight: 700;
   font-size: 1rem;
   background: var(--yellow);
   color: var(--ink);
@@ -382,7 +419,7 @@ main.container {
 /* 標籤 */
 .tag {
   display: inline-block;
-  font-family: 'ZCOOL KuaiLe', cursive;
+  font-family: 'Zen Maru Gothic', sans-serif; font-weight: 700;
   font-size: 0.9rem;
   padding: 0.2rem 0.9rem;
   background: var(--pink);
@@ -400,7 +437,7 @@ main.container {
 .tag.tutorial { background: var(--green); color: var(--ink); }
 
 .featured-main .post-title {
-  font-family: 'Noto Sans TC', sans-serif;
+  font-family: 'Kaisei Decol', 'Noto Sans TC', serif;
   font-weight: 700;
   font-size: clamp(1.4rem, 2.5vw, 1.9rem);
   line-height: 1.4;
@@ -416,7 +453,7 @@ main.container {
 }
 
 .featured-side .post-title {
-  font-family: 'Noto Sans TC', sans-serif;
+  font-family: 'Kaisei Decol', 'Noto Sans TC', serif;
   font-weight: 700;
   font-size: 1.05rem;
   line-height: 1.5;
@@ -458,7 +495,7 @@ main.container {
 }
 
 .cat-btn {
-  font-family: 'ZCOOL KuaiLe', cursive;
+  font-family: 'Zen Maru Gothic', sans-serif; font-weight: 700;
   font-size: 1.1rem;
   padding: 0.4rem 1.4rem;
   border-radius: 999px;
@@ -540,7 +577,7 @@ main.container {
 }
 
 .post-card .post-title {
-  font-family: 'Noto Sans TC', sans-serif;
+  font-family: 'Kaisei Decol', 'Noto Sans TC', serif;
   font-weight: 700;
   font-size: 1.05rem;
   line-height: 1.5;
@@ -566,7 +603,7 @@ main.container {
 }
 
 .load-more-btn {
-  font-family: 'ZCOOL KuaiLe', cursive;
+  font-family: 'Zen Maru Gothic', sans-serif; font-weight: 700;
   font-size: 1.2rem;
   padding: 0.8rem 2.5rem;
   border-radius: 999px;
@@ -592,7 +629,6 @@ main.container {
 
 <div class="page-stickers">
   <span class="sticker flower s1">✿</span>
-  <span class="sticker ribbon s2"></span>
   <span class="sticker heart s3">♡</span>
   <span class="sticker flower s4">❀</span>
   <span class="sticker sparkle s5">✦</span>
@@ -613,9 +649,9 @@ main.container {
 </nav>
 
 <header class="blog-header">
-  <span class="blog-eyebrow">~ blog ~</span>
-  <h1 class="blog-title">日常碎碎念</h1>
-  <p class="blog-tagline">書籍 · 家電 · 保健 · 生活</p>
+  <span class="blog-eyebrow">BLOG</span>
+  <h1 class="blog-title">剛剛好的日子</h1>
+  <p class="blog-tagline">生活 · 心得 · 開箱</p>
 </header>
 
 <main class="container">
@@ -631,6 +667,7 @@ main.container {
     <div class="featured-grid">
       <a href="post.html" class="featured-main">
         <div class="thumb">
+          <span class="thumb-sticker">範本</span>
         </div>
         <div class="content">
           <span class="tag recommend">推薦</span>
@@ -641,23 +678,21 @@ main.container {
       </a>
 
       <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-        <a href="post.html" class="featured-side">
+        <a href="#" class="featured-side">
           <div class="thumb"></div>
           <div class="content">
-            <span class="tag tutorial">教學</span>
-            <h3 class="post-title">第二篇精選文章標題</h3>
-            <p class="excerpt">摘要文字，簡短介紹文章內容。</p>
-            <p class="post-meta">2026.04.25</p>
+            <h3 class="post-title">文章正在烘焙中</h3>
+            <p class="excerpt">還在收集生活的小片段、想分享的心得，之後會在這裡慢慢長出文章。不急，我們慢慢來 ✨</p>
+            <p class="post-meta">COMING SOON</p>
           </div>
         </a>
 
-        <a href="post.html" class="featured-side purple">
+        <a href="#" class="featured-side purple">
           <div class="thumb"></div>
           <div class="content">
-            <span class="tag review">評測</span>
-            <h3 class="post-title">第三篇精選文章標題</h3>
-            <p class="excerpt">摘要文字，簡短介紹文章內容。</p>
-            <p class="post-meta">2026.04.22</p>
+            <h3 class="post-title">文章正在烘焙中</h3>
+            <p class="excerpt">還在收集生活的小片段、想分享的心得，之後會在這裡慢慢長出文章。不急，我們慢慢來 ✨</p>
+            <p class="post-meta">COMING SOON</p>
           </div>
         </a>
       </div>
@@ -687,59 +722,54 @@ main.container {
         <div class="thumb"></div>
         <div class="content">
           <span class="tag review">評測</span>
-          <h3 class="post-title">某個商品的詳細評測心得分享</h3>
+          <h3 class="post-title">某個商品的詳細評測心得分享 [範本]</h3>
           <p class="excerpt">用了三個月的真實感想，優缺點都會老實說。</p>
           <p class="post-meta">2026.04.20</p>
         </div>
       </a>
 
-      <a href="post.html" class="post-card c2">
+      <a href="#" class="post-card c2">
         <div class="thumb"></div>
         <div class="content">
-          <span class="tag unbox">開箱</span>
-          <h3 class="post-title">這個東西到底值不值得買？開箱實測</h3>
-          <p class="excerpt">收到貨第一天就拆開來測試，分享給大家。</p>
-          <p class="post-meta">2026.04.18</p>
+          <h3 class="post-title">文章正在烘焙中</h3>
+          <p class="excerpt">還在收集生活的小片段、想分享的心得，之後會在這裡慢慢長出文章。</p>
+          <p class="post-meta">COMING SOON</p>
         </div>
       </a>
 
-      <a href="post.html" class="post-card c3">
+      <a href="#" class="post-card c3">
         <div class="thumb"></div>
         <div class="content">
-          <span class="tag recommend">推薦</span>
-          <h3 class="post-title">推薦五個我自己也在用的好東西</h3>
-          <p class="excerpt">不藏私分享自己日常生活中的愛用清單。</p>
-          <p class="post-meta">2026.04.15</p>
+          <h3 class="post-title">文章正在烘焙中</h3>
+          <p class="excerpt">不急，我們慢慢來 ✨</p>
+          <p class="post-meta">COMING SOON</p>
         </div>
       </a>
 
-      <a href="post.html" class="post-card c4">
+      <a href="#" class="post-card c4">
         <div class="thumb"></div>
         <div class="content">
-          <span class="tag tutorial">教學</span>
-          <h3 class="post-title">手把手教你怎麼選擇適合的XX</h3>
-          <p class="excerpt">新手必看，從零開始的入門指南。</p>
-          <p class="post-meta">2026.04.12</p>
+          <h3 class="post-title">文章正在烘焙中</h3>
+          <p class="excerpt">還在收集生活的小片段、想分享的心得，之後會在這裡慢慢長出文章。</p>
+          <p class="post-meta">COMING SOON</p>
         </div>
       </a>
 
-      <a href="post.html" class="post-card c5">
+      <a href="#" class="post-card c5">
         <div class="thumb"></div>
         <div class="content">
-          <span class="tag review">評測</span>
-          <h3 class="post-title">最近超紅的那個產品到底好不好？</h3>
-          <p class="excerpt">買來實測，結果跟想像中不太一樣。</p>
-          <p class="post-meta">2026.04.10</p>
+          <h3 class="post-title">文章正在烘焙中</h3>
+          <p class="excerpt">不急，我們慢慢來 ✨</p>
+          <p class="post-meta">COMING SOON</p>
         </div>
       </a>
 
-      <a href="post.html" class="post-card c6">
+      <a href="#" class="post-card c6">
         <div class="thumb"></div>
         <div class="content">
-          <span class="tag recommend">推薦</span>
-          <h3 class="post-title">這幾款書最近讀得超級停不下來</h3>
-          <p class="excerpt">本月閱讀清單分享，每本都很值得。</p>
-          <p class="post-meta">2026.04.08</p>
+          <h3 class="post-title">文章正在烘焙中</h3>
+          <p class="excerpt">還在收集生活的小片段、想分享的心得，之後會在這裡慢慢長出文章。</p>
+          <p class="post-meta">COMING SOON</p>
         </div>
       </a>
 

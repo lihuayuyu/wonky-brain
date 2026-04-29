@@ -3,10 +3,48 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>遊戲攻略 — 歪腦袋</title>
+<title>遊戲 — 歪腦袋</title>
+<meta name="description" content="蕨蕨・Casual Gameplay 的遊戲頻道。遊戲試玩、新手攻略、隨意分享。">
+<meta name="keywords" content="遊戲, 遊戲攻略, 新手攻略, 遊戲試玩, 蕨蕨, Casual Gameplay">
+<meta name="author" content="歪腦袋 Wonky Brain">
+<link rel="canonical" href="https://wonky-brain.vercel.app/game.html">
+
+<!-- Open Graph (Facebook, LINE) -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://wonky-brain.vercel.app/game.html">
+<meta property="og:title" content="遊戲 — 歪腦袋">
+<meta property="og:description" content="蕨蕨・Casual Gameplay 的遊戲頻道。遊戲試玩、新手攻略、隨意分享。">
+<meta property="og:site_name" content="歪腦袋">
+<meta property="og:locale" content="zh_TW">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="遊戲 — 歪腦袋">
+<meta name="twitter:description" content="蕨蕨・Casual Gameplay 的遊戲頻道。遊戲試玩、新手攻略、隨意分享。">
+
+<!-- Favicon -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9C%BF%3C/text%3E%3C/svg%3E">
+
+<!-- Schema.org -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "歪腦袋",
+  "alternateName": "Wonky Brain",
+  "url": "https://wonky-brain.vercel.app/",
+  "description": "蕨蕨・Casual Gameplay 的遊戲頻道。遊戲試玩、新手攻略、隨意分享。",
+  "inLanguage": "zh-TW",
+  "author": {
+    "@type": "Person",
+    "name": "歪腦袋"
+  }
+}
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Dancing+Script:wght@400;500;600;700&family=ZCOOL+KuaiLe&family=Liu+Jian+Mao+Cao&family=Noto+Sans+TC:wght@400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Dancing+Script:wght@400;500;600;700&family=Kaisei+Decol:wght@400;500;700&family=Zen+Maru+Gothic:wght@400;500;700;900&family=Noto+Sans+TC:wght@400;500;700;900&family=Liu+Jian+Mao+Cao&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg: #FFE4F0;
@@ -30,7 +68,7 @@ html { scroll-behavior: smooth; }
 body {
   background: linear-gradient(135deg, #FFE4F0 0%, #FFD6EA 50%, #F5DCFF 100%);
   color: var(--ink);
-  font-family: 'Noto Sans TC', sans-serif;
+  font-family: 'Kaisei Decol', 'Noto Sans TC', serif;
   overflow-x: hidden;
   position: relative;
   min-height: 100vh;
@@ -70,8 +108,6 @@ body::after {
 .sticker.heart { font-size: 1.6rem; color: var(--pink-deep); filter: drop-shadow(1px 1px 0 rgba(74, 58, 92, 0.3)); }
 .sticker.star { font-size: 1.5rem; color: var(--purple-deep); filter: drop-shadow(1px 1px 0 rgba(74, 58, 92, 0.3)); }
 .sticker.sparkle { font-size: 1.4rem; color: var(--blue-deep); filter: drop-shadow(1px 1px 0 rgba(74, 58, 92, 0.3)); }
-.sticker.ribbon { width: 50px; height: 22px; background: var(--pink); border: 2px solid var(--ink); border-radius: 4px; filter: drop-shadow(2px 2px 0 rgba(74, 58, 92, 0.2)); }
-.sticker.ribbon::after { content: ''; position: absolute; top: -2px; right: -10px; width: 0; height: 0; border-style: solid; border-width: 12px 0 12px 10px; border-color: transparent transparent transparent var(--pink); }
 .sticker.tape { width: 60px; height: 22px; background: rgba(196, 157, 255, 0.7); border-left: 2px dashed rgba(0,0,0,0.2); border-right: 2px dashed rgba(0,0,0,0.2); }
 .sticker.s1 { top: 8%; left: 4%; animation-delay: 0s; }
 .sticker.s2 { top: 18%; right: 6%; animation-delay: 1.2s; transform: rotate(15deg); }
@@ -101,7 +137,7 @@ body::after {
 }
 
 .logo {
-  font-family: 'ZCOOL KuaiLe', cursive;
+  font-family: 'Zen Maru Gothic', sans-serif; font-weight: 700;
   font-size: 1.8rem;
   color: var(--ink);
   text-decoration: none;
@@ -142,7 +178,7 @@ footer {
   z-index: 3;
   border-top: 2px dashed var(--ink);
 }
-.footer-line { font-family: 'Liu Jian Mao Cao', cursive; font-size: 1.6rem; margin-bottom: 0.8rem; color: var(--ink); }
+.footer-line { font-family: 'Kaisei Decol', 'Noto Sans TC', serif; font-size: 1.6rem; margin-bottom: 0.8rem; color: var(--ink); }
 .footer-meta { font-family: 'Dancing Script', cursive; font-size: 0.95rem; color: var(--ink-soft); font-weight: 500; }
 
 .page-header {
@@ -168,7 +204,7 @@ footer {
 }
 
 .page-title {
-  font-family: 'ZCOOL KuaiLe', cursive;
+  font-family: 'Zen Maru Gothic', sans-serif; font-weight: 700;
   font-size: clamp(3rem, 8vw, 5rem);
   letter-spacing: 0.05em;
   color: var(--ink);
@@ -184,7 +220,7 @@ footer {
 }
 
 .page-tagline {
-  font-family: 'Liu Jian Mao Cao', cursive;
+  font-family: 'Kaisei Decol', 'Noto Sans TC', serif;
   font-size: 1.3rem;
   color: var(--ink-soft);
 }
@@ -213,7 +249,7 @@ main {
 }
 
 .section-label-text {
-  font-family: 'ZCOOL KuaiLe', cursive;
+  font-family: 'Zen Maru Gothic', sans-serif; font-weight: 700;
   font-size: 1.5rem;
   color: var(--ink);
   background: var(--yellow);
@@ -292,7 +328,7 @@ main {
 }
 
 .aff-banner-title {
-  font-family: 'ZCOOL KuaiLe', cursive;
+  font-family: 'Zen Maru Gothic', sans-serif; font-weight: 700;
   font-size: 1.3rem;
   color: var(--ink);
   margin-bottom: 0.2rem;
@@ -305,7 +341,7 @@ main {
 }
 
 .aff-banner-arrow {
-  font-family: 'ZCOOL KuaiLe', cursive;
+  font-family: 'Zen Maru Gothic', sans-serif; font-weight: 700;
   font-size: 1.5rem;
   color: var(--pink-deep);
   transition: transform 0.3s;
@@ -375,7 +411,7 @@ main {
   position: absolute;
   top: 1rem;
   left: 1rem;
-  font-family: 'ZCOOL KuaiLe', cursive;
+  font-family: 'Zen Maru Gothic', sans-serif; font-weight: 700;
   font-size: 1rem;
   padding: 0.3rem 1rem;
   background: var(--yellow);
@@ -395,7 +431,7 @@ main {
 }
 
 .game-feature .game-name {
-  font-family: 'ZCOOL KuaiLe', cursive;
+  font-family: 'Zen Maru Gothic', sans-serif; font-weight: 700;
   font-size: 1.6rem;
   margin-bottom: 0.5rem;
   color: var(--ink);
@@ -506,7 +542,7 @@ main {
 }
 
 .video-title {
-  font-family: 'Noto Sans TC', sans-serif;
+  font-family: 'Kaisei Decol', 'Noto Sans TC', serif;
   font-weight: 700;
   font-size: 1rem;
   line-height: 1.5;
@@ -551,7 +587,7 @@ main {
 }
 
 .guide-num {
-  font-family: 'ZCOOL KuaiLe', cursive;
+  font-family: 'Zen Maru Gothic', sans-serif; font-weight: 700;
   font-size: 2.5rem;
   color: var(--pink-deep);
   line-height: 1;
@@ -563,7 +599,7 @@ main {
 
 .guide-tag {
   display: inline-block;
-  font-family: 'ZCOOL KuaiLe', cursive;
+  font-family: 'Zen Maru Gothic', sans-serif; font-weight: 700;
   font-size: 0.9rem;
   padding: 0.15rem 0.7rem;
   background: var(--pink);
@@ -579,7 +615,7 @@ main {
 .guide-tag.tips { background: var(--yellow); color: var(--ink); }
 
 .guide-title {
-  font-family: 'Noto Sans TC', sans-serif;
+  font-family: 'Kaisei Decol', 'Noto Sans TC', serif;
   font-weight: 700;
   font-size: 1.15rem;
   color: var(--ink);
@@ -596,7 +632,7 @@ main {
 }
 
 .guide-arrow {
-  font-family: 'ZCOOL KuaiLe', cursive;
+  font-family: 'Zen Maru Gothic', sans-serif; font-weight: 700;
   font-size: 1.3rem;
   color: var(--pink-deep);
 }
@@ -613,7 +649,7 @@ main {
 }
 
 .load-more-btn {
-  font-family: 'ZCOOL KuaiLe', cursive;
+  font-family: 'Zen Maru Gothic', sans-serif; font-weight: 700;
   font-size: 1.2rem;
   padding: 0.8rem 2.5rem;
   border-radius: 999px;
@@ -639,7 +675,6 @@ main {
 
 <div class="page-stickers">
   <span class="sticker flower s1">✿</span>
-  <span class="sticker ribbon s2"></span>
   <span class="sticker heart s3">♡</span>
   <span class="sticker flower s4">❀</span>
   <span class="sticker sparkle s5">✦</span>
@@ -660,10 +695,10 @@ main {
 </nav>
 
 <header class="page-header">
-  <span class="page-eyebrow">~ game zone ~</span>
-  <h1 class="page-title">遊戲頻道</h1>
-  <p class="page-subtitle">Casual Gameplay</p>
-  <p class="page-tagline">遊戲試玩 · 新手攻略 · 各種有趣的遊戲分享</p>
+  <span class="page-eyebrow">GAMEPLAY</span>
+  <h1 class="page-title">遊戲</h1>
+  <p class="page-subtitle">Gameplay</p>
+  <p class="page-tagline">遊戲試玩 · 新手攻略 · 隨意分享</p>
 </header>
 
 <main>
@@ -806,7 +841,7 @@ main {
       <div class="guide-num">01</div>
       <div class="guide-content">
         <span class="guide-tag beginner">新手攻略</span>
-        <h3 class="guide-title">最新攻略文章標題：新手必看的入門指南</h3>
+        <h3 class="guide-title">最新攻略文章標題：新手必看的入門指南 [範本]</h3>
         <p class="guide-meta">2026.04.27 · 8 MIN READ · 遊戲名稱</p>
       </div>
       <span class="guide-arrow">→</span>
@@ -815,9 +850,8 @@ main {
     <a href="#" class="guide-item">
       <div class="guide-num">02</div>
       <div class="guide-content">
-        <span class="guide-tag advanced">進階技巧</span>
-        <h3 class="guide-title">高手必學的進階操作技巧整理</h3>
-        <p class="guide-meta">2026.04.25 · 12 MIN READ · 遊戲名稱</p>
+        <h3 class="guide-title">攻略正在烘焙中</h3>
+        <p class="guide-meta">COMING SOON · 還在玩、還在寫</p>
       </div>
       <span class="guide-arrow">→</span>
     </a>
@@ -825,9 +859,8 @@ main {
     <a href="#" class="guide-item">
       <div class="guide-num">03</div>
       <div class="guide-content">
-        <span class="guide-tag tips">小技巧</span>
-        <h3 class="guide-title">這些隱藏小技巧 90% 玩家都不知道</h3>
-        <p class="guide-meta">2026.04.22 · 5 MIN READ · 遊戲名稱</p>
+        <h3 class="guide-title">攻略正在烘焙中</h3>
+        <p class="guide-meta">COMING SOON · 還在玩、還在寫</p>
       </div>
       <span class="guide-arrow">→</span>
     </a>
@@ -835,9 +868,8 @@ main {
     <a href="#" class="guide-item">
       <div class="guide-num">04</div>
       <div class="guide-content">
-        <span class="guide-tag beginner">新手攻略</span>
-        <h3 class="guide-title">新手最容易犯的 5 個錯誤</h3>
-        <p class="guide-meta">2026.04.20 · 6 MIN READ · 遊戲名稱</p>
+        <h3 class="guide-title">攻略正在烘焙中</h3>
+        <p class="guide-meta">COMING SOON · 還在玩、還在寫</p>
       </div>
       <span class="guide-arrow">→</span>
     </a>
@@ -845,9 +877,8 @@ main {
     <a href="#" class="guide-item">
       <div class="guide-num">05</div>
       <div class="guide-content">
-        <span class="guide-tag advanced">進階技巧</span>
-        <h3 class="guide-title">高難度關卡通關完整流程</h3>
-        <p class="guide-meta">2026.04.18 · 15 MIN READ · 遊戲名稱</p>
+        <h3 class="guide-title">攻略正在烘焙中</h3>
+        <p class="guide-meta">COMING SOON · 還在玩、還在寫</p>
       </div>
       <span class="guide-arrow">→</span>
     </a>
