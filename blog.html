@@ -664,7 +664,7 @@ main.container {
       <div class="section-label-line"></div>
     </div>
 
-    <div class="featured-grid">
+    <div class="featured-grid" id="featured-grid">
       <a href="post.html" class="featured-main">
         <div class="thumb">
           <span class="thumb-sticker">範本</span>
@@ -716,7 +716,7 @@ main.container {
       <div class="section-label-line"></div>
     </div>
 
-    <div class="posts-grid">
+    <div class="posts-grid" id="posts-grid">
 
       <a href="post.html" class="post-card c1">
         <div class="thumb"></div>
@@ -787,5 +787,189 @@ main.container {
   <p class="footer-meta">© 2026 歪腦袋 · a wonky little corner</p>
 </footer>
 
+
+<script>
+// === 從 Notion 載入部落格文章 ===
+
+async function loadBlogPosts() {
+  try {
+    const response = await fetch('/api/notion?type=list&category=部落格');
+    if (!response.ok) {
+      console.warn('Notion API failed, keeping fallback content');
+      return;
+    }
+    const data = await response.json();
+    const articles = data.articles || [];
+    
+    if (articles.length === 0) {
+      console.log('沒有已發布的部落格文章');
+      return;
+    }
+    
+    // 分組
+    const featuredBig = articles.filter(a => a.position === '精選大卡');
+    const featuredMid = articles.filter(a => a.position === '精選中卡');
+    const general = articles.filter(a => a.position === '一般' || !a.position);
+    
+    renderFeatured(featuredBig, featuredMid);
+    renderGeneral(general);
+  } catch (e) {
+    console.error('載入失敗:', e);
+  }
+}
+
+function renderFeatured(big, mid) {
+  const container = document.getElementById('featured-grid');
+  if (!container) return;
+  
+  // 如果沒有精選大卡，從一般文章補一篇當大卡
+  let bigPost = big[0];
+  let mid1 = mid[0];
+  let mid2 = mid[1];
+  
+  if (!bigPost && !mid1 && !mid2) return; // 都沒有就保留 fallback
+  
+  let html = '';
+  
+  // 精選大卡
+  if (bigPost) {
+    html += `
+      <a href="post.html?slug=${bigPost.slug}" class="featured-main">
+        <div class="thumb" ${bigPost.cover ? `style="background-image: url('${escapeAttr(bigPost.cover)}'); background-size: cover; background-position: center;"` : ''}></div>
+        <div class="content">
+          ${bigPost.tag ? `<span class="tag ${tagClass(bigPost.tag)}">${escapeHtml(bigPost.tag)}</span>` : ''}
+          <h2 class="post-title">${escapeHtml(bigPost.title)}</h2>
+          <p class="excerpt">${escapeHtml(bigPost.excerpt || '')}</p>
+          <p class="post-meta">${formatDate(bigPost.date)} · ${calcReadTime(bigPost)} MIN READ</p>
+        </div>
+      </a>`;
+  }
+  
+  html += '<div style="display: flex; flex-direction: column; gap: 1.5rem;">';
+  
+  // 精選中卡 1
+  if (mid1) {
+    html += `
+      <a href="post.html?slug=${mid1.slug}" class="featured-side">
+        <div class="thumb" ${mid1.cover ? `style="background-image: url('${escapeAttr(mid1.cover)}'); background-size: cover; background-position: center;"` : ''}></div>
+        <div class="content">
+          ${mid1.tag ? `<span class="tag ${tagClass(mid1.tag)}">${escapeHtml(mid1.tag)}</span>` : ''}
+          <h3 class="post-title">${escapeHtml(mid1.title)}</h3>
+          <p class="excerpt">${escapeHtml(mid1.excerpt || '')}</p>
+          <p class="post-meta">${formatDate(mid1.date)}</p>
+        </div>
+      </a>`;
+  } else {
+    html += `
+      <a href="#" class="featured-side">
+        <div class="thumb"></div>
+        <div class="content">
+          <h3 class="post-title">文章正在烘焙中</h3>
+          <p class="excerpt">還在收集生活的小片段，之後會在這裡慢慢長出文章。</p>
+          <p class="post-meta">COMING SOON</p>
+        </div>
+      </a>`;
+  }
+  
+  // 精選中卡 2
+  if (mid2) {
+    html += `
+      <a href="post.html?slug=${mid2.slug}" class="featured-side purple">
+        <div class="thumb" ${mid2.cover ? `style="background-image: url('${escapeAttr(mid2.cover)}'); background-size: cover; background-position: center;"` : ''}></div>
+        <div class="content">
+          ${mid2.tag ? `<span class="tag ${tagClass(mid2.tag)}">${escapeHtml(mid2.tag)}</span>` : ''}
+          <h3 class="post-title">${escapeHtml(mid2.title)}</h3>
+          <p class="excerpt">${escapeHtml(mid2.excerpt || '')}</p>
+          <p class="post-meta">${formatDate(mid2.date)}</p>
+        </div>
+      </a>`;
+  } else {
+    html += `
+      <a href="#" class="featured-side purple">
+        <div class="thumb"></div>
+        <div class="content">
+          <h3 class="post-title">文章正在烘焙中</h3>
+          <p class="excerpt">還在收集生活的小片段，之後會在這裡慢慢長出文章。</p>
+          <p class="post-meta">COMING SOON</p>
+        </div>
+      </a>`;
+  }
+  
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function renderGeneral(posts) {
+  const container = document.getElementById('posts-grid');
+  if (!container) return;
+  
+  // 取前 6 篇
+  const display = posts.slice(0, 6);
+  let html = '';
+  
+  display.forEach((post, i) => {
+    html += `
+      <a href="post.html?slug=${post.slug}" class="post-card c${i + 1}">
+        <div class="thumb" ${post.cover ? `style="background-image: url('${escapeAttr(post.cover)}'); background-size: cover; background-position: center;"` : ''}></div>
+        <div class="content">
+          ${post.tag ? `<span class="tag ${tagClass(post.tag)}">${escapeHtml(post.tag)}</span>` : ''}
+          <h3 class="post-title">${escapeHtml(post.title)}</h3>
+          <p class="excerpt">${escapeHtml(post.excerpt || '')}</p>
+          <p class="post-meta">${formatDate(post.date)}</p>
+        </div>
+      </a>`;
+  });
+  
+  // 不夠 6 篇就補烘焙中
+  for (let i = display.length; i < 6; i++) {
+    html += `
+      <a href="#" class="post-card c${i + 1}">
+        <div class="thumb"></div>
+        <div class="content">
+          <h3 class="post-title">文章正在烘焙中</h3>
+          <p class="excerpt">不急，我們慢慢來 ✨</p>
+          <p class="post-meta">COMING SOON</p>
+        </div>
+      </a>`;
+  }
+  
+  container.innerHTML = html;
+}
+
+function tagClass(tag) {
+  const map = {
+    '評測': 'review', '開箱': 'unbox', '推薦': 'recommend',
+    '教學': 'tutorial', '心得': 'review', '小知識': 'recommend',
+    '新手攻略': 'beginner', '進階技巧': 'advanced', '初見試玩': 'beginner',
+    '遊戲攻略': 'beginner'
+  };
+  return map[tag] || 'review';
+}
+
+function formatDate(d) {
+  if (!d) return '';
+  return d.replace(/-/g, '.').substring(0, 10);
+}
+
+function calcReadTime(post) {
+  // 粗估：摘要 + 標題長度
+  const len = (post.excerpt || '').length + (post.title || '').length;
+  return Math.max(3, Math.ceil(len / 100));
+}
+
+function escapeHtml(text) {
+  if (!text) return '';
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function escapeAttr(text) {
+  if (!text) return '';
+  return text.replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+}
+
+document.addEventListener('DOMContentLoaded', loadBlogPosts);
+</script>
 </body>
 </html>

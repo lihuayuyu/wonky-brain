@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>文章標題 — 歪腦袋</title>
+<title>遊戲攻略標題 — 歪腦袋</title>
 <meta name="description" content="在歪腦袋部落格上閱讀這篇文章，了解作者的想法、評測或心得分享。">
 <meta name="keywords" content="部落格, 文章, 心得, 評測, 歪腦袋">
 <meta name="author" content="歪腦袋 Wonky Brain">
@@ -546,6 +546,214 @@ footer {
   font-weight: 700;
 }
 
+/* === 遊戲攻略專用元件 === */
+
+/* 影片嵌入框 */
+.game-video-wrap {
+  margin: 2.5rem 0;
+  text-align: center;
+}
+
+.game-video-label {
+  font-family: 'Zen Maru Gothic', sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--ink);
+  margin-bottom: 0.8rem !important;
+  background: var(--yellow);
+  display: inline-block;
+  padding: 0.3rem 1.2rem;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.youtube-embed-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  border: 2.5px solid var(--ink);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 6px 6px 0 var(--ink);
+  background: #000;
+  margin: 0.8rem 0;
+}
+
+.youtube-embed-frame iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.game-video-caption {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  font-style: italic;
+  margin-top: 0.5rem !important;
+}
+
+/* 遊戲基本資訊卡 */
+.game-info-card {
+  background: linear-gradient(135deg, #E8F2FF 0%, #DCE7FF 100%);
+  border: 2.5px solid var(--ink);
+  border-radius: 20px;
+  padding: 1.5rem 1.8rem;
+  margin: 2.5rem 0;
+  box-shadow: 5px 5px 0 var(--ink);
+}
+
+.game-info-title {
+  font-family: 'Zen Maru Gothic', sans-serif;
+  font-weight: 700;
+  font-size: 1.3rem;
+  margin-bottom: 1rem !important;
+  margin-top: 0 !important;
+  color: var(--ink);
+  border-bottom: 2px dashed var(--ink);
+  padding-bottom: 0.6rem;
+}
+
+.game-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.8rem 1.5rem;
+}
+
+@media (max-width: 600px) {
+  .game-info-grid { grid-template-columns: 1fr; }
+}
+
+.game-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.8rem;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 8px;
+}
+
+.game-info-key {
+  color: var(--ink);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.game-info-value {
+  color: var(--ink);
+  font-size: 0.9rem;
+}
+
+/* 小技巧框 */
+.tip-box {
+  background: linear-gradient(135deg, #FFF8DC 0%, #FFF2A8 100%);
+  border: 2.5px solid var(--ink);
+  border-left: 8px solid #FFB833;
+  border-radius: 12px;
+  padding: 1.2rem 1.5rem;
+  margin: 1.8rem 0;
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.tip-label {
+  font-family: 'Zen Maru Gothic', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--pink-deep);
+  margin-bottom: 0.5rem !important;
+}
+
+.tip-box p:last-child {
+  margin: 0 !important;
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+/* 警告框 */
+.warn-box {
+  background: linear-gradient(135deg, #FFE0E5 0%, #FFC8CD 100%);
+  border: 2.5px solid var(--ink);
+  border-left: 8px solid var(--pink-deep);
+  border-radius: 12px;
+  padding: 1.2rem 1.5rem;
+  margin: 1.8rem 0;
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.warn-label {
+  font-family: 'Zen Maru Gothic', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--pink-deep);
+  margin-bottom: 0.5rem !important;
+}
+
+.warn-box ul {
+  margin: 0 !important;
+  padding-left: 1.2rem !important;
+}
+
+.warn-box li {
+  margin-bottom: 0.4rem !important;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--ink);
+}
+
+/* 步驟清單 */
+.step-list {
+  margin: 2rem 0;
+}
+
+.step-item {
+  display: flex;
+  gap: 1rem;
+  background: white;
+  border: 2px solid var(--ink);
+  border-radius: 16px;
+  padding: 1.2rem 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 3px 3px 0 var(--ink);
+  align-items: flex-start;
+}
+
+.step-num {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--pink);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Zen Maru Gothic', sans-serif;
+  font-weight: 900;
+  font-size: 1.2rem;
+  border: 2px solid var(--ink);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.step-content {
+  flex: 1;
+}
+
+.step-content h4 {
+  font-family: 'Zen Maru Gothic', sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin: 0 0 0.4rem !important;
+  color: var(--ink);
+}
+
+.step-content p {
+  margin: 0 !important;
+  font-size: 0.92rem;
+  line-height: 1.7;
+}
+
 /* 聯盟行銷推薦框 */
 .affiliate-box {
   background: white;
@@ -798,7 +1006,7 @@ footer {
 }
 </style>
 </head>
-<body>
+<body data-post-type="game">
 
 <div class="page-stickers">
   <span class="sticker flower s1">✿</span>
@@ -826,14 +1034,14 @@ footer {
   <nav class="breadcrumb">
     <a href="index.html">首頁</a>
     <span class="sep">/</span>
-    <a href="blog.html">部落格</a>
+    <a href="game.html">遊戲</a>
     <span class="sep">/</span>
-    <a href="#">推薦</a>
+    <a href="#">新手攻略</a>
   </nav>
 
   <header class="article-header">
-    <a href="#" class="tag">推薦</a>
-    <h1 class="article-title">這裡放文章標題：吸引人的好標題決定點擊率</h1>
+    <a href="#" class="tag">新手攻略</a>
+    <h1 class="article-title">[遊戲名稱] 新手必看：開局 5 個重點不踩坑</h1>
     <div class="article-meta">
       <span>2026.04.27</span>
       <span>5 MIN READ</span>
@@ -845,118 +1053,114 @@ footer {
   </div>
 
   <div class="article-content">
-    <p>這是文章的開頭段落，通常會用一個吸引人的故事或場景開場，讓讀者願意繼續往下讀。第一段是整篇文章最重要的地方，要在這裡告訴讀者為什麼這篇文章值得花時間看完。</p>
+    <p>這是攻略文章的開頭，先簡單介紹這款遊戲是什麼、適合誰。新手看到這段就知道值不值得花時間看下去。</p>
 
-    <p>第二段可以延伸第一段的內容，把背景交代清楚，讓讀者知道你接下來要分享什麼東西、為什麼你有資格分享這個主題。</p>
+    <p>可以說一下自己玩了多久、玩到什麼程度、為什麼有資格分享這篇攻略。建立信任感很重要。</p>
 
-    <!-- ⭐ 開箱評分卡（可刪除） -->
-    <div class="rating-card">
-      <p class="rating-label">綜合評分</p>
-      <div class="rating-stars">★★★★☆</div>
-      <p class="rating-score">4.2 / 5</p>
-      <div class="rating-details">
-        <div class="rating-item">
-          <span class="rating-key">外觀</span>
-          <span class="rating-value">★★★★★</span>
+    <!-- 📺 攻略影片嵌入（最重要！） -->
+    <div class="game-video-wrap">
+      <p class="game-video-label">影片版攻略</p>
+      <div class="youtube-embed-frame">
+        <iframe 
+          src="https://www.youtube.com/embed/REPLACE_VIDEO_ID" 
+          title="攻略影片標題"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allowfullscreen></iframe>
+      </div>
+      <p class="game-video-caption">不想看文字？直接看影片版攻略！</p>
+    </div>
+
+    <!-- 遊戲基本資訊 -->
+    <div class="game-info-card">
+      <h3 class="game-info-title">遊戲基本資訊</h3>
+      <div class="game-info-grid">
+        <div class="game-info-item">
+          <span class="game-info-key">類型</span>
+          <span class="game-info-value">RPG / 動作 / 解謎</span>
         </div>
-        <div class="rating-item">
-          <span class="rating-key">功能</span>
-          <span class="rating-value">★★★★☆</span>
-        </div>
-        <div class="rating-item">
-          <span class="rating-key">CP值</span>
-          <span class="rating-value">★★★☆☆</span>
-        </div>
-        <div class="rating-item">
-          <span class="rating-key">推薦度</span>
-          <span class="rating-value">★★★★☆</span>
+        <div class="game-info-item">
+          <span class="game-info-key">平台</span>
+          <span class="game-info-value">Steam / Switch</span>
         </div>
       </div>
     </div>
 
-    <h2>第一個重點段落標題</h2>
+    <h2>重點 1：開局該怎麼選</h2>
 
-    <p>這裡可以放主要內容的第一個重點。每個段落不要太長，<strong>重要的關鍵字可以加重點</strong>，這樣讀者掃讀的時候比較容易抓到重點。</p>
+    <p>這裡開始講第一個重點。新手攻略最常需要的就是「**開局怎麼選最不會踩坑**」。可以用粗體標出關鍵字。</p>
 
-    <ul>
-      <li>列出第一個要點，簡短說明</li>
-      <li>列出第二個要點,補充細節</li>
-      <li>列出第三個要點,舉例說明</li>
-    </ul>
+    <!-- TIP框 -->
+    <div class="tip-box">
+      <p class="tip-label">TIP</p>
+      <p>新手很容易在開局選錯職業/角色／路線。建議先看完這個段落再決定。</p>
+    </div>
 
-    <!-- 圖庫網格（放圖片範例：把 src 換成你的圖片路徑） -->
-    <div class="gallery-grid">
-      <div class="gallery-item">
-        <!-- 範例：<img src="images/檔名.jpg" alt="圖片描述"> -->
-        <span class="gallery-placeholder">圖片 1</span>
+    <h2>重點 2：必學基礎操作</h2>
+
+    <p>進入正題。可以用步驟清單一步一步教。</p>
+
+    <!-- 📝 步驟清單 -->
+    <div class="step-list">
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h4>第一步：打開設定</h4>
+          <p>進入主選單後，點選右上角的設定圖示。建議先把按鍵配置改成自己順手的方式。</p>
+        </div>
       </div>
-      <div class="gallery-item">
-        <span class="gallery-placeholder">圖片 2</span>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h4>第二步：完成新手任務</h4>
+          <p>新手任務的獎勵超豐富，<strong>絕對不要跳過</strong>，可以拿到大量資源。</p>
+        </div>
       </div>
-      <div class="gallery-item">
-        <span class="gallery-placeholder">圖片 3</span>
-      </div>
-      <div class="gallery-item">
-        <span class="gallery-placeholder">圖片 4</span>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h4>第三步：加入公會</h4>
+          <p>有公會的遊戲，越早加入福利越多。可以問老玩家很多新手不知道的細節。</p>
+        </div>
       </div>
     </div>
-    <p class="gallery-caption">圖片說明：簡短描述這幾張圖在拍什麼。</p>
 
-    <!-- 單張大圖範例（複製貼上即可用） -->
-    <!-- <figure class="single-image">
-      <img src="images/檔名.jpg" alt="圖片描述">
-      <figcaption>這是圖片說明文字</figcaption>
-    </figure> -->
+    <h2>重點 3：避開的常見坑</h2>
+
+    <p>有些坑不告訴新手，玩到後面就回不去了。這裡整理常見的坑。</p>
+
+    <!-- ⚠️ 警告框 -->
+    <div class="warn-box">
+      <p class="warn-label">注意事項</p>
+      <ul>
+        <li>不要一開始就把資源花光（例如：抽卡資源、強化石）</li>
+        <li>不要急著解鎖太多角色，<strong>專精一個比較重要</strong></li>
+        <li>不要忽略每日任務，獎勵長期累積很可觀</li>
+      </ul>
+    </div>
+
+    <h2>重點 4：進階技巧</h2>
+
+    <p>當你度過新手期後，可以開始學一些進階操作。</p>
 
     <blockquote>
-      用引言塊放重要的金句或讀者會印象深刻的話，這樣可以讓文章看起來更有節奏感。
+      其實這款遊戲的精華都在中後期，新手期只是讓你熟悉操作。撐過第一週就會開始有趣！
     </blockquote>
-
-    <h2>第二個重點段落標題</h2>
-
-    <p>繼續分享內容，文章長度建議至少 800 字以上，對 SEO 比較友善。Google 比較喜歡有深度的內容，太短的文章排名會比較吃虧。</p>
-
-    <!-- ✅❌ 優缺點對照（可刪除） -->
-    <div class="pros-cons-grid">
-      <div class="pros-box">
-        <h4 class="pc-title">✦ 優點</h4>
-        <ul>
-          <li>第一個優點：詳細描述好在哪</li>
-          <li>第二個優點：實際使用感受</li>
-          <li>第三個優點：超出預期的部分</li>
-        </ul>
-      </div>
-      <div class="cons-box">
-        <h4 class="pc-title">✦ 缺點</h4>
-        <ul>
-          <li>第一個缺點：誠實說出哪裡不行</li>
-          <li>第二個缺點：可能困擾的地方</li>
-          <li>第三個缺點：要注意的細節</li>
-        </ul>
-      </div>
-    </div>
-
-    <h3>小標題：細項說明</h3>
-
-    <p>用三級標題可以把內容切得更細，讓讀者容易找到自己想看的部分。</p>
-
-    <ol>
-      <li>第一步：先做什麼</li>
-      <li>第二步：再做什麼</li>
-      <li>第三步：最後做什麼</li>
-    </ol>
 
     <!-- 聯盟行銷區塊 -->
     <div class="affiliate-box">
       <span class="affiliate-label">PURCHASE</span>
-      <h4 class="affiliate-title">商品名稱</h4>
-      <p class="affiliate-desc">簡短說明這個商品的特色與購買原因。</p>
+      <h4 class="affiliate-title">遊戲代儲方案</h4>
+      <p class="affiliate-desc">代儲平台介紹，價格與官方差別。</p>
       <a href="#" class="affiliate-btn">前往購買 →</a>
     </div>
 
-    <h2>結論</h2>
+    <h2>重點 5：結論</h2>
 
-    <p>用一段話總結整篇文章的重點，提醒讀者最重要的 take-away。如果有相關文章可以推薦，也可以在這裡放連結，讓讀者繼續看下去。</p>
+    <p>用一段話總結。可以推薦讀者去看你頻道的其他攻略影片，或是訂閱頻道追蹤更新。</p>
+
+    <p>有問題也可以在 YouTube 影片底下留言，看到都會回覆。</p>
   </div>
 
   <footer class="article-footer">

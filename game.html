@@ -739,7 +739,7 @@ main {
     <div class="section-label-line"></div>
   </div>
 
-  <div class="featured-games">
+  <div class="featured-games" id="featured-games">
     <a href="#" class="game-feature g1">
       <div class="cover">
       </div>
@@ -795,7 +795,7 @@ main {
     <div class="section-label-line"></div>
   </div>
 
-  <div class="guides-list">
+  <div class="guides-list" id="guides-list">
 
     <a href="#" class="guide-item">
       <div class="guide-num">01</div>
@@ -917,6 +917,143 @@ function escapeHtml(text) {
 }
 
 document.addEventListener('DOMContentLoaded', loadGameVideos);
+</script>
+
+<script>
+// === 從 Notion 載入遊戲攻略 ===
+
+async function loadGameGuides() {
+  try {
+    const response = await fetch('/api/notion?type=list&category=遊戲攻略');
+    if (!response.ok) {
+      console.warn('Notion API failed, keeping fallback content');
+      return;
+    }
+    const data = await response.json();
+    const articles = data.articles || [];
+    
+    if (articles.length === 0) {
+      console.log('沒有已發布的遊戲攻略');
+      return;
+    }
+    
+    const featured = articles.filter(a => a.position === '精選遊戲');
+    const general = articles.filter(a => a.position === '一般' || !a.position);
+    
+    renderFeaturedGames(featured);
+    renderGuides(general);
+  } catch (e) {
+    console.error('載入失敗:', e);
+  }
+}
+
+function renderFeaturedGames(games) {
+  const container = document.getElementById('featured-games');
+  if (!container) return;
+  
+  if (games.length === 0) return; // 保留 fallback
+  
+  let html = '';
+  
+  games.slice(0, 2).forEach((game, i) => {
+    html += `
+      <a href="post-game.html?slug=${game.slug}" class="game-feature g${i + 1}">
+        <div class="cover" ${game.cover ? `style="background-image: url('${escapeAttr(game.cover)}'); background-size: cover; background-position: center;"` : ''}>
+        </div>
+        <div class="content">
+          <h3 class="game-name">${escapeHtml(game.title)}</h3>
+          <p class="game-desc">${escapeHtml(game.excerpt || '')}</p>
+          <div class="meta-row">
+            <span>${game.tag || '攻略'}</span>
+            <span>${formatDate(game.date)}</span>
+          </div>
+        </div>
+      </a>`;
+  });
+  
+  // 補空位
+  for (let i = games.length; i < 2; i++) {
+    html += `
+      <div class="game-feature g${i + 1}">
+        <div class="cover"></div>
+        <div class="content">
+          <h3 class="game-name">遊戲名稱 ${i + 1}</h3>
+          <p class="game-desc">遊戲試玩 / 攻略還在烘焙中。</p>
+          <div class="meta-row">
+            <span>COMING SOON</span>
+          </div>
+        </div>
+      </div>`;
+  }
+  
+  container.innerHTML = html;
+}
+
+function renderGuides(posts) {
+  const container = document.getElementById('guides-list');
+  if (!container) return;
+  
+  let html = '';
+  
+  posts.slice(0, 5).forEach((post, i) => {
+    const num = String(i + 1).padStart(2, '0');
+    html += `
+      <a href="post-game.html?slug=${post.slug}" class="guide-item">
+        <div class="guide-num">${num}</div>
+        <div class="guide-content">
+          ${post.tag ? `<span class="guide-tag ${tagClass(post.tag)}">${escapeHtml(post.tag)}</span>` : ''}
+          <h3 class="guide-title">${escapeHtml(post.title)}</h3>
+          <p class="guide-meta">${formatDate(post.date)} · ${post.excerpt ? escapeHtml(post.excerpt.substring(0, 50)) : ''}</p>
+        </div>
+        <span class="guide-arrow">→</span>
+      </a>`;
+  });
+  
+  for (let i = posts.length; i < 5; i++) {
+    const num = String(i + 1).padStart(2, '0');
+    html += `
+      <a href="#" class="guide-item">
+        <div class="guide-num">${num}</div>
+        <div class="guide-content">
+          <h3 class="guide-title">攻略正在烘焙中</h3>
+          <p class="guide-meta">COMING SOON · 還在玩、還在寫</p>
+        </div>
+        <span class="guide-arrow">→</span>
+      </a>`;
+  }
+  
+  container.innerHTML = html;
+}
+
+function tagClass(tag) {
+  const map = {
+    '新手攻略': 'beginner',
+    '進階技巧': 'advanced',
+    '小知識': 'tips',
+    '初見試玩': 'beginner',
+    '遊戲攻略': 'beginner'
+  };
+  return map[tag] || 'beginner';
+}
+
+function formatDate(d) {
+  if (!d) return '';
+  return d.replace(/-/g, '.').substring(0, 10);
+}
+
+function escapeHtml(text) {
+  if (!text) return '';
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function escapeAttr(text) {
+  if (!text) return '';
+  return text.replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+}
+
+document.addEventListener('DOMContentLoaded', loadGameGuides);
 </script>
 </body>
 </html>
