@@ -1219,8 +1219,39 @@ function renderBlock(block) {
       return `<ol><li>${renderRichText(data.rich_text)}</li></ol>`;
     case 'quote':
       return `<blockquote>${renderRichText(data.rich_text)}</blockquote>`;
-    case 'callout':
-      return `<div class="tip-box"><p class="tip-label">TIP</p><p>${renderRichText(data.rich_text)}</p></div>`;
+    case 'callout': {
+      const calloutText = renderRichText(data.rich_text);
+      const calloutPlain = data.rich_text.map(t => t.plain_text).join('');
+      const icon = data.icon;
+      const emoji = icon?.type === 'emoji' ? icon.emoji : '';
+      
+      if (emoji === '💡' || emoji === '🔵' || emoji === '🟢' || emoji === 'ℹ️') {
+        return `<div class="tip-box"><p class="tip-label">TIP</p><p>${calloutText}</p></div>`;
+      }
+      if (emoji === '⚠️' || emoji === '🚨' || emoji === '🔴') {
+        return `<div class="warn-box"><p class="warn-label">注意事項</p><p>${calloutText}</p></div>`;
+      }
+      if (emoji === '⭐' || emoji === '🌟') {
+        return parseRatingCard(calloutText);
+      }
+      if (emoji === '✅' || emoji === '✔️') {
+        // 優點框（單獨顯示）
+        return parsePCBox(calloutText, 'pros', '優點');
+      }
+      if (emoji === '❌' || emoji === '✖️') {
+        // 缺點框（單獨顯示）
+        return parsePCBox(calloutText, 'cons', '缺點');
+      }
+      if (emoji === '🎮' || emoji === '🕹️') {
+        return parseGameInfoCard(calloutText);
+      }
+      if (emoji === '💰' || emoji === '🛒' || emoji === '🛍️') {
+        // 購買連結框
+        return parseAffiliateBox(calloutText, calloutPlain, data.rich_text);
+      }
+      // 預設樣式
+      return `<div class="tip-box"><p class="tip-label">${emoji || 'NOTE'}</p><p>${calloutText}</p></div>`;
+    }
     case 'image':
       const imgUrl = data.type === 'external' ? data.external.url : data.file.url;
       const caption = data.caption?.length ? renderRichText(data.caption) : '';
