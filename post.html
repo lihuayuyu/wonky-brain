@@ -960,7 +960,7 @@ footer {
   </div>
 
   <footer class="article-footer">
-    <div class="tags-row">
+    <div class="tags-row" id="tags-row">
       <a href="#" class="tag-mini"># 標籤一</a>
       <a href="#" class="tag-mini"># 標籤二</a>
       <a href="#" class="tag-mini"># 標籤三</a>
@@ -1103,7 +1103,22 @@ function renderPost(post) {
     coverEl.style.backgroundPosition = 'center';
   }
   
-  // 渲染文章內容
+
+  // 更新 hashtags
+  const tagsRow = document.getElementById('tags-row');
+  if (tagsRow) {
+    if (post.hashtags && post.hashtags.length > 0) {
+      tagsRow.innerHTML = post.hashtags.map(h => 
+        `<a href="#" class="tag-mini"># ${escapeHtml(h)}</a>`
+      ).join('');
+      tagsRow.style.display = '';
+    } else {
+      // 沒填 hashtag 就隱藏整區
+      tagsRow.style.display = 'none';
+    }
+  }
+  
+    // 渲染文章內容
   const contentEl = document.querySelector('.article-content');
   if (contentEl && post.blocks) {
     // 如果是遊戲攻略且有 YouTube ID，先放影片
