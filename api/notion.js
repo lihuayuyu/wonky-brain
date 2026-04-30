@@ -171,6 +171,7 @@ function parsePageToArticle(page) {
     status: getSelectFromProperty(props['狀態']),
     date: getDateFromProperty(props['發布日期']),
     tag: getSelectFromProperty(props['標籤']),
+    hashtags: parseHashtags(getTextFromProperty(props['Hashtag'])),
     excerpt: getTextFromProperty(props['摘要']),
     youtubeId: extractYoutubeId(getTextFromProperty(props['YouTube 影片'])),
     cover: getCoverFromPage(page)
@@ -208,4 +209,14 @@ function extractYoutubeId(input) {
   // 從網址抓
   const match = input.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
   return match ? match[1] : '';
+}
+
+// 解析 hashtag 字串（用逗號分隔）
+function parseHashtags(text) {
+  if (!text) return [];
+  return text
+    .split(/[,，、]/)
+    .map(t => t.trim().replace(/^#/, ''))
+    .filter(t => t.length > 0)
+    .slice(0, 8); // 最多 8 個避免太長
 }
