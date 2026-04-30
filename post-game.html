@@ -1004,6 +1004,32 @@ footer {
   transform: translate(-1px, -1px);
   box-shadow: 5px 5px 0 var(--ink);
 }
+
+/* === 修正 article-content 內的 iframe 顯示 === */
+.article-content iframe {
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 16/9;
+  height: auto;
+  min-height: 200px;
+  border: 2px solid var(--ink);
+  border-radius: 12px;
+  box-shadow: 4px 4px 0 var(--ink);
+  margin: 1.5rem 0;
+}
+
+/* embed 容器（Notion 嵌入的影片用 div 包起來） */
+.article-content > div:has(> iframe) {
+  width: 100%;
+  margin: 1.5rem 0;
+}
+
+/* 內文裡的單張圖片自動撐滿 */
+.article-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+}
 </style>
 </head>
 <body data-post-type="game">
@@ -1308,7 +1334,32 @@ function renderPost(post) {
   }
   
 
-  // 更新 hashtags
+
+  // 根據文章分類更新導覽列 active 狀態
+  const navLinks = document.querySelectorAll('.nav-links a');
+  const breadcrumbCategoryLink = document.querySelector('.breadcrumb a:nth-of-type(2)');
+  
+  if (post.category === '遊戲攻略') {
+    navLinks.forEach(a => {
+      a.classList.remove('active');
+      if (a.getAttribute('href') === 'game.html') a.classList.add('active');
+    });
+    if (breadcrumbCategoryLink) {
+      breadcrumbCategoryLink.href = 'game.html';
+      breadcrumbCategoryLink.textContent = '遊戲';
+    }
+  } else if (post.category === '部落格') {
+    navLinks.forEach(a => {
+      a.classList.remove('active');
+      if (a.getAttribute('href') === 'blog.html') a.classList.add('active');
+    });
+    if (breadcrumbCategoryLink) {
+      breadcrumbCategoryLink.href = 'blog.html';
+      breadcrumbCategoryLink.textContent = '部落格';
+    }
+  }
+  
+    // 更新 hashtags
   const tagsRow = document.getElementById('tags-row');
   if (tagsRow) {
     if (post.hashtags && post.hashtags.length > 0) {
