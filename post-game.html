@@ -1108,6 +1108,183 @@ article.article-wrapper .article-content .affiliate-btn-mini {
   font-size: 0.95rem !important;
   font-weight: 700 !important;
 }
+
+/* === 半星評分 === */
+article.article-wrapper .article-content .star-row {
+  display: inline-flex !important;
+  gap: 0.15em !important;
+  align-items: center !important;
+}
+
+article.article-wrapper .article-content .star {
+  width: 1.6em;
+  height: 1.6em;
+  display: inline-block;
+  background: linear-gradient(90deg, #FFB833 var(--fill, 0%), rgba(180,180,180,0.3) var(--fill, 0%));
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\'><path d=\'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z\'/></svg>") center/contain no-repeat;
+  mask: url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\'><path d=\'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z\'/></svg>") center/contain no-repeat;
+  filter: drop-shadow(1.5px 1.5px 0 rgba(0,0,0,0.2));
+}
+
+article.article-wrapper .article-content .rating-card .rating-stars .star {
+  width: 2.2em;
+  height: 2.2em;
+}
+
+article.article-wrapper .article-content .rating-card .rating-stars {
+  margin: 0.5rem 0 !important;
+  text-align: center !important;
+}
+
+/* 評分項目格子 */
+article.article-wrapper .article-content .rating-details {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 0.6rem !important;
+  text-align: left !important;
+  margin-top: 1.2rem !important;
+}
+
+@media (max-width: 480px) {
+  article.article-wrapper .article-content .rating-details {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+article.article-wrapper .article-content .rating-item {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 0.55rem 0.9rem !important;
+  background: rgba(255,255,255,0.5) !important;
+  border-radius: 10px !important;
+  border: 1px solid rgba(74, 58, 92, 0.15) !important;
+}
+
+article.article-wrapper .article-content .rating-item .rating-value .star {
+  width: 1.1em;
+  height: 1.1em;
+}
+
+/* === 購買連結行樣式 === */
+article.article-wrapper .article-content .affiliate-rows {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.7rem !important;
+  margin-top: 1rem !important;
+}
+
+article.article-wrapper .article-content .affiliate-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 1rem !important;
+  padding: 0.8rem 1.2rem !important;
+  background: rgba(255, 255, 255, 0.7) !important;
+  border: 2px solid var(--ink) !important;
+  border-radius: 14px !important;
+  box-shadow: 3px 3px 0 var(--ink) !important;
+}
+
+article.article-wrapper .article-content .affiliate-store {
+  font-family: \'Zen Maru Gothic\', sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 1.05rem !important;
+  color: var(--ink) !important;
+  flex: 1 !important;
+}
+
+article.article-wrapper .article-content .affiliate-btn-mini {
+  display: inline-block !important;
+  background: var(--pink-deep) !important;
+  color: white !important;
+  padding: 0.5rem 1.3rem !important;
+  border-radius: 999px !important;
+  font-family: \'Zen Maru Gothic\', sans-serif !important;
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+  text-decoration: none !important;
+  white-space: nowrap !important;
+  border: 2px solid var(--ink) !important;
+  box-shadow: 2px 2px 0 var(--ink) !important;
+  transition: transform 0.15s, box-shadow 0.15s !important;
+}
+
+article.article-wrapper .article-content .affiliate-btn-mini:hover {
+  transform: translate(-2px, -2px) !important;
+  box-shadow: 4px 4px 0 var(--ink) !important;
+}
+
+@media (max-width: 480px) {
+  article.article-wrapper .article-content .affiliate-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.6rem !important;
+  }
+  article.article-wrapper .article-content .affiliate-btn-mini {
+    text-align: center !important;
+  }
+}
+
+/* === 優缺點清單樣式 === */
+article.article-wrapper .article-content .pros-box .pc-list,
+article.article-wrapper .article-content .cons-box .pc-list {
+  list-style: none !important;
+  padding-left: 0 !important;
+  margin: 0.6rem 0 0 !important;
+}
+
+article.article-wrapper .article-content .pros-box .pc-list li,
+article.article-wrapper .article-content .cons-box .pc-list li {
+  padding-left: 1.4rem !important;
+  position: relative !important;
+  margin-bottom: 0.5rem !important;
+  display: block !important;
+}
+
+article.article-wrapper .article-content .pros-box .pc-list li::before {
+  content: \'●\' !important;
+  position: absolute !important;
+  left: 0.3rem !important;
+  top: 0 !important;
+  color: #2A9D60 !important;
+  font-size: 0.85rem !important;
+  line-height: 1.85 !important;
+}
+
+article.article-wrapper .article-content .cons-box .pc-list li::before {
+  content: \'●\' !important;
+  position: absolute !important;
+  left: 0.3rem !important;
+  top: 0 !important;
+  color: #E8538A !important;
+  font-size: 0.85rem !important;
+  line-height: 1.85 !important;
+}
+
+/* === 遊戲資訊網格 === */
+article.article-wrapper .article-content .game-info-card .game-info-grid {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 0.7rem !important;
+  margin-top: 1rem !important;
+}
+
+@media (min-width: 600px) {
+  article.article-wrapper .article-content .game-info-card .game-info-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+
+article.article-wrapper .article-content .game-info-card .game-info-item {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 0.7rem 1rem !important;
+  background: rgba(255, 255, 255, 0.7) !important;
+  border-radius: 10px !important;
+  border: 1px solid rgba(74, 58, 92, 0.15) !important;
+}
 </style>
 </head>
 <body data-post-type="game">
