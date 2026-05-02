@@ -150,7 +150,29 @@ async function fetchSinglePost(token, slug) {
 
   if (blocksResponse.ok) {
     const blocksData = await blocksResponse.json();
-    article.blocks = blocksData.results;
+    const blocks = blocksData.results;
+    
+    // 遞迴抓有 children 的 block（callout、toggle 等）
+    for (const block of blocks) {
+      if (block.has_children) {
+        try {
+          const childrenResp = await fetch(`${NOTION_API_URL}/blocks/${block.id}/children?page_size=100`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Notion-Version': NOTION_VERSION
+            }
+          });
+          if (childrenResp.ok) {
+            const childrenData = await childrenResp.json();
+            block.children = childrenData.results;
+          }
+        } catch (e) {
+          console.error('Failed to fetch children for block', block.id, e);
+        }
+      }
+    }
+    
+    article.blocks = blocks;
   } else {
     article.blocks = [];
   }
