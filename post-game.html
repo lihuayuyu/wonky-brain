@@ -1046,6 +1046,111 @@ footer {
     flex-wrap: wrap;
   }
 }
+
+/* === 字體放大調整 === */
+.tip-box p,
+.warn-box p,
+.tip-box li,
+.warn-box li {
+  font-size: 1rem !important;
+  line-height: 1.7 !important;
+}
+
+.pros-box p, .cons-box p,
+.pros-box li, .cons-box li {
+  font-size: 1rem !important;
+  line-height: 1.7 !important;
+}
+
+.rating-card .rating-key,
+.rating-card .rating-value {
+  font-size: 1.05rem !important;
+}
+
+.game-info-key,
+.game-info-value {
+  font-size: 1rem !important;
+}
+
+.game-info-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.7rem;
+}
+
+@media (min-width: 600px) {
+  .game-info-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.game-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.7rem 1rem;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 8px;
+  gap: 0.5rem;
+}
+
+/* === 購買連結新樣式：每個商場一行 === */
+.affiliate-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  margin-top: 1rem;
+}
+
+.affiliate-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.6rem 1rem;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1.5px solid var(--ink);
+  border-radius: 12px;
+}
+
+.affiliate-store {
+  font-family: 'Zen Maru Gothic', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--ink);
+  flex: 1;
+}
+
+.affiliate-btn-mini {
+  display: inline-block;
+  background: var(--pink-deep);
+  color: white !important;
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  border: 2px solid var(--ink);
+  box-shadow: 2px 2px 0 var(--ink);
+  transition: transform 0.15s;
+}
+
+.affiliate-btn-mini:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+@media (max-width: 480px) {
+  .affiliate-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  .affiliate-btn-mini {
+    text-align: center;
+  }
+}
 </style>
 </head>
 <body data-post-type="game">
@@ -1523,13 +1628,32 @@ function parseGameInfoCard(headText, children) {
     return `<div class="game-info-card"><h3 class="game-info-title">遊戲基本資訊</h3></div>`;
   }
   
+  // 把所有行合併、再用 / 或多空格 分隔成多個項目
+  const allText = lines.join(' / ');
+  
+  // 嘗試用 / 拆，如果沒有 / 就用「項目: 內容 項目: 內容」這種模式
+  let segments = [];
+  if (allText.includes('/')) {
+    segments = allText.split(/\s*\/\s*/).map(s => s.trim()).filter(s => s);
+  } else {
+    // 嘗試用「中文/英文/數字: ... 」模式重複切分
+    // 例如 "類型: RPG 平台: Steam, Switch 開發商: 米哈遊"
+    // 用正規表達式找出每個 「XX: YY」直到下一個「XX:」
+    const matches = allText.match(/[^\s:：][^:：]*?[:：]\s*(?:[^:：]+?(?=\s+[^\s:：]+[:：])|[^:：]+$)/g);
+    if (matches) {
+      segments = matches.map(s => s.trim()).filter(s => s);
+    } else {
+      segments = [allText];
+    }
+  }
+  
   let html = '<div class="game-info-card"><h3 class="game-info-title">遊戲基本資訊</h3><div class="game-info-grid">';
-  lines.forEach(line => {
-    const m = line.match(/^(.+?)[:：]\s*(.+)$/) || line.match(/^(\S+)\s+(.+)$/);
+  segments.forEach(seg => {
+    const m = seg.match(/^(.+?)[:：]\s*(.+)$/);
     if (m) {
       html += `<div class="game-info-item"><span class="game-info-key">${escapeHtml(m[1].trim())}</span><span class="game-info-value">${escapeHtml(m[2].trim())}</span></div>`;
-    } else if (line.trim()) {
-      html += `<div class="game-info-item"><span class="game-info-value">${escapeHtml(line.trim())}</span></div>`;
+    } else if (seg.trim()) {
+      html += `<div class="game-info-item"><span class="game-info-value">${escapeHtml(seg.trim())}</span></div>`;
     }
   });
   html += '</div></div>';
@@ -1552,39 +1676,51 @@ function parseAffiliateBox(headText, children) {
     return `<div class="affiliate-box"><span class="affiliate-label">PURCHASE</span></div>`;
   }
   
-  // 找出所有網址
-  const urlRegex = /https?:\/\/[^\s,，、]+/g;
-  const allUrls = [];
-  const cleanLines = [];
-  lines.forEach(line => {
-    const matches = [...line.matchAll(urlRegex)];
-    if (matches.length > 0) {
-      matches.forEach(m => allUrls.push(m[0]));
-      const remaining = line.replace(urlRegex, '').trim();
-      if (remaining) cleanLines.push(remaining);
+  // 第一行 = 商品標題（沒網址的話）
+  // 後面每行 = 商場名稱 + 網址
+  const urlRegex = /https?:\/\/[^\s,，、]+/;
+  
+  let title = '';
+  const purchaseRows = [];
+  
+  lines.forEach((line, idx) => {
+    const urlMatch = line.match(urlRegex);
+    if (urlMatch) {
+      // 這行有網址
+      const url = urlMatch[0];
+      const storeName = line.replace(url, '').trim() || `購買選項 ${purchaseRows.length + 1}`;
+      purchaseRows.push({ store: storeName, url: url });
+    } else if (idx === 0 && !title) {
+      // 第一行沒網址 → 標題
+      title = line.trim();
     } else {
-      cleanLines.push(line);
+      // 其他行沒網址也當標題擴充
+      title = title ? title + ' ' + line.trim() : line.trim();
     }
   });
   
-  const title = cleanLines[0] || '推薦商品';
-  const desc = cleanLines.slice(1).join(' ') || '';
+  if (!title) title = '推薦商品';
   
-  let buttonsHtml = '';
-  if (allUrls.length === 1) {
-    buttonsHtml = `<a href="${escapeAttr(allUrls[0])}" target="_blank" rel="noopener" class="affiliate-btn">前往購買 →</a>`;
-  } else if (allUrls.length > 1) {
-    buttonsHtml = '<div class="affiliate-btns">' + allUrls.map((u, i) => 
-      `<a href="${escapeAttr(u)}" target="_blank" rel="noopener" class="affiliate-btn">購買選項 ${i + 1} →</a>`
-    ).join('') + '</div>';
+  // 組合按鈕：每行一組「商場名稱 + 按鈕」
+  let rowsHtml = '';
+  if (purchaseRows.length > 0) {
+    rowsHtml = '<div class="affiliate-rows">';
+    purchaseRows.forEach(row => {
+      rowsHtml += `
+        <div class="affiliate-row">
+          <span class="affiliate-store">${escapeHtml(row.store)}</span>
+          <a href="${escapeAttr(row.url)}" target="_blank" rel="noopener" class="affiliate-btn-mini">前往購買 →</a>
+        </div>
+      `;
+    });
+    rowsHtml += '</div>';
   }
   
   return `
     <div class="affiliate-box">
       <span class="affiliate-label">PURCHASE</span>
       <h4 class="affiliate-title">${escapeHtml(title)}</h4>
-      ${desc ? `<p class="affiliate-desc">${escapeHtml(desc)}</p>` : ''}
-      ${buttonsHtml}
+      ${rowsHtml}
     </div>
   `;
 }
