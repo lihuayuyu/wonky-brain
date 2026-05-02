@@ -1917,7 +1917,7 @@ function parseGameInfoCard(headText, children) {
 //    第二行：說明
 //    第三行：網址
 function parseAffiliateBox(headText, children) {
-  const lines = [];
+  let lines = [];
   const headPlain = (headText || '').replace(/<[^>]+>/g, '').trim();
   if (headPlain) lines.push(headPlain);
   if (children) {
@@ -1928,21 +1928,53 @@ function parseAffiliateBox(headText, children) {
     return `<div class="affiliate-box"><span class="affiliate-label">PURCHASE</span></div>`;
   }
   
-  const urlRegex = /https?:\/\/[^\s,，、]+/;
+  const urlRegex = /https?:\/\/[^\s,，、]+/g;
+  
+  // ⭐ 自動切分：把每一行如果有多個網址的話，自動拆成多行
+  const expandedLines = [];
+  lines.forEach(line => {
+    const urls = [...line.matchAll(urlRegex)].map(m => m[0]);
+    
+    if (urls.length <= 1) {
+      expandedLines.push(line);
+      return;
+    }
+    
+    // 多個網址：依網址位置切分
+    let cursor = 0;
+    urls.forEach((url, i) => {
+      const urlIdx = line.indexOf(url, cursor);
+      const nextUrl = i < urls.length - 1 ? urls[i + 1] : null;
+      const endIdx = nextUrl ? line.indexOf(nextUrl, urlIdx + url.length) : line.length;
+      
+      const segment = line.substring(cursor, endIdx).trim();
+      if (segment) expandedLines.push(segment);
+      
+      cursor = endIdx;
+    });
+    
+    // 處理第一個網址前的內容（純標題）
+    const firstUrlIdx = line.indexOf(urls[0]);
+    if (firstUrlIdx > 0) {
+      // 已經包含在第一個 segment 裡了，不重複
+    }
+  });
+  
+  lines = expandedLines;
   
   // 規則：
-  // - 第一行有網址 → 第一行整行解析為「標題 + 第一個商場」
-  // - 第一行沒網址 → 第一行 = 標題
-  // - 之後每行 = 一個商場
+  // - 第一行有網址 → 第一行解析「標題 + 第一個商場」
+  // - 第一行沒網址 → 第一行 = 純標題
+  // - 之後每行 = 商場 + 網址
   
   let title = '';
   const purchaseRows = [];
+  const singleUrlRegex = /https?:\/\/[^\s,，、]+/;
   
   lines.forEach((line, idx) => {
-    const urlMatch = line.match(urlRegex);
+    const urlMatch = line.match(singleUrlRegex);
     
     if (!urlMatch) {
-      // 沒網址：當標題（如果還沒有）
       if (!title) {
         title = line.trim();
       } else {
@@ -1955,10 +1987,9 @@ function parseAffiliateBox(headText, children) {
     const beforeUrl = line.substring(0, line.indexOf(url)).trim();
     
     if (idx === 0 && !title) {
-      // 第一行有網址：把網址前的字依「最後一個短詞」切分為「標題 / 商場」
+      // 第一行有網址：嘗試從中切「標題 + 商場」
       const parts = beforeUrl.split(/\s+/).filter(p => p);
       if (parts.length >= 2) {
-        // 最後一個短詞當商場
         const lastWord = parts[parts.length - 1];
         if (lastWord.length <= 8) {
           title = parts.slice(0, -1).join(' ');
@@ -1966,11 +1997,9 @@ function parseAffiliateBox(headText, children) {
           return;
         }
       }
-      // 否則整個當標題、無商場名
       title = beforeUrl || '推薦商品';
       purchaseRows.push({ store: '', url: url });
     } else {
-      // 之後的行：網址前的字當商場名
       purchaseRows.push({ store: beforeUrl || `選項 ${purchaseRows.length + 1}`, url: url });
     }
   });
