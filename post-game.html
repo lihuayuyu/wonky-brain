@@ -1030,6 +1030,22 @@ footer {
   height: auto;
   border-radius: 12px;
 }
+
+.affiliate-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-top: 0.8rem;
+}
+.affiliate-btns .affiliate-btn {
+  margin-top: 0;
+}
+@media (min-width: 600px) {
+  .affiliate-btns {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+}
 </style>
 </head>
 <body data-post-type="game">
@@ -1443,32 +1459,41 @@ function childrenToHtml(children) {
 //    功能: 4
 //    CP值: 3
 function parseRatingCard(headText, children) {
-  const lines = [headText.replace(/<[^>]+>/g, '').trim()];
+  const lines = [];
+  const headPlain = (headText || '').replace(/<[^>]+>/g, '').trim();
+  if (headPlain) lines.push(headPlain);
   if (children) {
     childrenToLines(children).forEach(l => lines.push(l));
   }
   
-  // 從第一行抓主分數
+  if (lines.length === 0) {
+    return `<div class="tip-box"><p class="tip-label">RATING</p></div>`;
+  }
+  
+  // 第一行抓主分數
   const mainMatch = lines[0].match(/(\d+(?:\.\d+)?)/);
   const mainScore = mainMatch ? parseFloat(mainMatch[1]) : null;
   
   if (!mainScore || mainScore > 5) {
-    return `<div class="tip-box"><p class="tip-label">RATING</p><p>${headText}</p></div>`;
+    return `<div class="tip-box"><p class="tip-label">RATING</p><p>${escapeHtml(lines.join(' / '))}</p></div>`;
   }
   
   const round = Math.round(mainScore);
   const stars = '★'.repeat(round) + '☆'.repeat(Math.max(0, 5 - round));
   
-  // 各項評分
+  // 各項評分（寬容格式）
   let detailsHtml = '';
-  if (lines.length > 1) {
+  const itemLines = lines.slice(1);
+  if (itemLines.length > 0) {
     detailsHtml = '<div class="rating-details">';
-    lines.slice(1).forEach(line => {
-      const m = line.match(/(.+?)[:：]\s*(\d+(?:\.\d+)?)/);
-      if (m) {
+    itemLines.forEach(line => {
+      const m = line.match(/^(.+?)\s*[:：\-—]?\s*(\d+(?:\.\d+)?)\s*$/);
+      if (m && m[1].trim()) {
         const s = Math.round(parseFloat(m[2]));
-        const itemStars = '★'.repeat(s) + '☆'.repeat(Math.max(0, 5 - s));
+        const itemStars = '★'.repeat(Math.min(5, s)) + '☆'.repeat(Math.max(0, 5 - s));
         detailsHtml += `<div class="rating-item"><span class="rating-key">${escapeHtml(m[1].trim())}</span><span class="rating-value">${itemStars}</span></div>`;
+      } else if (line.trim()) {
+        detailsHtml += `<div class="rating-item"><span class="rating-key">${escapeHtml(line.trim())}</span></div>`;
       }
     });
     detailsHtml += '</div>';
@@ -1488,18 +1513,23 @@ function parseRatingCard(headText, children) {
 // 🎮 第一行可以是描述，後續每行是「項目: 內容」
 function parseGameInfoCard(headText, children) {
   const lines = [];
-  if (headText.replace(/<[^>]+>/g, '').trim()) {
-    lines.push(headText.replace(/<[^>]+>/g, '').trim());
-  }
+  const headPlain = (headText || '').replace(/<[^>]+>/g, '').trim();
+  if (headPlain) lines.push(headPlain);
   if (children) {
     childrenToLines(children).forEach(l => lines.push(l));
   }
   
+  if (lines.length === 0) {
+    return `<div class="game-info-card"><h3 class="game-info-title">遊戲基本資訊</h3></div>`;
+  }
+  
   let html = '<div class="game-info-card"><h3 class="game-info-title">遊戲基本資訊</h3><div class="game-info-grid">';
   lines.forEach(line => {
-    const m = line.match(/(.+?)[:：]\s*(.+)/);
+    const m = line.match(/^(.+?)[:：]\s*(.+)$/) || line.match(/^(\S+)\s+(.+)$/);
     if (m) {
       html += `<div class="game-info-item"><span class="game-info-key">${escapeHtml(m[1].trim())}</span><span class="game-info-value">${escapeHtml(m[2].trim())}</span></div>`;
+    } else if (line.trim()) {
+      html += `<div class="game-info-item"><span class="game-info-value">${escapeHtml(line.trim())}</span></div>`;
     }
   });
   html += '</div></div>';
@@ -1511,22 +1541,26 @@ function parseGameInfoCard(headText, children) {
 //    第二行：說明
 //    第三行：網址
 function parseAffiliateBox(headText, children) {
-  const allLines = [];
-  const headPlain = headText.replace(/<[^>]+>/g, '').trim();
-  if (headPlain) allLines.push(headPlain);
-  
+  const lines = [];
+  const headPlain = (headText || '').replace(/<[^>]+>/g, '').trim();
+  if (headPlain) lines.push(headPlain);
   if (children) {
-    childrenToLines(children).forEach(l => allLines.push(l));
+    childrenToLines(children).forEach(l => lines.push(l));
   }
   
-  // 找出網址
-  let url = '#';
+  if (lines.length === 0) {
+    return `<div class="affiliate-box"><span class="affiliate-label">PURCHASE</span></div>`;
+  }
+  
+  // 找出所有網址
+  const urlRegex = /https?:\/\/[^\s,，、]+/g;
+  const allUrls = [];
   const cleanLines = [];
-  allLines.forEach(line => {
-    const urlMatch = line.match(/https?:\/\/[^\s,，、]+/);
-    if (urlMatch) {
-      url = urlMatch[0];
-      const remaining = line.replace(urlMatch[0], '').trim();
+  lines.forEach(line => {
+    const matches = [...line.matchAll(urlRegex)];
+    if (matches.length > 0) {
+      matches.forEach(m => allUrls.push(m[0]));
+      const remaining = line.replace(urlRegex, '').trim();
       if (remaining) cleanLines.push(remaining);
     } else {
       cleanLines.push(line);
@@ -1534,14 +1568,23 @@ function parseAffiliateBox(headText, children) {
   });
   
   const title = cleanLines[0] || '推薦商品';
-  const desc = cleanLines.slice(1).join(' ') || '簡短說明這個商品的特色與購買原因。';
+  const desc = cleanLines.slice(1).join(' ') || '';
+  
+  let buttonsHtml = '';
+  if (allUrls.length === 1) {
+    buttonsHtml = `<a href="${escapeAttr(allUrls[0])}" target="_blank" rel="noopener" class="affiliate-btn">前往購買 →</a>`;
+  } else if (allUrls.length > 1) {
+    buttonsHtml = '<div class="affiliate-btns">' + allUrls.map((u, i) => 
+      `<a href="${escapeAttr(u)}" target="_blank" rel="noopener" class="affiliate-btn">購買選項 ${i + 1} →</a>`
+    ).join('') + '</div>';
+  }
   
   return `
     <div class="affiliate-box">
       <span class="affiliate-label">PURCHASE</span>
       <h4 class="affiliate-title">${escapeHtml(title)}</h4>
-      <p class="affiliate-desc">${escapeHtml(desc)}</p>
-      <a href="${escapeAttr(url)}" target="_blank" rel="noopener" class="affiliate-btn">前往購買 →</a>
+      ${desc ? `<p class="affiliate-desc">${escapeHtml(desc)}</p>` : ''}
+      ${buttonsHtml}
     </div>
   `;
 }
