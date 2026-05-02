@@ -1221,6 +1221,66 @@ article.article-wrapper .article-content .affiliate-box .affiliate-store {
   font-weight: 700 !important;
   color: #2D2438 !important;
 }
+
+/* === 購買連結行樣式 === */
+article.article-wrapper .article-content .affiliate-rows {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.7rem !important;
+  margin-top: 1rem !important;
+}
+
+article.article-wrapper .article-content .affiliate-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 1rem !important;
+  padding: 0.8rem 1.2rem !important;
+  background: rgba(255, 255, 255, 0.7) !important;
+  border: 2px solid var(--ink) !important;
+  border-radius: 14px !important;
+  box-shadow: 3px 3px 0 var(--ink) !important;
+}
+
+article.article-wrapper .article-content .affiliate-store {
+  font-family: 'Zen Maru Gothic', sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 1.05rem !important;
+  color: var(--ink) !important;
+  flex: 1 !important;
+}
+
+article.article-wrapper .article-content .affiliate-btn-mini {
+  display: inline-block !important;
+  background: var(--pink-deep) !important;
+  color: white !important;
+  padding: 0.5rem 1.3rem !important;
+  border-radius: 999px !important;
+  font-family: 'Zen Maru Gothic', sans-serif !important;
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+  text-decoration: none !important;
+  white-space: nowrap !important;
+  border: 2px solid var(--ink) !important;
+  box-shadow: 2px 2px 0 var(--ink) !important;
+  transition: transform 0.15s, box-shadow 0.15s !important;
+}
+
+article.article-wrapper .article-content .affiliate-btn-mini:hover {
+  transform: translate(-2px, -2px) !important;
+  box-shadow: 4px 4px 0 var(--ink) !important;
+}
+
+@media (max-width: 480px) {
+  article.article-wrapper .article-content .affiliate-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.6rem !important;
+  }
+  article.article-wrapper .article-content .affiliate-btn-mini {
+    text-align: center !important;
+  }
+}
 </style>
 </head>
 <body data-post-type="game">
