@@ -994,6 +994,117 @@ footer {
 .article-content .affiliate-box .affiliate-store {
   font-size: 1.05rem !important;
 }
+
+/* === 框架字體優化 === */
+.article-content .tip-box,
+.article-content .warn-box,
+.article-content .pros-box,
+.article-content .cons-box,
+.article-content .game-info-card,
+.article-content .rating-card,
+.article-content .affiliate-box {
+  font-family: 'Kaisei Decol', 'Noto Sans TC', sans-serif;
+}
+
+.article-content .tip-box p,
+.article-content .warn-box p,
+.article-content .tip-box li,
+.article-content .warn-box li {
+  font-size: 1.05rem !important;
+  line-height: 1.8 !important;
+  color: var(--ink) !important;
+  font-weight: 500 !important;
+}
+
+.article-content .tip-box .tip-label,
+.article-content .warn-box .warn-label {
+  font-size: 1.1rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.05em !important;
+}
+
+/* === 優缺點清單樣式（每項前 ‧ ） === */
+.article-content .pros-box .pc-list,
+.article-content .cons-box .pc-list {
+  list-style: none !important;
+  padding-left: 0 !important;
+  margin: 0.5rem 0 0 !important;
+}
+
+.article-content .pros-box .pc-list li,
+.article-content .cons-box .pc-list li {
+  font-size: 1.05rem !important;
+  line-height: 1.8 !important;
+  color: var(--ink) !important;
+  font-weight: 500 !important;
+  padding-left: 1.4rem !important;
+  position: relative !important;
+  margin-bottom: 0.4rem !important;
+}
+
+.article-content .pros-box .pc-list li::before {
+  content: '‧' !important;
+  position: absolute !important;
+  left: 0.4rem !important;
+  color: #2A9D60 !important;
+  font-weight: 900 !important;
+  font-size: 1.4rem !important;
+  line-height: 1.4 !important;
+}
+
+.article-content .cons-box .pc-list li::before {
+  content: '‧' !important;
+  position: absolute !important;
+  left: 0.4rem !important;
+  color: var(--pink-deep) !important;
+  font-weight: 900 !important;
+  font-size: 1.4rem !important;
+  line-height: 1.4 !important;
+}
+
+.article-content .pros-box .pc-title,
+.article-content .cons-box .pc-title {
+  font-size: 1.15rem !important;
+  font-weight: 800 !important;
+  margin-bottom: 0.6rem !important;
+}
+
+/* === 遊戲資訊 === */
+.article-content .game-info-card .game-info-key,
+.article-content .game-info-card .game-info-value {
+  font-size: 1.05rem !important;
+  font-weight: 600 !important;
+}
+
+.article-content .game-info-card .game-info-title {
+  font-size: 1.3rem !important;
+  font-weight: 800 !important;
+}
+
+/* === 評分卡 === */
+.article-content .rating-card .rating-key {
+  font-size: 1.05rem !important;
+  font-weight: 700 !important;
+}
+
+.article-content .rating-card .rating-value {
+  font-size: 1.1rem !important;
+}
+
+.article-content .rating-card .rating-label {
+  font-size: 1.1rem !important;
+}
+
+/* === 購買連結 === */
+.article-content .affiliate-box .affiliate-title {
+  font-size: 1.25rem !important;
+  font-weight: 800 !important;
+}
+
+.article-content .affiliate-box .affiliate-store {
+  font-size: 1.05rem !important;
+  font-weight: 700 !important;
+}
 </style>
 </head>
 <body>
@@ -1263,49 +1374,7 @@ function renderBlocks(blocks) {
   while (i < blocks.length) {
     const block = blocks[i];
     
-    // 偵測 ⭐ 標註塊：如果 children 為空但下一個 block 是段落或清單，嘗試合併當各項評分
-    if (block.type === 'callout' && block.callout?.icon?.type === 'emoji' && 
-        (block.callout.icon.emoji === '⭐' || block.callout.icon.emoji === '🌟')) {
-      
-      const calloutChildren = block.children || [];
-      
-      // 如果 children 為空，往後看是否有「項目: 分數」格式的段落／清單
-      if (calloutChildren.length === 0) {
-        const collected = [];
-        let j = i + 1;
-        while (j < blocks.length) {
-          const next = blocks[j];
-          let lineText = '';
-          if (next.type === 'paragraph' && next.paragraph?.rich_text) {
-            lineText = next.paragraph.rich_text.map(t => t.plain_text).join('');
-          } else if (next.type === 'bulleted_list_item' && next.bulleted_list_item?.rich_text) {
-            lineText = next.bulleted_list_item.rich_text.map(t => t.plain_text).join('');
-          } else if (next.type === 'numbered_list_item' && next.numbered_list_item?.rich_text) {
-            lineText = next.numbered_list_item.rich_text.map(t => t.plain_text).join('');
-          } else {
-            break;
-          }
-          
-          // 檢查是不是「項目: 分數」格式
-          if (/^.+?[:：\-\s]+\d+(?:\.\d+)?$/.test(lineText.trim())) {
-            collected.push({ type: 'paragraph', paragraph: { rich_text: [{ plain_text: lineText, annotations: {} }] } });
-            j++;
-          } else {
-            break;
-          }
-        }
-        
-        if (collected.length > 0) {
-          // 把這些段落當 children
-          const calloutText = renderRichText(block.callout.rich_text);
-          html += parseRatingCard(calloutText, collected);
-          i = j;
-          continue;
-        }
-      }
-    }
-    
-    // 偵測連續圖片：如果連續 ≥ 2 張圖，組成圖庫
+    // 偵測連續圖片
     if (block.type === 'image') {
       const consecutive = [];
       let j = i;
@@ -1340,7 +1409,45 @@ function renderBlocks(blocks) {
       }
     }
     
-    // 偵測連續 numbered_list_item ≥ 3 個 → 變成步驟清單
+    // ⭐ 評分卡：children 為空才向後抓段落
+    if (block.type === 'callout' && block.callout?.icon?.type === 'emoji' && 
+        (block.callout.icon.emoji === '⭐' || block.callout.icon.emoji === '🌟')) {
+      
+      const calloutChildren = block.children || [];
+      
+      if (calloutChildren.length === 0) {
+        const collected = [];
+        let j = i + 1;
+        while (j < blocks.length) {
+          const next = blocks[j];
+          let lineText = '';
+          if (next.type === 'paragraph' && next.paragraph?.rich_text) {
+            lineText = next.paragraph.rich_text.map(t => t.plain_text).join('');
+          } else if (next.type === 'bulleted_list_item' && next.bulleted_list_item?.rich_text) {
+            lineText = next.bulleted_list_item.rich_text.map(t => t.plain_text).join('');
+          } else {
+            break;
+          }
+          
+          if (/^.+?[:：\-\s]+\d+(?:\.\d+)?$/.test(lineText.trim())) {
+            collected.push({ type: 'paragraph', paragraph: { rich_text: [{ plain_text: lineText, annotations: {} }] } });
+            j++;
+          } else {
+            break;
+          }
+        }
+        
+        if (collected.length > 0) {
+          const calloutText = renderRichText(block.callout.rich_text);
+          html += parseRatingCard(calloutText, collected);
+          i = j;
+          continue;
+        }
+      }
+      // children 有資料 → 走 renderBlock 的正常流程
+    }
+    
+    // 偵測連續 numbered_list_item ≥ 3 個
     if (block.type === 'numbered_list_item') {
       const consecutive = [];
       let j = i;
@@ -1475,13 +1582,21 @@ function formatDate(d) {
 // 把 children blocks 渲染成純文字行陣列
 function childrenToLines(children) {
   if (!children || !Array.isArray(children)) return [];
-  return children.map(c => {
+  const lines = [];
+  children.forEach(c => {
     const t = c.type;
     const d = c[t];
-    if (!d) return '';
-    if (d.rich_text) return d.rich_text.map(r => r.plain_text).join('');
-    return '';
-  }).filter(s => s.trim());
+    if (!d || !d.rich_text) return;
+    
+    // 有些 rich_text 元素中含有 \n（shift+Enter 換行）
+    // 把每個 rich_text 串起來再用 \n 拆分
+    const fullText = d.rich_text.map(r => r.plain_text).join('');
+    fullText.split(/\r?\n/).forEach(l => {
+      const trimmed = l.trim();
+      if (trimmed) lines.push(trimmed);
+    });
+  });
+  return lines;
 }
 
 // 把 children blocks 渲染成 HTML 列表項
@@ -1630,61 +1745,66 @@ function parseAffiliateBox(headText, children) {
   let title = '';
   const purchaseRows = [];
   
-  // 單行有多個網址、沒有換行 → 嘗試切分
-  // 例如 "iPhone 15 蝦皮 https://A PChome https://B"
-  if (lines.length === 1) {
-    const line = lines[0];
+  lines.forEach((line, idx) => {
     const urls = [...line.matchAll(urlRegex)].map(m => m[0]);
     
     if (urls.length === 0) {
-      // 沒網址，整行當標題
-      return `
-        <div class="affiliate-box">
-          <span class="affiliate-label">PURCHASE</span>
-          <h4 class="affiliate-title">${escapeHtml(line)}</h4>
-        </div>
-      `;
-    }
-    
-    if (urls.length === 1) {
-      // 一個網址：取網址前面當標題、網址當按鈕
-      const idx = line.indexOf(urls[0]);
-      const titleText = line.substring(0, idx).trim();
-      title = titleText || '推薦商品';
-      purchaseRows.push({ store: '', url: urls[0] });
-    } else {
-      // 多個網址：以網址為基準切分
-      // 取第一個網址前面當標題、之後每段當「商場 + 網址」
-      const firstIdx = line.indexOf(urls[0]);
-      title = line.substring(0, firstIdx).trim() || '推薦商品';
-      
-      let rest = line.substring(firstIdx);
-      urls.forEach((url, i) => {
-        const next = i < urls.length - 1 ? rest.indexOf(urls[i + 1]) : rest.length;
-        const segment = rest.substring(0, next);
-        const beforeUrl = segment.substring(0, segment.indexOf(url)).trim();
-        purchaseRows.push({ store: beforeUrl || `選項 ${i + 1}`, url: url });
-        rest = rest.substring(next);
-      });
-    }
-  } else {
-    // 多行：第一行（沒網址的）= 標題；其他行每行 = 商場 + 網址
-    lines.forEach((line, idx) => {
-      const m = line.match(urlRegex);
-      if (m) {
-        const url = m[0];
-        const storeName = line.replace(url, '').trim();
-        purchaseRows.push({ store: storeName || `選項 ${purchaseRows.length + 1}`, url: url });
-      } else if (!title) {
+      // 沒網址：這行當標題（如果還沒有標題）或附加到標題
+      if (!title) {
         title = line.trim();
       } else {
         title += ' ' + line.trim();
       }
-    });
-    
-    if (!title && purchaseRows.length > 0) {
-      title = '推薦商品';
+    } else if (urls.length === 1) {
+      // 一個網址：取網址前面當商場名
+      const url = urls[0];
+      const beforeUrl = line.substring(0, line.indexOf(url)).trim();
+      const afterUrl = line.substring(line.indexOf(url) + url.length).trim();
+      
+      // 如果這是第一行 + 還沒有標題 + 商場名很長（>10字）→ 把它當成標題
+      // 否則商場名 = 網址前面的字
+      if (idx === 0 && !title && beforeUrl.length > 10 && /\s/.test(beforeUrl)) {
+        // 嘗試從中找出最後一個「短詞」當商場名
+        const parts = beforeUrl.split(/\s+/);
+        if (parts.length >= 2) {
+          // 最後一個短詞當商場名、其他當標題
+          const storeName = parts[parts.length - 1];
+          if (storeName.length <= 6) {
+            title = parts.slice(0, -1).join(' ');
+            purchaseRows.push({ store: storeName, url: url });
+            return;
+          }
+        }
+        // 否則整個都當商場
+        purchaseRows.push({ store: beforeUrl, url: url });
+      } else {
+        purchaseRows.push({ store: beforeUrl || `選項 ${purchaseRows.length + 1}`, url: url });
+      }
+    } else {
+      // 多個網址在同一行：第一個網址前面的字當這行的標題、其他依序當商場
+      const firstUrl = urls[0];
+      const firstIdx = line.indexOf(firstUrl);
+      if (firstIdx > 0 && !title) {
+        title = line.substring(0, firstIdx).trim();
+      }
+      
+      let cursor = firstIdx;
+      urls.forEach((url, i) => {
+        const startIdx = line.indexOf(url, cursor);
+        const nextStart = i < urls.length - 1 ? line.indexOf(urls[i + 1], startIdx + url.length) : line.length;
+        const segment = line.substring(startIdx + url.length, nextStart).trim();
+        
+        // 商場名 = 該網址後面到下一個網址前面的文字（如果有）
+        // 或第一個網址前面（已抓給 title）
+        const storeName = segment || `選項 ${purchaseRows.length + 1}`;
+        purchaseRows.push({ store: storeName, url: url });
+        cursor = nextStart;
+      });
     }
+  });
+  
+  if (!title) {
+    title = '推薦商品';
   }
   
   let rowsHtml = '';
@@ -1693,7 +1813,7 @@ function parseAffiliateBox(headText, children) {
     purchaseRows.forEach(row => {
       rowsHtml += `
         <div class="affiliate-row">
-          ${row.store ? `<span class="affiliate-store">${escapeHtml(row.store)}</span>` : ''}
+          <span class="affiliate-store">${escapeHtml(row.store)}</span>
           <a href="${escapeAttr(row.url)}" target="_blank" rel="noopener" class="affiliate-btn-mini">前往購買 →</a>
         </div>
       `;
@@ -1704,7 +1824,7 @@ function parseAffiliateBox(headText, children) {
   return `
     <div class="affiliate-box">
       <span class="affiliate-label">PURCHASE</span>
-      <h4 class="affiliate-title">${escapeHtml(title || '推薦商品')}</h4>
+      <h4 class="affiliate-title">${escapeHtml(title)}</h4>
       ${rowsHtml}
     </div>
   `;
@@ -1724,12 +1844,9 @@ function parsePCBox(headText, children, type, label) {
     return `<div class="${type}-box"><h4 class="pc-title">${label}</h4></div>`;
   }
   
-  if (lines.length === 1) {
-    return `<div class="${type}-box"><h4 class="pc-title">${label}</h4><p>${escapeHtml(lines[0])}</p></div>`;
-  }
-  
+  // 永遠顯示為清單
   const items = lines.map(l => `<li>${escapeHtml(l)}</li>`).join('');
-  return `<div class="${type}-box"><h4 class="pc-title">${label}</h4><ul>${items}</ul></div>`;
+  return `<div class="${type}-box"><h4 class="pc-title">${label}</h4><ul class="pc-list">${items}</ul></div>`;
 }
 
 // 一般 callout 含 children
