@@ -1318,36 +1318,32 @@ function renderBlock(block) {
       return `<blockquote>${renderRichText(data.rich_text)}</blockquote>`;
     case 'callout': {
       const calloutText = renderRichText(data.rich_text);
-      const calloutPlain = data.rich_text.map(t => t.plain_text).join('');
       const icon = data.icon;
       const emoji = icon?.type === 'emoji' ? icon.emoji : '';
+      const children = block.children || [];
       
       if (emoji === '💡' || emoji === '🔵' || emoji === '🟢' || emoji === 'ℹ️') {
-        return `<div class="tip-box"><p class="tip-label">TIP</p><p>${calloutText}</p></div>`;
+        return renderGenericCallout(emoji, 'TIP', calloutText, children);
       }
       if (emoji === '⚠️' || emoji === '🚨' || emoji === '🔴') {
-        return `<div class="warn-box"><p class="warn-label">注意事項</p><p>${calloutText}</p></div>`;
+        return renderGenericWarn(calloutText, children);
       }
       if (emoji === '⭐' || emoji === '🌟') {
-        return parseRatingCard(calloutText);
+        return parseRatingCard(calloutText, children);
       }
       if (emoji === '✅' || emoji === '✔️') {
-        // 優點框（單獨顯示）
-        return parsePCBox(calloutText, 'pros', '優點');
+        return parsePCBox(calloutText, children, 'pros', '優點');
       }
       if (emoji === '❌' || emoji === '✖️') {
-        // 缺點框（單獨顯示）
-        return parsePCBox(calloutText, 'cons', '缺點');
+        return parsePCBox(calloutText, children, 'cons', '缺點');
       }
       if (emoji === '🎮' || emoji === '🕹️') {
-        return parseGameInfoCard(calloutText);
+        return parseGameInfoCard(calloutText, children);
       }
       if (emoji === '💰' || emoji === '🛒' || emoji === '🛍️') {
-        // 購買連結框
-        return parseAffiliateBox(calloutText, calloutPlain, data.rich_text);
+        return parseAffiliateBox(calloutText, children);
       }
-      // 預設樣式
-      return `<div class="tip-box"><p class="tip-label">${emoji || 'NOTE'}</p><p>${calloutText}</p></div>`;
+      return renderGenericCallout(emoji, emoji || 'NOTE', calloutText, children);
     }
     case 'image':
       const imgUrl = data.type === 'external' ? data.external.url : data.file.url;
@@ -1403,6 +1399,193 @@ function formatDate(d) {
   if (!d) return '';
   return d.replace(/-/g, '.').substring(0, 10);
 }
+
+// === 漂亮元件 helper 函式 ===
+
+// 把 children blocks 渲染成純文字行陣列
+function childrenToLines(children) {
+  if (!children || !Array.isArray(children)) return [];
+  return children.map(c => {
+    const t = c.type;
+    const d = c[t];
+    if (!d) return '';
+    if (d.rich_text) return d.rich_text.map(r => r.plain_text).join('');
+    return '';
+  }).filter(s => s.trim());
+}
+
+// 把 children blocks 渲染成 HTML 列表項
+function childrenToListItems(children) {
+  if (!children || !Array.isArray(children)) return '';
+  return children.map(c => {
+    const t = c.type;
+    const d = c[t];
+    if (!d || !d.rich_text) return '';
+    return `<li>${renderRichText(d.rich_text)}</li>`;
+  }).filter(s => s).join('');
+}
+
+// 把 children blocks 渲染成 HTML
+function childrenToHtml(children) {
+  if (!children || !Array.isArray(children)) return '';
+  return children.map(c => {
+    const t = c.type;
+    const d = c[t];
+    if (!d || !d.rich_text) return '';
+    return `<p>${renderRichText(d.rich_text)}</p>`;
+  }).filter(s => s).join('');
+}
+
+// 評分卡：第一行是主分數，第 2 行起是各項
+// 例如標註塊：
+// ⭐ 4.5
+//    外觀: 5
+//    功能: 4
+//    CP值: 3
+function parseRatingCard(headText, children) {
+  const lines = [headText.replace(/<[^>]+>/g, '').trim()];
+  if (children) {
+    childrenToLines(children).forEach(l => lines.push(l));
+  }
+  
+  // 從第一行抓主分數
+  const mainMatch = lines[0].match(/(\d+(?:\.\d+)?)/);
+  const mainScore = mainMatch ? parseFloat(mainMatch[1]) : null;
+  
+  if (!mainScore || mainScore > 5) {
+    return `<div class="tip-box"><p class="tip-label">RATING</p><p>${headText}</p></div>`;
+  }
+  
+  const round = Math.round(mainScore);
+  const stars = '★'.repeat(round) + '☆'.repeat(Math.max(0, 5 - round));
+  
+  // 各項評分
+  let detailsHtml = '';
+  if (lines.length > 1) {
+    detailsHtml = '<div class="rating-details">';
+    lines.slice(1).forEach(line => {
+      const m = line.match(/(.+?)[:：]\s*(\d+(?:\.\d+)?)/);
+      if (m) {
+        const s = Math.round(parseFloat(m[2]));
+        const itemStars = '★'.repeat(s) + '☆'.repeat(Math.max(0, 5 - s));
+        detailsHtml += `<div class="rating-item"><span class="rating-key">${escapeHtml(m[1].trim())}</span><span class="rating-value">${itemStars}</span></div>`;
+      }
+    });
+    detailsHtml += '</div>';
+  }
+  
+  return `
+    <div class="rating-card">
+      <p class="rating-label">綜合評分</p>
+      <div class="rating-stars">${stars}</div>
+      <p class="rating-score">${mainScore} / 5</p>
+      ${detailsHtml}
+    </div>
+  `;
+}
+
+// 遊戲資訊卡
+// 🎮 第一行可以是描述，後續每行是「項目: 內容」
+function parseGameInfoCard(headText, children) {
+  const lines = [];
+  if (headText.replace(/<[^>]+>/g, '').trim()) {
+    lines.push(headText.replace(/<[^>]+>/g, '').trim());
+  }
+  if (children) {
+    childrenToLines(children).forEach(l => lines.push(l));
+  }
+  
+  let html = '<div class="game-info-card"><h3 class="game-info-title">遊戲基本資訊</h3><div class="game-info-grid">';
+  lines.forEach(line => {
+    const m = line.match(/(.+?)[:：]\s*(.+)/);
+    if (m) {
+      html += `<div class="game-info-item"><span class="game-info-key">${escapeHtml(m[1].trim())}</span><span class="game-info-value">${escapeHtml(m[2].trim())}</span></div>`;
+    }
+  });
+  html += '</div></div>';
+  return html;
+}
+
+// 購買連結框
+// 💰 第一行：商品名稱
+//    第二行：說明
+//    第三行：網址
+function parseAffiliateBox(headText, children) {
+  const allLines = [];
+  const headPlain = headText.replace(/<[^>]+>/g, '').trim();
+  if (headPlain) allLines.push(headPlain);
+  
+  if (children) {
+    childrenToLines(children).forEach(l => allLines.push(l));
+  }
+  
+  // 找出網址
+  let url = '#';
+  const cleanLines = [];
+  allLines.forEach(line => {
+    const urlMatch = line.match(/https?:\/\/[^\s,，、]+/);
+    if (urlMatch) {
+      url = urlMatch[0];
+      const remaining = line.replace(urlMatch[0], '').trim();
+      if (remaining) cleanLines.push(remaining);
+    } else {
+      cleanLines.push(line);
+    }
+  });
+  
+  const title = cleanLines[0] || '推薦商品';
+  const desc = cleanLines.slice(1).join(' ') || '簡短說明這個商品的特色與購買原因。';
+  
+  return `
+    <div class="affiliate-box">
+      <span class="affiliate-label">PURCHASE</span>
+      <h4 class="affiliate-title">${escapeHtml(title)}</h4>
+      <p class="affiliate-desc">${escapeHtml(desc)}</p>
+      <a href="${escapeAttr(url)}" target="_blank" rel="noopener" class="affiliate-btn">前往購買 →</a>
+    </div>
+  `;
+}
+
+// 優缺點框（單個）
+function parsePCBox(headText, children, type, label) {
+  const lines = [];
+  const headPlain = headText.replace(/<[^>]+>/g, '').trim();
+  if (headPlain) lines.push(headPlain);
+  
+  if (children) {
+    childrenToLines(children).forEach(l => lines.push(l));
+  }
+  
+  if (lines.length === 0) {
+    return `<div class="${type}-box"><h4 class="pc-title">${label}</h4></div>`;
+  }
+  
+  if (lines.length === 1) {
+    return `<div class="${type}-box"><h4 class="pc-title">${label}</h4><p>${escapeHtml(lines[0])}</p></div>`;
+  }
+  
+  const items = lines.map(l => `<li>${escapeHtml(l)}</li>`).join('');
+  return `<div class="${type}-box"><h4 class="pc-title">${label}</h4><ul>${items}</ul></div>`;
+}
+
+// 一般 callout 含 children
+function renderGenericCallout(emoji, label, headText, children) {
+  let body = headText ? `<p>${headText}</p>` : '';
+  if (children && children.length) {
+    body += childrenToHtml(children);
+  }
+  return `<div class="tip-box"><p class="tip-label">${label}</p>${body}</div>`;
+}
+
+// 一般 warn box 含 children
+function renderGenericWarn(headText, children) {
+  let body = headText ? `<p>${headText}</p>` : '';
+  if (children && children.length) {
+    body += childrenToHtml(children);
+  }
+  return `<div class="warn-box"><p class="warn-label">注意事項</p>${body}</div>`;
+}
+
 
 function escapeHtml(text) {
   if (!text) return '';
