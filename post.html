@@ -1077,6 +1077,69 @@ article.article-wrapper .article-content .game-info-card .game-info-item {
   border-radius: 10px !important;
   border: 1px solid rgba(74, 58, 92, 0.15) !important;
 }
+
+/* === 最終字體調整：放大 + 換清楚的字體 === */
+
+/* 框架內所有文字：用 Noto Sans TC 黑體（比楷書清楚） */
+article.article-wrapper .article-content .tip-box,
+article.article-wrapper .article-content .warn-box,
+article.article-wrapper .article-content .pros-box,
+article.article-wrapper .article-content .cons-box,
+article.article-wrapper .article-content .game-info-card,
+article.article-wrapper .article-content .rating-card,
+article.article-wrapper .article-content .affiliate-box {
+  font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif !important;
+}
+
+/* 內文字體 +30%（從 1rem → 1.3rem） */
+article.article-wrapper .article-content .tip-box p,
+article.article-wrapper .article-content .warn-box p,
+article.article-wrapper .article-content .pros-box .pc-list li,
+article.article-wrapper .article-content .cons-box .pc-list li,
+article.article-wrapper .article-content .rating-item .rating-key,
+article.article-wrapper .article-content .game-info-card .game-info-key,
+article.article-wrapper .article-content .game-info-card .game-info-value,
+article.article-wrapper .article-content .affiliate-box .affiliate-store {
+  font-size: 1.3rem !important;
+  font-weight: 500 !important;
+  line-height: 1.7 !important;
+}
+
+/* 小標再大一點 */
+article.article-wrapper .article-content .tip-box .tip-label,
+article.article-wrapper .article-content .warn-box .warn-label,
+article.article-wrapper .article-content .pros-box .pc-title,
+article.article-wrapper .article-content .cons-box .pc-title,
+article.article-wrapper .article-content .rating-card .rating-label,
+article.article-wrapper .article-content .game-info-card .game-info-title {
+  font-size: 1.45rem !important;
+  font-weight: 800 !important;
+}
+
+/* 商品標題 */
+article.article-wrapper .article-content .affiliate-box .affiliate-title {
+  font-size: 1.4rem !important;
+  font-weight: 700 !important;
+}
+
+/* 評分主分數 */
+article.article-wrapper .article-content .rating-card .rating-score {
+  font-size: 2.1rem !important;
+  font-weight: 800 !important;
+}
+
+/* 按鈕字 */
+article.article-wrapper .article-content .affiliate-btn-mini {
+  font-size: 1.05rem !important;
+  font-weight: 700 !important;
+}
+
+/* 點點再大一點，配合放大字 */
+article.article-wrapper .article-content .pros-box .pc-list li::before,
+article.article-wrapper .article-content .cons-box .pc-list li::before {
+  font-size: 1rem !important;
+  line-height: 1.7 !important;
+}
 </style>
 </head>
 <body>
