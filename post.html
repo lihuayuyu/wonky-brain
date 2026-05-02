@@ -839,271 +839,179 @@ footer {
   }
 }
 
-/* === 字體放大調整 === */
-.tip-box p,
-.warn-box p,
-.tip-box li,
-.warn-box li {
-  font-size: 1rem !important;
-  line-height: 1.7 !important;
+
+/* === 框架字體（最高優先序，覆蓋一切） === */
+article.article-wrapper .article-content .tip-box,
+article.article-wrapper .article-content .warn-box,
+article.article-wrapper .article-content .pros-box,
+article.article-wrapper .article-content .cons-box,
+article.article-wrapper .article-content .game-info-card,
+article.article-wrapper .article-content .rating-card,
+article.article-wrapper .article-content .affiliate-box {
+  font-family: 'Kaisei Decol', 'Noto Sans TC', sans-serif !important;
 }
 
-.pros-box p, .cons-box p,
-.pros-box li, .cons-box li {
-  font-size: 1rem !important;
-  line-height: 1.7 !important;
-}
-
-.rating-card .rating-key,
-.rating-card .rating-value {
+article.article-wrapper .article-content .tip-box p,
+article.article-wrapper .article-content .warn-box p,
+article.article-wrapper .article-content .tip-box li,
+article.article-wrapper .article-content .warn-box li {
   font-size: 1.05rem !important;
-}
-
-.game-info-key,
-.game-info-value {
-  font-size: 1rem !important;
-}
-
-.game-info-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.7rem;
-}
-
-@media (min-width: 600px) {
-  .game-info-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-.game-info-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.7rem 1rem;
-  background: rgba(255, 255, 255, 0.7);
-  border-radius: 8px;
-  gap: 0.5rem;
-}
-
-/* === 購買連結新樣式：每個商場一行 === */
-.affiliate-rows {
-  display: flex;
-  flex-direction: column;
-  gap: 0.7rem;
-  margin-top: 1rem;
-}
-
-.affiliate-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.6rem 1rem;
-  background: rgba(255, 255, 255, 0.5);
-  border: 1.5px solid var(--ink);
-  border-radius: 12px;
-}
-
-.affiliate-store {
-  font-family: 'Zen Maru Gothic', sans-serif;
-  font-weight: 700;
-  font-size: 1rem;
-  color: var(--ink);
-  flex: 1;
-}
-
-.affiliate-btn-mini {
-  display: inline-block;
-  background: var(--pink-deep);
-  color: white !important;
-  padding: 0.4rem 1rem;
-  border-radius: 999px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  text-decoration: none;
-  white-space: nowrap;
-  border: 2px solid var(--ink);
-  box-shadow: 2px 2px 0 var(--ink);
-  transition: transform 0.15s;
-}
-
-.affiliate-btn-mini:hover {
-  transform: translate(-1px, -1px);
-  box-shadow: 3px 3px 0 var(--ink);
-}
-
-@media (max-width: 480px) {
-  .affiliate-row {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.5rem;
-  }
-  .affiliate-btn-mini {
-    text-align: center;
-  }
-}
-
-/* === 強制放大框架字體 (覆蓋舊樣式) === */
-.article-content .tip-box p,
-.article-content .warn-box p,
-.article-content .tip-box li,
-.article-content .warn-box li,
-.article-content .tip-box,
-.article-content .warn-box {
-  font-size: 1.05rem !important;
-  line-height: 1.75 !important;
-}
-
-.article-content .pros-box p,
-.article-content .cons-box p,
-.article-content .pros-box li,
-.article-content .cons-box li {
-  font-size: 1.05rem !important;
-  line-height: 1.75 !important;
-}
-
-.article-content .pros-box .pc-title,
-.article-content .cons-box .pc-title,
-.article-content .tip-box .tip-label,
-.article-content .warn-box .warn-label {
-  font-size: 1.1rem !important;
-}
-
-.article-content .game-info-card .game-info-key,
-.article-content .game-info-card .game-info-value {
-  font-size: 1.05rem !important;
-}
-
-.article-content .game-info-card .game-info-title {
-  font-size: 1.3rem !important;
-}
-
-.article-content .rating-card .rating-key {
-  font-size: 1.05rem !important;
-}
-
-.article-content .rating-card .rating-value {
-  font-size: 1.1rem !important;
-}
-
-.article-content .affiliate-box .affiliate-title {
-  font-size: 1.2rem !important;
-}
-
-.article-content .affiliate-box .affiliate-store {
-  font-size: 1.05rem !important;
-}
-
-/* === 框架字體優化 === */
-.article-content .tip-box,
-.article-content .warn-box,
-.article-content .pros-box,
-.article-content .cons-box,
-.article-content .game-info-card,
-.article-content .rating-card,
-.article-content .affiliate-box {
-  font-family: 'Kaisei Decol', 'Noto Sans TC', sans-serif;
-}
-
-.article-content .tip-box p,
-.article-content .warn-box p,
-.article-content .tip-box li,
-.article-content .warn-box li {
-  font-size: 1.05rem !important;
-  line-height: 1.8 !important;
-  color: var(--ink) !important;
+  line-height: 1.85 !important;
+  color: #2D2438 !important;
   font-weight: 500 !important;
 }
 
-.article-content .tip-box .tip-label,
-.article-content .warn-box .warn-label {
-  font-size: 1.1rem !important;
+article.article-wrapper .article-content .tip-box .tip-label,
+article.article-wrapper .article-content .warn-box .warn-label {
+  font-size: 1.15rem !important;
   font-weight: 800 !important;
-  letter-spacing: 0.05em !important;
 }
 
-/* === 優缺點清單樣式（每項前 ‧ ） === */
-.article-content .pros-box .pc-list,
-.article-content .cons-box .pc-list {
+/* === 優缺點清單（每項分行 + 點點） === */
+article.article-wrapper .article-content .pros-box .pc-list,
+article.article-wrapper .article-content .cons-box .pc-list {
   list-style: none !important;
   padding-left: 0 !important;
-  margin: 0.5rem 0 0 !important;
+  margin: 0.6rem 0 0 !important;
 }
 
-.article-content .pros-box .pc-list li,
-.article-content .cons-box .pc-list li {
+article.article-wrapper .article-content .pros-box .pc-list li,
+article.article-wrapper .article-content .cons-box .pc-list li {
   font-size: 1.05rem !important;
-  line-height: 1.8 !important;
-  color: var(--ink) !important;
+  line-height: 1.85 !important;
+  color: #2D2438 !important;
   font-weight: 500 !important;
   padding-left: 1.4rem !important;
   position: relative !important;
-  margin-bottom: 0.4rem !important;
+  margin-bottom: 0.5rem !important;
+  display: block !important;
 }
 
-.article-content .pros-box .pc-list li::before {
-  content: '‧' !important;
+article.article-wrapper .article-content .pros-box .pc-list li::marker,
+article.article-wrapper .article-content .cons-box .pc-list li::marker {
+  content: '' !important;
+}
+
+article.article-wrapper .article-content .pros-box .pc-list li::before {
+  content: '●' !important;
   position: absolute !important;
-  left: 0.4rem !important;
+  left: 0.3rem !important;
+  top: 0 !important;
   color: #2A9D60 !important;
   font-weight: 900 !important;
-  font-size: 1.4rem !important;
-  line-height: 1.4 !important;
+  font-size: 0.85rem !important;
+  line-height: 1.85 !important;
 }
 
-.article-content .cons-box .pc-list li::before {
-  content: '‧' !important;
+article.article-wrapper .article-content .cons-box .pc-list li::before {
+  content: '●' !important;
   position: absolute !important;
-  left: 0.4rem !important;
-  color: var(--pink-deep) !important;
+  left: 0.3rem !important;
+  top: 0 !important;
+  color: #E8538A !important;
   font-weight: 900 !important;
-  font-size: 1.4rem !important;
-  line-height: 1.4 !important;
+  font-size: 0.85rem !important;
+  line-height: 1.85 !important;
 }
 
-.article-content .pros-box .pc-title,
-.article-content .cons-box .pc-title {
-  font-size: 1.15rem !important;
+article.article-wrapper .article-content .pros-box .pc-title,
+article.article-wrapper .article-content .cons-box .pc-title {
+  font-size: 1.2rem !important;
   font-weight: 800 !important;
-  margin-bottom: 0.6rem !important;
+  margin-bottom: 0.7rem !important;
+}
+
+/* === 半星評分樣式 === */
+article.article-wrapper .article-content .star-row {
+  display: inline-flex !important;
+  gap: 0.15em !important;
+  align-items: center !important;
+}
+
+article.article-wrapper .article-content .star {
+  width: 1.6em;
+  height: 1.6em;
+  display: inline-block;
+  background: linear-gradient(90deg, #FFB833 var(--fill, 0%), rgba(180,180,180,0.3) var(--fill, 0%));
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z'/></svg>") center/contain no-repeat;
+  mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z'/></svg>") center/contain no-repeat;
+  filter: drop-shadow(1.5px 1.5px 0 rgba(0,0,0,0.2));
+}
+
+article.article-wrapper .article-content .rating-card .rating-stars .star {
+  width: 2.2em;
+  height: 2.2em;
+}
+
+article.article-wrapper .article-content .rating-card .rating-stars {
+  font-size: 1.6rem !important;
+  margin: 0.5rem 0 !important;
+}
+
+article.article-wrapper .article-content .rating-details {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 0.5rem !important;
+  text-align: left !important;
+  margin-top: 1rem !important;
+}
+
+article.article-wrapper .article-content .rating-item {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 0.5rem 1rem !important;
+  background: rgba(255,255,255,0.5) !important;
+  border-radius: 8px !important;
+}
+
+article.article-wrapper .article-content .rating-item .rating-key {
+  font-size: 1.05rem !important;
+  font-weight: 700 !important;
+  color: #2D2438 !important;
+}
+
+article.article-wrapper .article-content .rating-item .rating-value {
+  font-size: 1rem !important;
+}
+
+article.article-wrapper .article-content .rating-item .rating-value .star {
+  width: 1.2em;
+  height: 1.2em;
+}
+
+article.article-wrapper .article-content .rating-card .rating-score {
+  font-size: 2rem !important;
+}
+
+article.article-wrapper .article-content .rating-card .rating-label {
+  font-size: 1.1rem !important;
 }
 
 /* === 遊戲資訊 === */
-.article-content .game-info-card .game-info-key,
-.article-content .game-info-card .game-info-value {
+article.article-wrapper .article-content .game-info-card .game-info-key,
+article.article-wrapper .article-content .game-info-card .game-info-value {
   font-size: 1.05rem !important;
   font-weight: 600 !important;
+  color: #2D2438 !important;
 }
 
-.article-content .game-info-card .game-info-title {
+article.article-wrapper .article-content .game-info-card .game-info-title {
   font-size: 1.3rem !important;
   font-weight: 800 !important;
 }
 
-/* === 評分卡 === */
-.article-content .rating-card .rating-key {
-  font-size: 1.05rem !important;
-  font-weight: 700 !important;
-}
-
-.article-content .rating-card .rating-value {
-  font-size: 1.1rem !important;
-}
-
-.article-content .rating-card .rating-label {
-  font-size: 1.1rem !important;
-}
-
 /* === 購買連結 === */
-.article-content .affiliate-box .affiliate-title {
+article.article-wrapper .article-content .affiliate-box .affiliate-title {
   font-size: 1.25rem !important;
   font-weight: 800 !important;
+  color: #2D2438 !important;
 }
 
-.article-content .affiliate-box .affiliate-store {
+article.article-wrapper .article-content .affiliate-box .affiliate-store {
   font-size: 1.05rem !important;
   font-weight: 700 !important;
+  color: #2D2438 !important;
 }
 </style>
 </head>
@@ -1588,10 +1496,11 @@ function childrenToLines(children) {
     const d = c[t];
     if (!d || !d.rich_text) return;
     
-    // 有些 rich_text 元素中含有 \n（shift+Enter 換行）
-    // 把每個 rich_text 串起來再用 \n 拆分
-    const fullText = d.rich_text.map(r => r.plain_text).join('');
-    fullText.split(/\r?\n/).forEach(l => {
+    // 串起所有 rich_text 元素
+    const fullText = d.rich_text.map(r => r.plain_text || '').join('');
+    
+    // 用任何換行字元切分（\n、\r、Notion 的特殊字元）
+    fullText.split(/[\n\r\u2028\u2029]+/).forEach(l => {
       const trimmed = l.trim();
       if (trimmed) lines.push(trimmed);
     });
@@ -1639,7 +1548,6 @@ function parseRatingCard(headText, children) {
     return `<div class="tip-box"><p class="tip-label">RATING</p></div>`;
   }
   
-  // 第一行抓主分數
   const mainMatch = lines[0].match(/(\d+(?:\.\d+)?)/);
   const mainScore = mainMatch ? parseFloat(mainMatch[1]) : null;
   
@@ -1647,10 +1555,23 @@ function parseRatingCard(headText, children) {
     return `<div class="tip-box"><p class="tip-label">RATING</p><p>${escapeHtml(lines.join(' / '))}</p></div>`;
   }
   
-  const round = Math.round(mainScore);
-  const stars = '★'.repeat(round) + '☆'.repeat(Math.max(0, 5 - round));
+  // 5 顆星，每顆是獨立 span，用 % 表示填充程度
+  // 例如 4.5 = 第 1-4 顆 100%、第 5 顆 50%
+  const renderStars = (score) => {
+    let html = '<span class="star-row">';
+    for (let i = 1; i <= 5; i++) {
+      let fill = 0;
+      if (score >= i) fill = 100;
+      else if (score > i - 1) fill = (score - (i - 1)) * 100;
+      html += `<span class="star" style="--fill:${fill}%"></span>`;
+    }
+    html += '</span>';
+    return html;
+  };
   
-  // 各項評分（寬容格式）
+  const stars = renderStars(mainScore);
+  
+  // 各項評分
   let detailsHtml = '';
   const itemLines = lines.slice(1);
   if (itemLines.length > 0) {
@@ -1658,9 +1579,8 @@ function parseRatingCard(headText, children) {
     itemLines.forEach(line => {
       const m = line.match(/^(.+?)\s*[:：\-—]?\s*(\d+(?:\.\d+)?)\s*$/);
       if (m && m[1].trim()) {
-        const s = Math.round(parseFloat(m[2]));
-        const itemStars = '★'.repeat(Math.min(5, s)) + '☆'.repeat(Math.max(0, 5 - s));
-        detailsHtml += `<div class="rating-item"><span class="rating-key">${escapeHtml(m[1].trim())}</span><span class="rating-value">${itemStars}</span></div>`;
+        const s = parseFloat(m[2]);
+        detailsHtml += `<div class="rating-item"><span class="rating-key">${escapeHtml(m[1].trim())}</span><span class="rating-value">${renderStars(s)}</span></div>`;
       } else if (line.trim()) {
         detailsHtml += `<div class="rating-item"><span class="rating-key">${escapeHtml(line.trim())}</span></div>`;
       }
@@ -1740,80 +1660,63 @@ function parseAffiliateBox(headText, children) {
     return `<div class="affiliate-box"><span class="affiliate-label">PURCHASE</span></div>`;
   }
   
-  const urlRegex = /https?:\/\/[^\s,，、]+/g;
+  const urlRegex = /https?:\/\/[^\s,，、]+/;
+  
+  // 規則：
+  // - 第一行有網址 → 第一行整行解析為「標題 + 第一個商場」
+  // - 第一行沒網址 → 第一行 = 標題
+  // - 之後每行 = 一個商場
   
   let title = '';
   const purchaseRows = [];
   
   lines.forEach((line, idx) => {
-    const urls = [...line.matchAll(urlRegex)].map(m => m[0]);
+    const urlMatch = line.match(urlRegex);
     
-    if (urls.length === 0) {
-      // 沒網址：這行當標題（如果還沒有標題）或附加到標題
+    if (!urlMatch) {
+      // 沒網址：當標題（如果還沒有）
       if (!title) {
         title = line.trim();
       } else {
         title += ' ' + line.trim();
       }
-    } else if (urls.length === 1) {
-      // 一個網址：取網址前面當商場名
-      const url = urls[0];
-      const beforeUrl = line.substring(0, line.indexOf(url)).trim();
-      const afterUrl = line.substring(line.indexOf(url) + url.length).trim();
-      
-      // 如果這是第一行 + 還沒有標題 + 商場名很長（>10字）→ 把它當成標題
-      // 否則商場名 = 網址前面的字
-      if (idx === 0 && !title && beforeUrl.length > 10 && /\s/.test(beforeUrl)) {
-        // 嘗試從中找出最後一個「短詞」當商場名
-        const parts = beforeUrl.split(/\s+/);
-        if (parts.length >= 2) {
-          // 最後一個短詞當商場名、其他當標題
-          const storeName = parts[parts.length - 1];
-          if (storeName.length <= 6) {
-            title = parts.slice(0, -1).join(' ');
-            purchaseRows.push({ store: storeName, url: url });
-            return;
-          }
+      return;
+    }
+    
+    const url = urlMatch[0];
+    const beforeUrl = line.substring(0, line.indexOf(url)).trim();
+    
+    if (idx === 0 && !title) {
+      // 第一行有網址：把網址前的字依「最後一個短詞」切分為「標題 / 商場」
+      const parts = beforeUrl.split(/\s+/).filter(p => p);
+      if (parts.length >= 2) {
+        // 最後一個短詞當商場
+        const lastWord = parts[parts.length - 1];
+        if (lastWord.length <= 8) {
+          title = parts.slice(0, -1).join(' ');
+          purchaseRows.push({ store: lastWord, url: url });
+          return;
         }
-        // 否則整個都當商場
-        purchaseRows.push({ store: beforeUrl, url: url });
-      } else {
-        purchaseRows.push({ store: beforeUrl || `選項 ${purchaseRows.length + 1}`, url: url });
       }
+      // 否則整個當標題、無商場名
+      title = beforeUrl || '推薦商品';
+      purchaseRows.push({ store: '', url: url });
     } else {
-      // 多個網址在同一行：第一個網址前面的字當這行的標題、其他依序當商場
-      const firstUrl = urls[0];
-      const firstIdx = line.indexOf(firstUrl);
-      if (firstIdx > 0 && !title) {
-        title = line.substring(0, firstIdx).trim();
-      }
-      
-      let cursor = firstIdx;
-      urls.forEach((url, i) => {
-        const startIdx = line.indexOf(url, cursor);
-        const nextStart = i < urls.length - 1 ? line.indexOf(urls[i + 1], startIdx + url.length) : line.length;
-        const segment = line.substring(startIdx + url.length, nextStart).trim();
-        
-        // 商場名 = 該網址後面到下一個網址前面的文字（如果有）
-        // 或第一個網址前面（已抓給 title）
-        const storeName = segment || `選項 ${purchaseRows.length + 1}`;
-        purchaseRows.push({ store: storeName, url: url });
-        cursor = nextStart;
-      });
+      // 之後的行：網址前的字當商場名
+      purchaseRows.push({ store: beforeUrl || `選項 ${purchaseRows.length + 1}`, url: url });
     }
   });
   
-  if (!title) {
-    title = '推薦商品';
-  }
+  if (!title) title = '推薦商品';
   
   let rowsHtml = '';
   if (purchaseRows.length > 0) {
     rowsHtml = '<div class="affiliate-rows">';
     purchaseRows.forEach(row => {
+      const storeName = row.store || '購買連結';
       rowsHtml += `
         <div class="affiliate-row">
-          <span class="affiliate-store">${escapeHtml(row.store)}</span>
+          <span class="affiliate-store">${escapeHtml(storeName)}</span>
           <a href="${escapeAttr(row.url)}" target="_blank" rel="noopener" class="affiliate-btn-mini">前往購買 →</a>
         </div>
       `;
