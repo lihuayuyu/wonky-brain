@@ -3,49 +3,51 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>遊戲攻略標題 — 歪腦袋</title>
-<meta name="description" content="在歪腦袋部落格上閱讀這篇文章，了解作者的想法、評測或心得分享。">
-<meta name="keywords" content="部落格, 文章, 心得, 評測, 歪腦袋">
-<meta name="author" content="歪腦袋 Wonky Brain">
-<link rel="canonical" href="https://wonky-brain.vercel.app/post.html">
-
-<!-- Open Graph (Facebook, LINE) -->
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://wonky-brain.vercel.app/post.html">
-<meta property="og:title" content="文章 — 歪腦袋">
-<meta property="og:description" content="在歪腦袋部落格上閱讀這篇文章，了解作者的想法、評測或心得分享。">
-<meta property="og:site_name" content="歪腦袋">
-<meta property="og:locale" content="zh_TW">
-
-<!-- Twitter Card -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="文章 — 歪腦袋">
-<meta name="twitter:description" content="在歪腦袋部落格上閱讀這篇文章，了解作者的想法、評測或心得分享。">
-
-<!-- Favicon -->
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9C%BF%3C/text%3E%3C/svg%3E">
-
-<!-- Schema.org -->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  "name": "歪腦袋",
-  "alternateName": "Wonky Brain",
-  "url": "https://wonky-brain.vercel.app/",
-  "description": "在歪腦袋部落格上閱讀這篇文章，了解作者的想法、評測或心得分享。",
-  "inLanguage": "zh-TW",
-  "author": {
-    "@type": "Person",
-    "name": "歪腦袋"
+  <!-- ========== SEO ========== -->
+  <title>文章 — 歪腦袋</title>
+  <meta name="description" content="歪腦袋遊戲攻略 — 親切、誠實、有觀點的個人創作角落。分享 AI 音樂、遊戲試玩、商品開箱、生活心得。">
+  <meta name="keywords" content="歪腦袋, 部落格, 開箱, 推薦, 心得, 評測, 個人網站">
+  <link rel="canonical" href="https://wonky-brain.vercel.app/post-game.html">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+  <meta name="author" content="歪腦袋">
+  
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://wonky-brain.vercel.app/post-game.html">
+  <meta property="og:title" content="歪腦袋遊戲攻略">
+  <meta property="og:description" content="親切、誠實、有觀點的個人創作角落。">
+  <meta property="og:image" content="https://wonky-brain.vercel.app/og-default.png">
+  <meta property="og:site_name" content="歪腦袋">
+  <meta property="og:locale" content="zh_TW">
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="歪腦袋遊戲攻略">
+  <meta name="twitter:description" content="親切、誠實、有觀點的個人創作角落。">
+  <meta name="twitter:image" content="https://wonky-brain.vercel.app/og-default.png">
+  
+  <!-- 結構化資料：Article (預設值，JS 會更新) -->
+  <script type="application/ld+json" id="article-jsonld">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "歪腦袋遊戲攻略",
+    "description": "親切、誠實、有觀點的個人創作角落。",
+    "author": {
+      "@type": "Person",
+      "name": "歪腦袋"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "歪腦袋",
+      "url": "https://wonky-brain.vercel.app"
+    },
+    "datePublished": "2026-04-29",
+    "image": "https://wonky-brain.vercel.app/og-default.png"
   }
-}
-</script>
+  </script>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Dancing+Script:wght@400;500;600;700&family=Kaisei+Decol:wght@400;500;700&family=Zen+Maru+Gothic:wght@400;500;700;900&family=Noto+Sans+TC:wght@400;500;700;900&family=Liu+Jian+Mao+Cao&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
+  <style>
 :root {
   --bg: #FFE4F0;
   --bg-paper: #FFFFFF;
@@ -103,6 +105,28 @@ body::after {
 }
 
 .page-stickers { position: fixed; inset: 0; pointer-events: none; z-index: 2; }
+.sticker svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  filter: drop-shadow(2px 2px 0 rgba(45, 36, 56, 0.15));
+}
+
+.sticker.s1 svg, .sticker.s4 svg, .sticker.s8 svg {
+  width: 48px;
+  height: 48px;
+}
+
+.sticker.s3 svg {
+  width: 38px;
+  height: 38px;
+}
+
+.sticker.s5 svg, .sticker.s7 svg {
+  width: 36px;
+  height: 36px;
+}
+
 .sticker { position: absolute; user-select: none; animation: floatSticker 6s ease-in-out infinite; }
 .sticker.flower { font-size: 1.8rem; color: var(--pink); filter: drop-shadow(1px 1px 0 rgba(74, 58, 92, 0.3)); }
 .sticker.heart { font-size: 1.6rem; color: var(--pink-deep); filter: drop-shadow(1px 1px 0 rgba(74, 58, 92, 0.3)); }
@@ -1353,13 +1377,13 @@ article.article-wrapper .article-content .cons-box .pc-list li::before {
 <body data-post-type="game">
 
 <div class="page-stickers">
-  <span class="sticker flower s1">✿</span>
-  <span class="sticker heart s3">♡</span>
-  <span class="sticker flower s4">❀</span>
-  <span class="sticker sparkle s5">✦</span>
+  <span class="sticker s1"><svg viewBox="-20 -20 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="0" cy="-12" r="8" fill="#FF8FAF"/><circle cx="11" cy="-4" r="8" fill="#FF8FAF"/><circle cx="7" cy="9" r="8" fill="#FF8FAF"/><circle cx="-7" cy="9" r="8" fill="#FF8FAF"/><circle cx="-11" cy="-4" r="8" fill="#FF8FAF"/><circle cx="0" cy="0" r="5" fill="#FFB833"/></svg></span>
+  <span class="sticker s3"><svg viewBox="-20 -20 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M0 10 C-16 -3, -16 -22, 0 -10 C16 -22, 16 -3, 0 10 Z" fill="#FF6B9D"/></svg></span>
+  <span class="sticker s4"><svg viewBox="-20 -20 40 40" xmlns="http://www.w3.org/2000/svg"><ellipse cx="0" cy="-13" rx="5" ry="10" fill="#FFFFFF" stroke="#E8538A" stroke-width="1.2"/><ellipse cx="12" cy="-4" rx="5" ry="10" fill="#FFFFFF" stroke="#E8538A" stroke-width="1.2" transform="rotate(72 12 -4)"/><ellipse cx="8" cy="11" rx="5" ry="10" fill="#FFFFFF" stroke="#E8538A" stroke-width="1.2" transform="rotate(144 8 11)"/><ellipse cx="-8" cy="11" rx="5" ry="10" fill="#FFFFFF" stroke="#E8538A" stroke-width="1.2" transform="rotate(216 -8 11)"/><ellipse cx="-12" cy="-4" rx="5" ry="10" fill="#FFFFFF" stroke="#E8538A" stroke-width="1.2" transform="rotate(288 -12 -4)"/><circle cx="0" cy="0" r="6" fill="#FFD96E"/></svg></span>
+  <span class="sticker s5"><svg viewBox="-20 -20 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M0 -16 L4 -4 L16 0 L4 4 L0 16 L-4 4 L-16 0 L-4 -4 Z" fill="#B997D9"/></svg></span>
   <span class="sticker tape s6"></span>
-  <span class="sticker star s7">✧</span>
-  <span class="sticker flower s8">✿</span>
+  <span class="sticker s7"><svg viewBox="-20 -20 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M0 -16 L5 -5 L16 -5 L7 3 L11 14 L0 8 L-11 14 L-7 3 L-16 -5 L-5 -5 Z" fill="#FFB833" stroke="#E8538A" stroke-width="1"/></svg></span>
+  <span class="sticker s8"><svg viewBox="-20 -20 40 40" xmlns="http://www.w3.org/2000/svg"><ellipse cx="0" cy="-13" rx="5" ry="10" fill="#FFFFFF" stroke="#E8538A" stroke-width="1.2"/><ellipse cx="12" cy="-4" rx="5" ry="10" fill="#FFFFFF" stroke="#E8538A" stroke-width="1.2" transform="rotate(72 12 -4)"/><ellipse cx="8" cy="11" rx="5" ry="10" fill="#FFFFFF" stroke="#E8538A" stroke-width="1.2" transform="rotate(144 8 11)"/><ellipse cx="-8" cy="11" rx="5" ry="10" fill="#FFFFFF" stroke="#E8538A" stroke-width="1.2" transform="rotate(216 -8 11)"/><ellipse cx="-12" cy="-4" rx="5" ry="10" fill="#FFFFFF" stroke="#E8538A" stroke-width="1.2" transform="rotate(288 -12 -4)"/><circle cx="0" cy="0" r="6" fill="#FFD96E"/></svg></span>
 </div>
 
 <nav class="nav">
@@ -1504,12 +1528,55 @@ async function loadPost() {
 }
 
 function renderPost(post) {
-  // 更新 title
-  document.title = `${post.title} — 歪腦袋`;
+
+  // ===== SEO：更新所有相關 meta =====
+  const fullTitle = `${post.title} — 歪腦袋`;
+  document.title = fullTitle;
   
-  // 更新 meta description
-  const metaDesc = document.querySelector('meta[name="description"]');
-  if (metaDesc && post.excerpt) metaDesc.content = post.excerpt;
+  const setMeta = (selector, value) => {
+    const el = document.querySelector(selector);
+    if (el && value) el.setAttribute('content', value);
+  };
+  
+  const desc = post.excerpt || `${post.title} - 歪腦袋部落格分享。`;
+  setMeta('meta[name="description"]', desc);
+  setMeta('meta[property="og:title"]', fullTitle);
+  setMeta('meta[property="og:description"]', desc);
+  setMeta('meta[property="og:url"]', window.location.href);
+  setMeta('meta[name="twitter:title"]', fullTitle);
+  setMeta('meta[name="twitter:description"]', desc);
+  
+  // Canonical URL
+  const canonical = document.querySelector('link[rel="canonical"]');
+  if (canonical) canonical.href = window.location.href;
+  
+  // 更新結構化資料 JSON-LD
+  const jsonLd = document.getElementById('article-jsonld');
+  if (jsonLd) {
+    const data = {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": post.title,
+      "description": desc,
+      "author": { "@type": "Person", "name": "歪腦袋" },
+      "publisher": {
+        "@type": "Organization",
+        "name": "歪腦袋",
+        "url": "https://wonky-brain.vercel.app",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://wonky-brain.vercel.app/og-default.png"
+        }
+      },
+      "datePublished": post.date || new Date().toISOString().slice(0, 10),
+      "dateModified": post.date || new Date().toISOString().slice(0, 10),
+      "image": "https://wonky-brain.vercel.app/og-default.png",
+      "mainEntityOfPage": window.location.href,
+      "keywords": (post.hashtags || []).join(', ')
+    };
+    jsonLd.textContent = JSON.stringify(data, null, 2);
+  }
+  // ===== SEO 結束 =====
   
   // 更新麵包屑最後一段
   const breadcrumb = document.querySelector('.breadcrumb');
@@ -1800,7 +1867,7 @@ function renderRichText(richText) {
 function showNotFound() {
   const contentEl = document.querySelector('.article-content');
   if (contentEl) {
-    contentEl.innerHTML = '<p style="text-align:center; padding: 3rem 0;">找不到這篇文章 ☹️<br><br><a href="/">回首頁</a></p>';
+    contentEl.innerHTML = '<p style="text-align:center; padding: 3rem 0;">找不到這篇文章<br><br><a href="/">回首頁</a></p>';
   }
   document.title = '找不到文章 — 歪腦袋';
 }

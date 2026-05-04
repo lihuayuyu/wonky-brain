@@ -8,6 +8,7 @@
 <meta name="keywords" content="遊戲, 遊戲攻略, 新手攻略, 遊戲試玩, 蕨蕨, Casual Gameplay">
 <meta name="author" content="歪腦袋 Wonky Brain">
 <link rel="canonical" href="https://wonky-brain.vercel.app/game.html">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
 
 <!-- Open Graph (Facebook, LINE) -->
 <meta property="og:type" content="website">
@@ -103,6 +104,28 @@ body::after {
 }
 
 .page-stickers { position: fixed; inset: 0; pointer-events: none; z-index: 2; }
+.sticker svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  filter: drop-shadow(2px 2px 0 rgba(45, 36, 56, 0.15));
+}
+
+.sticker.s1 svg, .sticker.s4 svg, .sticker.s8 svg {
+  width: 48px;
+  height: 48px;
+}
+
+.sticker.s3 svg {
+  width: 38px;
+  height: 38px;
+}
+
+.sticker.s5 svg, .sticker.s7 svg {
+  width: 36px;
+  height: 36px;
+}
+
 .sticker { position: absolute; user-select: none; animation: floatSticker 6s ease-in-out infinite; }
 .sticker.flower { font-size: 1.8rem; color: var(--pink); filter: drop-shadow(1px 1px 0 rgba(74, 58, 92, 0.3)); }
 .sticker.heart { font-size: 1.6rem; color: var(--pink-deep); filter: drop-shadow(1px 1px 0 rgba(74, 58, 92, 0.3)); }
@@ -692,13 +715,13 @@ main {
 <body>
 
 <div class="page-stickers">
-  <span class="sticker flower s1">✿</span>
-  <span class="sticker heart s3">♡</span>
-  <span class="sticker flower s4">❀</span>
-  <span class="sticker sparkle s5">✦</span>
+  <span class="sticker s1"><svg viewBox="-20 -20 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="0" cy="-12" r="8" fill="#FF8FAF"/><circle cx="11" cy="-4" r="8" fill="#FF8FAF"/><circle cx="7" cy="9" r="8" fill="#FF8FAF"/><circle cx="-7" cy="9" r="8" fill="#FF8FAF"/><circle cx="-11" cy="-4" r="8" fill="#FF8FAF"/><circle cx="0" cy="0" r="5" fill="#FFB833"/></svg></span>
+  <span class="sticker s3"><svg viewBox="-20 -20 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M0 10 C-16 -3, -16 -22, 0 -10 C16 -22, 16 -3, 0 10 Z" fill="#FF6B9D"/></svg></span>
+  <span class="sticker s4"><svg viewBox="-20 -20 40 40" xmlns="http://www.w3.org/2000/svg"><ellipse cx="0" cy="-13" rx="5" ry="10" fill="#FFFFFF" stroke="#E8538A" stroke-width="1.2"/><ellipse cx="12" cy="-4" rx="5" ry="10" fill="#FFFFFF" stroke="#E8538A" stroke-width="1.2" transform="rotate(72 12 -4)"/><ellipse cx="8" cy="11" rx="5" ry="10" fill="#FFFFFF" stroke="#E8538A" stroke-width="1.2" transform="rotate(144 8 11)"/><ellipse cx="-8" cy="11" rx="5" ry="10" fill="#FFFFFF" stroke="#E8538A" stroke-width="1.2" transform="rotate(216 -8 11)"/><ellipse cx="-12" cy="-4" rx="5" ry="10" fill="#FFFFFF" stroke="#E8538A" stroke-width="1.2" transform="rotate(288 -12 -4)"/><circle cx="0" cy="0" r="6" fill="#FFD96E"/></svg></span>
+  <span class="sticker s5"><svg viewBox="-20 -20 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M0 -16 L4 -4 L16 0 L4 4 L0 16 L-4 4 L-16 0 L-4 -4 Z" fill="#B997D9"/></svg></span>
   <span class="sticker tape s6"></span>
-  <span class="sticker star s7">✧</span>
-  <span class="sticker flower s8">✿</span>
+  <span class="sticker s7"><svg viewBox="-20 -20 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M0 -16 L5 -5 L16 -5 L7 3 L11 14 L0 8 L-11 14 L-7 3 L-16 -5 L-5 -5 Z" fill="#FFB833" stroke="#E8538A" stroke-width="1"/></svg></span>
+  <span class="sticker s8"><svg viewBox="-20 -20 40 40" xmlns="http://www.w3.org/2000/svg"><ellipse cx="0" cy="-13" rx="5" ry="10" fill="#FFFFFF" stroke="#E8538A" stroke-width="1.2"/><ellipse cx="12" cy="-4" rx="5" ry="10" fill="#FFFFFF" stroke="#E8538A" stroke-width="1.2" transform="rotate(72 12 -4)"/><ellipse cx="8" cy="11" rx="5" ry="10" fill="#FFFFFF" stroke="#E8538A" stroke-width="1.2" transform="rotate(144 8 11)"/><ellipse cx="-8" cy="11" rx="5" ry="10" fill="#FFFFFF" stroke="#E8538A" stroke-width="1.2" transform="rotate(216 -8 11)"/><ellipse cx="-12" cy="-4" rx="5" ry="10" fill="#FFFFFF" stroke="#E8538A" stroke-width="1.2" transform="rotate(288 -12 -4)"/><circle cx="0" cy="0" r="6" fill="#FFD96E"/></svg></span>
 </div>
 
 <nav class="nav">
@@ -722,15 +745,36 @@ main {
 <main>
 
   <!-- 代儲推薦 -->
-  <a href="#" target="_blank" rel="noopener" class="aff-banner">
-    <div class="aff-banner-icon">$</div>
+  <a href="https://lootbar.gg/a/afGe0R" target="_blank" rel="noopener" class="aff-banner">
+    <div class="aff-banner-icon"><svg class="ico-bag" viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M19 7h-3V6a4 4 0 0 0-8 0v1H5a1 1 0 0 0-1 1v11a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V8a1 1 0 0 0-1-1zM10 6a2 2 0 1 1 4 0v1h-4V6zm9 13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V9h2v2a1 1 0 0 0 2 0V9h4v2a1 1 0 0 0 2 0V9h2v10z"/></svg></div>
     <div class="aff-banner-content">
-      <p class="aff-banner-eyebrow">~ recommended ~</p>
+      <p class="aff-banner-eyebrow">RECOMMENDED</p>
       <h3 class="aff-banner-title">遊戲代儲・禮品卡</h3>
       <p class="aff-banner-desc">熱門遊戲都能儲值，也買得到 iTunes、Steam、PlayStation 禮品卡</p>
     </div>
     <span class="aff-banner-arrow">→</span>
   </a>
+
+  <!-- 最新影片 -->
+  <div class="section-label">
+    <div class="section-label-line"></div>
+    <p class="section-label-text"><svg class="ico-play" viewBox="0 0 24 24" fill="currentColor" width="14" height="14" style="vertical-align:middle;margin-right:0.3em;"><path d="M8 5v14l11-7z"/></svg>最新影片</p>
+    <div class="section-label-line"></div>
+  </div>
+
+  <div class="youtube-embed-wrap" style="margin-bottom: 2.5rem;">
+    <iframe 
+      src="https://www.youtube.com/embed/videoseries?list=UUaJT8NS7ZIV8-qWCLI6X_rA" 
+      title="蕨蕨・Casual Gameplay 最新影片"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      referrerpolicy="strict-origin-when-cross-origin"
+      allowfullscreen></iframe>
+  </div>
+
+  <div class="load-more">
+    <a href="#" class="load-more-btn">看更多影片</a>
+  </div>
 
   <!-- 精選遊戲 -->
   <div class="section-label">
@@ -765,27 +809,6 @@ main {
         </div>
       </div>
     </a>
-  </div>
-
-  <!-- 最新影片 -->
-  <div class="section-label">
-    <div class="section-label-line"></div>
-    <p class="section-label-text">▶ 最新影片</p>
-    <div class="section-label-line"></div>
-  </div>
-
-  <div class="youtube-embed-wrap" style="margin-bottom: 2.5rem;">
-    <iframe 
-      src="https://www.youtube.com/embed/videoseries?list=UUaJT8NS7ZIV8-qWCLI6X_rA" 
-      title="蕨蕨・Casual Gameplay 最新影片"
-      frameborder="0"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-      referrerpolicy="strict-origin-when-cross-origin"
-      allowfullscreen></iframe>
-  </div>
-
-  <div class="load-more">
-    <a href="#" class="load-more-btn">看更多影片 ~</a>
   </div>
 
   <!-- 最新攻略 -->
@@ -852,7 +875,7 @@ main {
 </main>
 
 <footer>
-  <p class="footer-line">~ 慢慢長大中 ~</p>
+  <p class="footer-line">慢慢長大中</p>
   <p class="footer-meta">© 2026 歪腦袋 · a wonky little corner</p>
 </footer>
 
@@ -882,7 +905,7 @@ async function loadGameVideos() {
       return `
         <a href="${v.url}" target="_blank" rel="noopener" class="video-card v${i + 1}" style="text-decoration: none;">
           <div class="video-thumb" style="background-image: url('${v.thumbnail}'); background-size: cover; background-position: center;">
-            <span class="play-icon">▶</span>
+            <span class="play-icon"><svg class="ico-play" viewBox="0 0 24 24" fill="currentColor" width="20" height="20" style="vertical-align:middle;"><path d="M8 5v14l11-7z"/></svg></span>
           </div>
           <div class="video-content">
             <h4 class="video-title">${escapeHtml(v.title)}</h4>

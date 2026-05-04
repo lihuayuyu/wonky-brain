@@ -8,6 +8,7 @@
 <meta name="keywords" content="歪腦袋, 個人網站, 音樂, 遊戲攻略, 部落格, 小工具">
 <meta name="author" content="歪腦袋 Wonky Brain">
 <link rel="canonical" href="https://wonky-brain.vercel.app/">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
 
 <!-- Open Graph (Facebook, LINE) -->
 <meta property="og:type" content="website">
@@ -120,6 +121,28 @@ body::after {
   pointer-events: none;
   z-index: 2;
   overflow: hidden;
+}
+
+.sticker svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  filter: drop-shadow(2px 2px 0 rgba(45, 36, 56, 0.15));
+}
+
+.sticker.s1 svg, .sticker.s4 svg, .sticker.s8 svg {
+  width: 48px;
+  height: 48px;
+}
+
+.sticker.s3 svg {
+  width: 38px;
+  height: 38px;
+}
+
+.sticker.s5 svg, .sticker.s7 svg {
+  width: 36px;
+  height: 36px;
 }
 
 .sticker {
@@ -612,7 +635,7 @@ main {
 }
 
 .col-latest-label::before {
-  content: '🎀';
+  content: '';
   font-size: 0.85rem;
 }
 
@@ -627,7 +650,7 @@ main {
 }
 
 .col-thumb::after {
-  content: '▶';
+  content: '';
   position: absolute;
   top: 50%;
   left: 50%;
@@ -697,13 +720,13 @@ main {
 
 <!-- 漂浮貼紙裝飾 -->
 <div class="page-stickers">
-  <span class="sticker flower s1">✿</span>
-  <span class="sticker heart s3">♡</span>
-  <span class="sticker flower s4">❀</span>
-  <span class="sticker sparkle s5">✦</span>
+  <span class="sticker s1"><svg viewBox="-20 -20 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="0" cy="-12" r="8" fill="#FF8FAF"/><circle cx="11" cy="-4" r="8" fill="#FF8FAF"/><circle cx="7" cy="9" r="8" fill="#FF8FAF"/><circle cx="-7" cy="9" r="8" fill="#FF8FAF"/><circle cx="-11" cy="-4" r="8" fill="#FF8FAF"/><circle cx="0" cy="0" r="5" fill="#FFB833"/></svg></span>
+  <span class="sticker s3"><svg viewBox="-20 -20 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M0 10 C-16 -3, -16 -22, 0 -10 C16 -22, 16 -3, 0 10 Z" fill="#FF6B9D"/></svg></span>
+  <span class="sticker s4"><svg viewBox="-20 -20 40 40" xmlns="http://www.w3.org/2000/svg"><ellipse cx="0" cy="-13" rx="5" ry="10" fill="#FFFFFF" stroke="#E8538A" stroke-width="1.2"/><ellipse cx="12" cy="-4" rx="5" ry="10" fill="#FFFFFF" stroke="#E8538A" stroke-width="1.2" transform="rotate(72 12 -4)"/><ellipse cx="8" cy="11" rx="5" ry="10" fill="#FFFFFF" stroke="#E8538A" stroke-width="1.2" transform="rotate(144 8 11)"/><ellipse cx="-8" cy="11" rx="5" ry="10" fill="#FFFFFF" stroke="#E8538A" stroke-width="1.2" transform="rotate(216 -8 11)"/><ellipse cx="-12" cy="-4" rx="5" ry="10" fill="#FFFFFF" stroke="#E8538A" stroke-width="1.2" transform="rotate(288 -12 -4)"/><circle cx="0" cy="0" r="6" fill="#FFD96E"/></svg></span>
+  <span class="sticker s5"><svg viewBox="-20 -20 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M0 -16 L4 -4 L16 0 L4 4 L0 16 L-4 4 L-16 0 L-4 -4 Z" fill="#B997D9"/></svg></span>
   <span class="sticker tape s6"></span>
-  <span class="sticker star s7">✧</span>
-  <span class="sticker flower s8">✿</span>
+  <span class="sticker s7"><svg viewBox="-20 -20 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M0 -16 L5 -5 L16 -5 L7 3 L11 14 L0 8 L-11 14 L-7 3 L-16 -5 L-5 -5 Z" fill="#FFB833" stroke="#E8538A" stroke-width="1"/></svg></span>
+  <span class="sticker s8"><svg viewBox="-20 -20 40 40" xmlns="http://www.w3.org/2000/svg"><ellipse cx="0" cy="-13" rx="5" ry="10" fill="#FFFFFF" stroke="#E8538A" stroke-width="1.2"/><ellipse cx="12" cy="-4" rx="5" ry="10" fill="#FFFFFF" stroke="#E8538A" stroke-width="1.2" transform="rotate(72 12 -4)"/><ellipse cx="8" cy="11" rx="5" ry="10" fill="#FFFFFF" stroke="#E8538A" stroke-width="1.2" transform="rotate(144 8 11)"/><ellipse cx="-8" cy="11" rx="5" ry="10" fill="#FFFFFF" stroke="#E8538A" stroke-width="1.2" transform="rotate(216 -8 11)"/><ellipse cx="-12" cy="-4" rx="5" ry="10" fill="#FFFFFF" stroke="#E8538A" stroke-width="1.2" transform="rotate(288 -12 -4)"/><circle cx="0" cy="0" r="6" fill="#FFD96E"/></svg></span>
 </div>
 
 <!-- 導覽列 -->
@@ -720,7 +743,7 @@ main {
 
 <!-- 大型品牌標題 -->
 <header class="brand-hero">
-  <span class="brand-hero-tag">welcome to the chaos ✦</span>
+  <span class="brand-hero-tag">welcome to the chaos <svg viewBox="-20 -20 40 40" xmlns="http://www.w3.org/2000/svg" width="14" height="14" style="display:inline-block;vertical-align:middle"><path d="M0 -16 L4 -4 L16 0 L4 4 L0 16 L-4 4 L-16 0 L-4 -4 Z" fill="#B997D9"/></svg></span>
   <h1 class="brand-title">
     <span class="char">歪</span><span class="char">腦</span><span class="char">袋</span>
   </h1>
@@ -740,7 +763,7 @@ main {
 <main class="columns-container">
   <!-- 區塊標題 -->
   <div class="section-header">
-    <p class="section-eyebrow">~ what's inside ~</p>
+    <p class="section-eyebrow">WHAT'S INSIDE</p>
     <h2 class="section-title">這裡有什麼？</h2>
   </div>
 
@@ -843,7 +866,7 @@ main {
 </main>
 
 <footer>
-  <p class="footer-line">~ 慢慢長大中 ~</p>
+  <p class="footer-line">慢慢長大中</p>
   <p class="footer-meta">© 2026 歪腦袋 · a wonky little corner</p>
 </footer>
 

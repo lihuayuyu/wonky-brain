@@ -1,19 +1,35 @@
 # 歡迎所有搜尋引擎來爬取
 User-agent: *
 Allow: /
+Crawl-delay: 1
 
 # Sitemap 位置
 Sitemap: https://wonky-brain.vercel.app/sitemap.xml
 
-# 允許 AI 爬蟲（讓 ChatGPT、Claude、Perplexity 都能引用）
+# AI 爬蟲（讓 ChatGPT、Claude、Perplexity、Gemini 都能引用）
 User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
 Allow: /
 
 User-agent: ClaudeBot
 Allow: /
 
+User-agent: anthropic-ai
+Allow: /
+
 User-agent: PerplexityBot
 Allow: /
 
+User-agent: Perplexity-User
+Allow: /
+
 User-agent: Google-Extended
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
+User-agent: Bytespider
 Allow: /

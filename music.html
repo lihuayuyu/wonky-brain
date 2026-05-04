@@ -8,6 +8,7 @@
 <meta name="keywords" content="音樂, O.D.D. Frequencies, 中文歌, 韓文歌, YouTube Music, Spotify">
 <meta name="author" content="歪腦袋 Wonky Brain">
 <link rel="canonical" href="https://wonky-brain.vercel.app/music.html">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
 
 <!-- Open Graph (Facebook, LINE) -->
 <meta property="og:type" content="website">
@@ -103,6 +104,28 @@ body::after {
 }
 
 .page-stickers { position: fixed; inset: 0; pointer-events: none; z-index: 2; }
+.sticker svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  filter: drop-shadow(2px 2px 0 rgba(45, 36, 56, 0.15));
+}
+
+.sticker.s1 svg, .sticker.s4 svg, .sticker.s8 svg {
+  width: 48px;
+  height: 48px;
+}
+
+.sticker.s3 svg {
+  width: 38px;
+  height: 38px;
+}
+
+.sticker.s5 svg, .sticker.s7 svg {
+  width: 36px;
+  height: 36px;
+}
+
 .sticker { position: absolute; user-select: none; animation: floatSticker 6s ease-in-out infinite; }
 .sticker.flower { font-size: 1.8rem; color: var(--pink); filter: drop-shadow(1px 1px 0 rgba(74, 58, 92, 0.3)); }
 .sticker.heart { font-size: 1.6rem; color: var(--pink-deep); filter: drop-shadow(1px 1px 0 rgba(74, 58, 92, 0.3)); }
@@ -642,18 +665,157 @@ main {
   height: 100%;
   border: 0;
 }
+
+
+/* === 精選歌曲區 === */
+.featured-songs {
+  margin: 3rem 0 5rem;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.section-eyebrow {
+  font-family: 'Caveat', cursive;
+  font-size: 1.4rem;
+  color: var(--pink-deep);
+  margin-bottom: 0.3rem;
+}
+
+.section-title {
+  font-family: 'Zen Maru Gothic', sans-serif;
+  font-weight: 700;
+  font-size: clamp(2.5rem, 5vw, 3.5rem);
+  color: var(--ink);
+  letter-spacing: 0.1em;
+  margin-bottom: 0.5rem;
+}
+
+.section-tagline {
+  font-size: 1rem;
+  color: var(--ink-soft);
+}
+
+.songs-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+}
+
+@media (max-width: 800px) {
+  .songs-grid { grid-template-columns: 1fr; }
+}
+
+.song-card {
+  background: white;
+  border: 2.5px solid var(--ink);
+  border-radius: 24px;
+  padding: 1.8rem;
+  box-shadow: 6px 6px 0 var(--ink);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.song-card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0 var(--ink);
+}
+
+.song-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.2rem;
+  border-bottom: 1px dashed var(--ink);
+}
+
+.song-eyebrow {
+  font-family: 'Caveat', cursive;
+  font-size: 1rem;
+  color: var(--pink-deep);
+  margin-bottom: 0.3rem;
+}
+
+.song-title {
+  font-family: 'Zen Maru Gothic', sans-serif;
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: var(--ink);
+  letter-spacing: 0.05em;
+  margin-bottom: 0.3rem;
+}
+
+.song-subtitle {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.song-players {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.player-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.player-label {
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+  letter-spacing: 0.05em;
+}
+
+.tag {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-weight: 700;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  border: 1.5px solid var(--ink);
+}
+
+.tag.yt {
+  background: #FF0000;
+  color: white;
+}
+
+.tag.sp {
+  background: #1DB954;
+  color: white;
+}
+
+.spotify-embed-wrap {
+  border: 2px solid var(--ink);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 4px 4px 0 var(--ink);
+  background: #f5f5f5;
+}
+
+.spotify-embed-wrap iframe {
+  display: block;
+  width: 100%;
+  height: 80px;
+  border: 0;
+}
+
 </style>
 </head>
 <body>
 
 <div class="page-stickers">
-  <span class="sticker flower s1">✿</span>
-  <span class="sticker heart s3">♡</span>
-  <span class="sticker flower s4">❀</span>
-  <span class="sticker sparkle s5">✦</span>
+  <span class="sticker s1"><svg viewBox="-20 -20 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="0" cy="-12" r="8" fill="#FF8FAF"/><circle cx="11" cy="-4" r="8" fill="#FF8FAF"/><circle cx="7" cy="9" r="8" fill="#FF8FAF"/><circle cx="-7" cy="9" r="8" fill="#FF8FAF"/><circle cx="-11" cy="-4" r="8" fill="#FF8FAF"/><circle cx="0" cy="0" r="5" fill="#FFB833"/></svg></span>
+  <span class="sticker s3"><svg viewBox="-20 -20 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M0 10 C-16 -3, -16 -22, 0 -10 C16 -22, 16 -3, 0 10 Z" fill="#FF6B9D"/></svg></span>
+  <span class="sticker s4"><svg viewBox="-20 -20 40 40" xmlns="http://www.w3.org/2000/svg"><ellipse cx="0" cy="-13" rx="5" ry="10" fill="#FFFFFF" stroke="#E8538A" stroke-width="1.2"/><ellipse cx="12" cy="-4" rx="5" ry="10" fill="#FFFFFF" stroke="#E8538A" stroke-width="1.2" transform="rotate(72 12 -4)"/><ellipse cx="8" cy="11" rx="5" ry="10" fill="#FFFFFF" stroke="#E8538A" stroke-width="1.2" transform="rotate(144 8 11)"/><ellipse cx="-8" cy="11" rx="5" ry="10" fill="#FFFFFF" stroke="#E8538A" stroke-width="1.2" transform="rotate(216 -8 11)"/><ellipse cx="-12" cy="-4" rx="5" ry="10" fill="#FFFFFF" stroke="#E8538A" stroke-width="1.2" transform="rotate(288 -12 -4)"/><circle cx="0" cy="0" r="6" fill="#FFD96E"/></svg></span>
+  <span class="sticker s5"><svg viewBox="-20 -20 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M0 -16 L4 -4 L16 0 L4 4 L0 16 L-4 4 L-16 0 L-4 -4 Z" fill="#B997D9"/></svg></span>
   <span class="sticker tape s6"></span>
-  <span class="sticker star s7">✧</span>
-  <span class="sticker flower s8">✿</span>
+  <span class="sticker s7"><svg viewBox="-20 -20 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M0 -16 L5 -5 L16 -5 L7 3 L11 14 L0 8 L-11 14 L-7 3 L-16 -5 L-5 -5 Z" fill="#FFB833" stroke="#E8538A" stroke-width="1"/></svg></span>
+  <span class="sticker s8"><svg viewBox="-20 -20 40 40" xmlns="http://www.w3.org/2000/svg"><ellipse cx="0" cy="-13" rx="5" ry="10" fill="#FFFFFF" stroke="#E8538A" stroke-width="1.2"/><ellipse cx="12" cy="-4" rx="5" ry="10" fill="#FFFFFF" stroke="#E8538A" stroke-width="1.2" transform="rotate(72 12 -4)"/><ellipse cx="8" cy="11" rx="5" ry="10" fill="#FFFFFF" stroke="#E8538A" stroke-width="1.2" transform="rotate(144 8 11)"/><ellipse cx="-8" cy="11" rx="5" ry="10" fill="#FFFFFF" stroke="#E8538A" stroke-width="1.2" transform="rotate(216 -8 11)"/><ellipse cx="-12" cy="-4" rx="5" ry="10" fill="#FFFFFF" stroke="#E8538A" stroke-width="1.2" transform="rotate(288 -12 -4)"/><circle cx="0" cy="0" r="6" fill="#FFD96E"/></svg></span>
 </div>
 
 <nav class="nav">
@@ -700,121 +862,157 @@ main {
     </p>
   </section>
 
-  <div class="lang-row">
+  <section class="featured-songs">
+    <div class="section-header">
+      <p class="section-eyebrow">FEATURED</p>
+      <h2 class="section-title">精選</h2>
+      <p class="section-tagline">幾首想分享的歌</p>
+    </div>
 
-    <article class="lang-col zh">
-      <div class="lang-cover">
+    <div class="songs-grid">
+
+    <article class="song-card">
+      <div class="song-header">
+        <p class="song-eyebrow">TRACK</p>
+        <h3 class="song-title">半糖的距離</h3>
+        <p class="song-subtitle">Lo-fi Chill / 雨夜邂逅</p>
       </div>
-      <div class="lang-info">
-        <p class="lang-info-eyebrow">about</p>
-        <p class="lang-info-text">用中文寫下的故事，那些說不出口的心情，用旋律訴說。</p>
-      </div>
-      <div class="youtube-section">
-        <p class="section-mini-label"><span class="tag yt">YouTube</span> 精選影片</p>
-        <div class="youtube-embed-wrap">
-          <iframe 
-            src="https://www.youtube.com/embed/videoseries?list=UUxeBwwcLu8ej5L9qFoCRU2Q" 
-            title="O.D.D. Frequencies 最新影片"
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            referrerpolicy="strict-origin-when-cross-origin"
-            allowfullscreen></iframe>
-        </div>
-      </div>
-      <div class="spotify-section">
-        <p class="section-mini-label"><span class="tag sp">Spotify</span> 試聽</p>
-        <div class="spotify-row">
-          <div class="spotify-frame">
-            <div class="spotify-top">
-              <div class="spotify-album-cover"></div>
-              <div class="spotify-info">
-                <p class="spotify-track">// 歌曲 1</p>
-              </div>
-              <span class="spotify-logo-mini">Sp</span>
-            </div>
-            <div class="spotify-controls">
-              <div class="spotify-play-mini"></div>
-              <div class="spotify-bar"></div>
-              <span class="spotify-time-mini">--:--</span>
-            </div>
+      
+      <div class="song-players">
+        <div class="player-block">
+          <p class="player-label"><span class="tag yt">YouTube</span></p>
+          <div class="youtube-embed-wrap">
+            <iframe 
+              src="https://www.youtube.com/embed/46PotdgIT_g" 
+              title="半糖的距離 - O.D.D. Frequencies"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerpolicy="strict-origin-when-cross-origin"
+              allowfullscreen></iframe>
           </div>
-          <div class="spotify-frame">
-            <div class="spotify-top">
-              <div class="spotify-album-cover"></div>
-              <div class="spotify-info">
-                <p class="spotify-track">// 歌曲 2</p>
-              </div>
-              <span class="spotify-logo-mini">Sp</span>
-            </div>
-            <div class="spotify-controls">
-              <div class="spotify-play-mini"></div>
-              <div class="spotify-bar"></div>
-              <span class="spotify-time-mini">--:--</span>
-            </div>
+        </div>
+        
+        <div class="player-block">
+          <p class="player-label"><span class="tag sp">Spotify</span></p>
+          <div class="spotify-embed-wrap">
+            <iframe 
+              src="https://open.spotify.com/embed/track/1L3C40c6Hef9CBrrjEz6od?utm_source=generator&theme=0" 
+              title="半糖的距離 - Spotify"
+              frameborder="0"
+              loading="lazy"
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
           </div>
         </div>
       </div>
     </article>
-
-    <article class="lang-col kr">
-      <div class="lang-cover">
+    <article class="song-card">
+      <div class="song-header">
+        <p class="song-eyebrow">TRACK</p>
+        <h3 class="song-title">耳機裡的氣息</h3>
+        <p class="song-subtitle">Lo-fi R&B / 末班車的曖昧</p>
       </div>
-      <div class="lang-info">
-        <p class="lang-info-eyebrow">about</p>
-        <p class="lang-info-text">한국어로 부르는 이야기，用另一種語言訴說的旋律與感受。</p>
-      </div>
-      <div class="youtube-section">
-        <p class="section-mini-label"><span class="tag yt">YouTube</span> 精選影片</p>
-        <div class="youtube-embed-wrap">
-          <iframe 
-            src="https://www.youtube.com/embed/videoseries?list=UUxeBwwcLu8ej5L9qFoCRU2Q" 
-            title="O.D.D. Frequencies 最新影片"
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            referrerpolicy="strict-origin-when-cross-origin"
-            allowfullscreen></iframe>
-        </div>
-      </div>
-      <div class="spotify-section">
-        <p class="section-mini-label"><span class="tag sp">Spotify</span> 試聽</p>
-        <div class="spotify-row">
-          <div class="spotify-frame">
-            <div class="spotify-top">
-              <div class="spotify-album-cover"></div>
-              <div class="spotify-info">
-                <p class="spotify-track">// 歌曲 1</p>
-              </div>
-              <span class="spotify-logo-mini">Sp</span>
-            </div>
-            <div class="spotify-controls">
-              <div class="spotify-play-mini"></div>
-              <div class="spotify-bar"></div>
-              <span class="spotify-time-mini">--:--</span>
-            </div>
+      
+      <div class="song-players">
+        <div class="player-block">
+          <p class="player-label"><span class="tag yt">YouTube</span></p>
+          <div class="youtube-embed-wrap">
+            <iframe 
+              src="https://www.youtube.com/embed/7H_qz6w8yaA" 
+              title="耳機裡的氣息 - O.D.D. Frequencies"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerpolicy="strict-origin-when-cross-origin"
+              allowfullscreen></iframe>
           </div>
-          <div class="spotify-frame">
-            <div class="spotify-top">
-              <div class="spotify-album-cover"></div>
-              <div class="spotify-info">
-                <p class="spotify-track">// 歌曲 2</p>
-              </div>
-              <span class="spotify-logo-mini">Sp</span>
-            </div>
-            <div class="spotify-controls">
-              <div class="spotify-play-mini"></div>
-              <div class="spotify-bar"></div>
-              <span class="spotify-time-mini">--:--</span>
-            </div>
+        </div>
+        
+        <div class="player-block">
+          <p class="player-label"><span class="tag sp">Spotify</span></p>
+          <div class="spotify-embed-wrap">
+            <iframe 
+              src="https://open.spotify.com/embed/track/39BA73a8zzfKJdgvv4LNj0?utm_source=generator&theme=0" 
+              title="耳機裡的氣息 - Spotify"
+              frameborder="0"
+              loading="lazy"
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
           </div>
         </div>
       </div>
     </article>
-
-  </div>
+    <article class="song-card">
+      <div class="song-header">
+        <p class="song-eyebrow">TRACK</p>
+        <h3 class="song-title">午後的灰塵</h3>
+        <p class="song-subtitle">Lo-fi Urban Ballad / 感情冰河期</p>
+      </div>
+      
+      <div class="song-players">
+        <div class="player-block">
+          <p class="player-label"><span class="tag yt">YouTube</span></p>
+          <div class="youtube-embed-wrap">
+            <iframe 
+              src="https://www.youtube.com/embed/pfmivZpRZNA" 
+              title="午後的灰塵 - O.D.D. Frequencies"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerpolicy="strict-origin-when-cross-origin"
+              allowfullscreen></iframe>
+          </div>
+        </div>
+        
+        <div class="player-block">
+          <p class="player-label"><span class="tag sp">Spotify</span></p>
+          <div class="spotify-embed-wrap">
+            <iframe 
+              src="https://open.spotify.com/embed/track/4LMN5EMS7kYI8BAcUl33O0?utm_source=generator&theme=0" 
+              title="午後的灰塵 - Spotify"
+              frameborder="0"
+              loading="lazy"
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+          </div>
+        </div>
+      </div>
+    </article>
+    <article class="song-card">
+      <div class="song-header">
+        <p class="song-eyebrow">TRACK</p>
+        <h3 class="song-title">讓情緒降落</h3>
+        <p class="song-subtitle">Lo-fi Chillhop / 釋懷與重啟</p>
+      </div>
+      
+      <div class="song-players">
+        <div class="player-block">
+          <p class="player-label"><span class="tag yt">YouTube</span></p>
+          <div class="youtube-embed-wrap">
+            <iframe 
+              src="https://www.youtube.com/embed/vOJjNsYUCyo" 
+              title="讓情緒降落 - O.D.D. Frequencies"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerpolicy="strict-origin-when-cross-origin"
+              allowfullscreen></iframe>
+          </div>
+        </div>
+        
+        <div class="player-block">
+          <p class="player-label"><span class="tag sp">Spotify</span></p>
+          <div class="spotify-embed-wrap">
+            <iframe 
+              src="https://open.spotify.com/embed/track/78cSZQygg2rlHx71myQAhC?utm_source=generator&theme=0" 
+              title="讓情緒降落 - Spotify"
+              frameborder="0"
+              loading="lazy"
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+          </div>
+        </div>
+      </div>
+    </article>
+    </div>
+  </section>
 </main>
 
 <footer>
-  <p class="footer-line">~ 慢慢長大中 ~</p>
+  <p class="footer-line">慢慢長大中</p>
   <p class="footer-meta">© 2026 歪腦袋 · a wonky little corner</p>
 </footer>
 
