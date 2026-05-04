@@ -33,3 +33,5 @@ Allow: /
 
 User-agent: Bytespider
 Allow: /
+
+Sitemap: https://wonky-brain.vercel.app/sitemap.xml
