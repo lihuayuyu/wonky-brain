@@ -352,6 +352,7 @@ main.container {
 .tool-card.c6 .tool-cover { background: linear-gradient(135deg, var(--pink-soft), var(--purple)); }
 .tool-card.c7 .tool-cover { background: linear-gradient(135deg, var(--pink), var(--yellow)); }
 .tool-card.c8 .tool-cover { background: linear-gradient(135deg, var(--green), var(--blue)); }
+.tool-card.c9 .tool-cover { background: linear-gradient(135deg, var(--blue), var(--purple)); }
 
 .tool-cover::before {
   content: '';
@@ -411,6 +412,7 @@ main.container {
 .tool-cat-tag.calc { background: var(--purple); color: white; }
 .tool-cat-tag.text { background: var(--yellow); }
 .tool-cat-tag.fun { background: var(--green); }
+.tool-cat-tag.create { background: var(--blue); color: white; }
 
 .tool-name {
   font-family: 'Zen Maru Gothic', sans-serif; font-weight: 700;
@@ -592,11 +594,12 @@ main.container {
 <main class="container">
 
   <div class="category-bar">
-    <a href="#" class="cat-btn active">全部 <span class="count">8</span></a>
+    <a href="#" class="cat-btn active">全部 <span class="count">9</span></a>
     <a href="#" class="cat-btn">隨機決策 <span class="count">3</span></a>
     <a href="#" class="cat-btn">計算工具 <span class="count">2</span></a>
     <a href="#" class="cat-btn">文字處理 <span class="count">2</span></a>
     <a href="#" class="cat-btn">休閒娛樂 <span class="count">1</span></a>
+    <a href="#" class="cat-btn">創作工具 <span class="count">1</span></a>
   </div>
 
   <div class="tools-grid">
@@ -607,6 +610,32 @@ main.container {
         <span class="tool-cat-tag random">隨機決策</span>
         <h3 class="tool-name">隨機決策器</h3>
         <p class="tool-desc">猶豫不決的時候，讓命運幫你選一個。</p>
+        <div class="tool-footer">
+          <span class="tool-meta">FREE · NO LOGIN</span>
+          <span class="tool-arrow">使用 →</span>
+        </div>
+      </div>
+    </a>
+
+    <a href="tool-line-sticker.html" class="tool-card c4">
+      <div class="tool-cover"><span class="tool-icon">Sticker</span></div>
+      <div class="tool-content">
+        <span class="tool-cat-tag create">創作工具</span>
+        <h3 class="tool-name">LINE 貼圖分割器</h3>
+        <p class="tool-desc">上傳一張圖，自動去背、切成 LINE 貼圖三尺寸並打包下載。</p>
+        <div class="tool-footer">
+          <span class="tool-meta">FREE · NO LOGIN</span>
+          <span class="tool-arrow">使用 →</span>
+        </div>
+      </div>
+    </a>
+
+    <a href="tool-date.html" class="tool-card c9">
+      <div class="tool-cover"><span class="tool-icon">Date</span></div>
+      <div class="tool-content">
+        <span class="tool-cat-tag calc">計算工具</span>
+        <h3 class="tool-name">日期計算器</h3>
+        <p class="tool-desc">倒數日、預產期、紀念日、年齡計算一次搞定，附重要里程碑提醒。</p>
         <div class="tool-footer">
           <span class="tool-meta">FREE · NO LOGIN</span>
           <span class="tool-arrow">使用 →</span>
@@ -635,20 +664,6 @@ main.container {
         <span class="tool-cat-tag random">隨機決策</span>
         <h3 class="tool-name">線上骰子</h3>
         <p class="tool-desc">不用真的拿骰子，線上滾就好。</p>
-        <div class="tool-footer">
-          <span class="tool-meta">準備中...</span>
-          <span class="tool-arrow">→</span>
-        </div>
-      </div>
-    </a>
-
-    <a href="#" class="tool-card c4 coming-soon">
-      <span class="coming-badge">Soon</span>
-      <div class="tool-cover"><span class="tool-icon">Date</span></div>
-      <div class="tool-content">
-        <span class="tool-cat-tag calc">計算工具</span>
-        <h3 class="tool-name">日期計算器</h3>
-        <p class="tool-desc">算兩個日期之間相差幾天。</p>
         <div class="tool-footer">
           <span class="tool-meta">準備中...</span>
           <span class="tool-arrow">→</span>
