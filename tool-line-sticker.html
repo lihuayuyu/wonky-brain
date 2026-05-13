@@ -12,25 +12,24 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
   :root {
-    --bg: #f4f1ea;
-    --bg-paper: #faf7f0;
-    --ink: #1a1612;
-    --ink-soft: #5a554c;
+    --bg: #FFE4F0;
+    --bg-paper: #FFFFFF;
+    --ink: #4A3A5C;
+    --ink-soft: #8B7BA0;
     --accent: #00b900;
     --accent-deep: #008c00;
     --warn: #d64a2a;
-    --line: #d9d3c4;
+    --line: #E8D4F0;
     --highlight: #ffd60a;
     --blue: #2563eb;
-    --shadow: 0 2px 0 var(--ink), 4px 6px 0 rgba(26,22,18,0.12);
-    --shadow-sm: 0 1px 0 var(--ink), 2px 3px 0 rgba(26,22,18,0.1);
+    --shadow: 0 2px 0 var(--ink), 4px 6px 0 rgba(74,58,92,0.12);
+    --shadow-sm: 0 1px 0 var(--ink), 2px 3px 0 rgba(74,58,92,0.1);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { background: var(--bg); color: var(--ink); font-family: 'Noto Sans TC', sans-serif; line-height: 1.5; -webkit-font-smoothing: antialiased; }
   body {
-    background-image:
-      radial-gradient(circle at 20% 10%, rgba(0,185,0,0.04) 0, transparent 40%),
-      radial-gradient(circle at 80% 80%, rgba(255,214,10,0.05) 0, transparent 40%);
+    background: linear-gradient(135deg, #FFE4F0 0%, #FFD6EA 50%, #F5DCFF 100%);
+    background-attachment: fixed;
     min-height: 100vh;
   }
 
@@ -551,7 +550,8 @@
     align-items: center;
     justify-content: space-between;
     padding: 1rem 2rem;
-    background: var(--bg-paper);
+    background: rgba(255, 228, 240, 0.92);
+    backdrop-filter: blur(8px);
     border-bottom: 3px solid var(--ink);
     font-family: 'Noto Sans TC', sans-serif;
   }
@@ -563,7 +563,7 @@
     letter-spacing: -0.02em;
   }
   .wonky-logo .wonky-dot {
-    color: var(--accent);
+    color: #FF8FAF;
     margin-left: 2px;
   }
   .wonky-nav-links {
@@ -577,14 +577,16 @@
     font-weight: 500;
     padding: 0.3rem 0.6rem;
     border-radius: 6px;
-    transition: background 0.15s;
+    transition: all 0.15s;
   }
   .wonky-nav-links a:hover {
-    background: rgba(0, 185, 0, 0.1);
+    background: #FF8FAF;
+    color: white;
+    transform: rotate(-3deg);
   }
   .wonky-nav-links a.active {
-    background: var(--ink);
-    color: var(--bg-paper);
+    background: #4F8FED;
+    color: white;
   }
   @media (max-width: 640px) {
     .wonky-nav {
