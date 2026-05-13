@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>日期計算器｜倒數日 × 預產期 × 紀念日｜歪腦袋小工具</title>
+<meta name="description" content="日期計算器：倒數日、預產期、紀念日、年齡計算、兩日期相差，6 種模式一次搞定。免登入、純前端，計算後自動列出重要里程碑提醒。">
+<meta name="keywords" content="日期計算器, 預產期計算, 紀念日計算, 倒數日, 年齡計算, 懷孕週數, 線上日期工具">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- JSON-LD 結構化資料 -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "日期計算器｜倒數日 × 預產期 × 紀念日",
+  "description": "多模式日期計算工具：兩日期相差、倒數日、預產期、紀念日提醒",
+  "url": "https://wonky-brain.vercel.app/tool-date.html",
+  "applicationCategory": "UtilityApplication",
+  "operatingSystem": "Any (Web Browser)",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "TWD"
+  }
+}
+</script>
+
+<style>
+  :root {
+    --bg: #FFE4F0;
+    --bg-paper: #FFFFFF;
+    --ink: #4A3A5C;
+    --ink-soft: #8B7BA0;
+    --accent: #2563eb;
+    --accent-deep: #1e40af;
+    --pink: #FF8FAF;
+    --purple: #C49DFF;
+    --green: #00b900;
+    --yellow: #ffd60a;
+    --warn: #d64a2a;
+    --line: #E8D4F0;
+    --shadow: 0 2px 0 var(--ink), 4px 6px 0 rgba(74,58,92,0.12);
+    --shadow-sm: 0 1px 0 var(--ink), 2px 3px 0 rgba(74,58,92,0.1);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Noto Sans TC', sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    background: linear-gradient(135deg, #FFE4F0 0%, #FFD6EA 50%, #F5DCFF 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+
+  /* === 歪腦袋導覽列 === */
+  .wonky-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 2rem;
+    background: rgba(255, 228, 240, 0.92);
+    backdrop-filter: blur(8px);
+    border-bottom: 3px solid var(--ink);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .wonky-logo {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--ink);
+    text-decoration: none;
+    letter-spacing: -0.02em;
+  }
+  .wonky-logo .wonky-dot {
+    color: var(--pink);
+    margin-left: 2px;
+  }
+  .wonky-nav-links {
+    display: flex;
+    gap: 1.5rem;
+  }
+  .wonky-nav-links a {
+    color: var(--ink);
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    padding: 0.3rem 0.6rem;
+    border-radius: 6px;
+    transition: all 0.15s;
+  }
+  .wonky-nav-links a:hover {
+    background: var(--pink);
+    color: white;
+    transform: rotate(-3deg);
+  }
+  .wonky-nav-links a.active {
+    background: #4F8FED;
+    color: white;
+  }
+
+  /* === 頁首 === */
+  header {
+    text-align: center;
+    padding: 2.5rem 1rem 1.5rem;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  header h1 {
+    font-size: 2.2rem;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.6rem;
+  }
+  header h1 .accent-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    background: var(--accent);
+    border-radius: 50%;
+    margin-right: 0.5rem;
+    transform: translateY(-4px);
+  }
+  header p {
+    color: var(--ink-soft);
+    font-size: 1rem;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* === 主容器 === */
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 1rem 4rem;
+  }
+
+  /* === 模式切換 === */
+  .mode-tabs {
+    display: flex;
+    gap: 0.5rem;
+    background: var(--bg-paper);
+    border: 2px solid var(--ink);
+    border-radius: 12px;
+    padding: 0.4rem;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 1.5rem;
+    overflow-x: auto;
+  }
+  .mode-tab {
+    flex: 1;
+    padding: 0.7rem 0.5rem;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .mode-tab:hover {
+    background: rgba(37,99,235,0.08);
+    color: var(--ink);
+  }
+  .mode-tab.active {
+    background: var(--ink);
+    color: var(--bg-paper);
+  }
+
+  /* === 輸入卡 === */
+  .input-card {
+    background: var(--bg-paper);
+    border: 3px solid var(--ink);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 1.5rem;
+  }
+  .input-card h2 {
+    font-size: 1.2rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .input-card h2 .num {
+    background: var(--accent);
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+  .input-row {
+    display: flex;
+    gap: 1rem;
+    align-items: end;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+  .input-group {
+    flex: 1;
+    min-width: 180px;
+  }
+  .input-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--ink-soft);
+    margin-bottom: 0.4rem;
+  }
+  .input-group input,
+  .input-group select {
+    width: 100%;
+    padding: 0.7rem 0.9rem;
+    background: white;
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: var(--ink);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.15s;
+  }
+  .input-group input:focus,
+  .input-group select:focus {
+    outline: none;
+    box-shadow: 0 2px 0 var(--accent), 4px 6px 0 rgba(26,22,18,0.12);
+  }
+
+  .quick-btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+  .quick-btn {
+    padding: 0.4rem 0.9rem;
+    background: white;
+    border: 2px solid var(--line);
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .quick-btn:hover {
+    border-color: var(--ink);
+    color: var(--ink);
+    background: var(--bg);
+  }
+
+  /* === 結果卡 === */
+  .result-section {
+    display: none;
+  }
+  .result-section.show {
+    display: block;
+  }
+
+  .result-card {
+    background: var(--bg-paper);
+    border: 3px solid var(--ink);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 1.5rem;
+  }
+  .result-card h3 {
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    color: var(--ink);
+  }
+
+  /* === 大數字結果 === */
+  .big-result {
+    text-align: center;
+    padding: 1.5rem 1rem;
+    background: linear-gradient(135deg, rgba(37,99,235,0.08) 0%, rgba(236,72,153,0.08) 100%);
+    border-radius: 12px;
+    margin-bottom: 1rem;
+  }
+  .big-result .number {
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: var(--accent-deep);
+    line-height: 1;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: -0.03em;
+  }
+  .big-result .unit {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-top: 0.5rem;
+  }
+  .big-result .extra {
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+    margin-top: 0.4rem;
+  }
+
+  /* === 統計網格 === */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.8rem;
+  }
+  .stat-item {
+    background: white;
+    border: 2px solid var(--line);
+    border-radius: 10px;
+    padding: 0.9rem;
+    text-align: center;
+  }
+  .stat-item .label {
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    font-weight: 500;
+    margin-bottom: 0.3rem;
+  }
+  .stat-item .value {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--ink);
+    font-family: 'DM Mono', monospace;
+  }
+  .stat-item .value.warn {
+    color: var(--warn);
+  }
+  .stat-item .value.green {
+    color: var(--green);
+  }
+
+  /* === 場景提醒區 === */
+  .scenes {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .scene-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.9rem 1.1rem;
+    background: white;
+    border: 2px solid var(--line);
+    border-radius: 10px;
+    transition: all 0.15s;
+  }
+  .scene-item.highlight {
+    border-color: var(--accent);
+    background: rgba(37,99,235,0.05);
+  }
+  .scene-item.passed {
+    opacity: 0.55;
+    background: var(--bg);
+  }
+  .scene-item .scene-info {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    flex: 1;
+    min-width: 0;
+  }
+  .scene-item .scene-emoji {
+    font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+  .scene-item .scene-text {
+    flex: 1;
+    min-width: 0;
+  }
+  .scene-item .scene-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 0.1rem;
+  }
+  .scene-item .scene-date {
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+  }
+  .scene-item .scene-days {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--accent-deep);
+    font-family: 'DM Mono', monospace;
+    flex-shrink: 0;
+  }
+  .scene-item.passed .scene-days {
+    color: var(--ink-soft);
+  }
+
+  /* === 進度條 === */
+  .progress-wrap {
+    margin-top: 0.8rem;
+  }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    margin-bottom: 0.4rem;
+  }
+  .progress-bar {
+    width: 100%;
+    height: 12px;
+    background: var(--bg);
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent) 0%, var(--pink) 100%);
+    border-radius: 999px;
+    transition: width 0.4s ease-out;
+  }
+
+  /* === 動作按鈕 === */
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 1rem;
+  }
+  .action-btn {
+    flex: 1;
+    min-width: 100px;
+    padding: 0.7rem 1rem;
+    background: white;
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--ink);
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.1s;
+  }
+  .action-btn:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 0 3px 0 var(--ink), 5px 7px 0 rgba(26,22,18,0.12);
+  }
+  .action-btn:active {
+    transform: translate(1px, 1px);
+    box-shadow: var(--shadow-sm);
+  }
+  .action-btn.primary {
+    background: var(--accent);
+    color: white;
+  }
+
+  /* === 空狀態 === */
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--ink-soft);
+    background: var(--bg-paper);
+    border: 2px dashed var(--line);
+    border-radius: 16px;
+  }
+  .empty-state .empty-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+  .empty-state .empty-text {
+    font-size: 0.95rem;
+  }
+
+  /* === 提示 toast === */
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(150%);
+    background: var(--ink);
+    color: var(--bg-paper);
+    padding: 0.8rem 1.5rem;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    transition: transform 0.3s ease-out;
+    z-index: 100;
+  }
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* === 響應式 === */
+  @media (max-width: 640px) {
+    .wonky-nav {
+      padding: 0.8rem 1rem;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+    .wonky-nav-links {
+      gap: 0.8rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .wonky-nav-links a {
+      font-size: 0.85rem;
+      padding: 0.25rem 0.5rem;
+    }
+    header { padding: 1.5rem 1rem 1rem; }
+    header h1 { font-size: 1.7rem; }
+    header p { font-size: 0.9rem; }
+    .container { padding: 0 0.8rem 2rem; }
+    .mode-tabs { padding: 0.3rem; }
+    .mode-tab { padding: 0.6rem 0.4rem; font-size: 0.82rem; }
+    .input-card, .result-card { padding: 1.1rem; }
+    .big-result .number { font-size: 2.5rem; }
+    .stat-item .value { font-size: 1.15rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="wonky-nav">
+  <a href="index.html" class="wonky-logo">歪腦袋<span class="wonky-dot">.</span></a>
+  <div class="wonky-nav-links">
+    <a href="index.html">首頁</a>
+    <a href="blog.html">部落格</a>
+    <a href="music.html">音樂</a>
+    <a href="game.html">遊戲</a>
+    <a href="tools.html" class="active">工具</a>
+  </div>
+</nav>
+
+<header>
+  <h1><span class="accent-dot"></span>日期計算器</h1>
+  <p>倒數日 × 預產期 × 紀念日 × 年齡 × 兩日期相差，6 種模式一次搞定。算完還會自動列出重要里程碑。</p>
+</header>
+
+<main class="container">
+
+  <!-- 模式切換 -->
+  <div class="mode-tabs">
+    <button class="mode-tab active" data-mode="diff">兩日期相差</button>
+    <button class="mode-tab" data-mode="offset">N 天前/後</button>
+    <button class="mode-tab" data-mode="countdown">倒數日</button>
+    <button class="mode-tab" data-mode="age">年齡計算</button>
+    <button class="mode-tab" data-mode="pregnancy">懷孕週數</button>
+    <button class="mode-tab" data-mode="anniversary">紀念日</button>
+  </div>
+
+  <!-- 模式 1：兩日期相差 -->
+  <section class="mode-panel" id="panel-diff">
+    <div class="input-card">
+      <h2><span class="num">1</span>選擇兩個日期</h2>
+      <div class="input-row">
+        <div class="input-group">
+          <label for="diff-start">起始日期</label>
+          <input type="date" id="diff-start">
+        </div>
+        <div class="input-group">
+          <label for="diff-end">結束日期</label>
+          <input type="date" id="diff-end">
+        </div>
+      </div>
+      <div class="quick-btns">
+        <button class="quick-btn" onclick="setDiffQuick('today-end')">今天起到年底</button>
+        <button class="quick-btn" onclick="setDiffQuick('thisyear')">今年從頭到尾</button>
+        <button class="quick-btn" onclick="setDiffQuick('reset')">重設</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 模式 2：N 天前/後 -->
+  <section class="mode-panel" id="panel-offset" style="display:none">
+    <div class="input-card">
+      <h2><span class="num">1</span>從某天起算 N 天</h2>
+      <div class="input-row">
+        <div class="input-group">
+          <label for="offset-base">基準日期</label>
+          <input type="date" id="offset-base">
+        </div>
+        <div class="input-group">
+          <label for="offset-days">天數（負數為之前）</label>
+          <input type="number" id="offset-days" value="100" placeholder="例：100 或 -30">
+        </div>
+      </div>
+      <div class="quick-btns">
+        <button class="quick-btn" onclick="setOffsetQuick(7)">+7 天</button>
+        <button class="quick-btn" onclick="setOffsetQuick(30)">+30 天</button>
+        <button class="quick-btn" onclick="setOffsetQuick(100)">+100 天</button>
+        <button class="quick-btn" onclick="setOffsetQuick(365)">+1 年</button>
+        <button class="quick-btn" onclick="setOffsetQuick(-30)">-30 天</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 模式 3：倒數日 -->
+  <section class="mode-panel" id="panel-countdown" style="display:none">
+    <div class="input-card">
+      <h2><span class="num">1</span>輸入目標日期</h2>
+      <div class="input-row">
+        <div class="input-group">
+          <label for="countdown-target">目標日期</label>
+          <input type="date" id="countdown-target">
+        </div>
+        <div class="input-group">
+          <label for="countdown-name">活動名稱（選填）</label>
+          <input type="text" id="countdown-name" placeholder="例：日本旅行、學測、生日">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 模式 4：年齡計算 -->
+  <section class="mode-panel" id="panel-age" style="display:none">
+    <div class="input-card">
+      <h2><span class="num">1</span>輸入生日</h2>
+      <div class="input-row">
+        <div class="input-group">
+          <label for="age-birth">生日</label>
+          <input type="date" id="age-birth">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 模式 5：懷孕週數 -->
+  <section class="mode-panel" id="panel-pregnancy" style="display:none">
+    <div class="input-card">
+      <h2><span class="num">1</span>輸入日期</h2>
+      <div class="input-row">
+        <div class="input-group">
+          <label for="preg-type">輸入方式</label>
+          <select id="preg-type">
+            <option value="lmp">最後月經第一天 (LMP)</option>
+            <option value="edd">預產期 (EDD)</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label for="preg-date">日期</label>
+          <input type="date" id="preg-date">
+        </div>
+      </div>
+      <p style="color:var(--ink-soft);font-size:0.82rem;line-height:1.5">
+        💡 預產期 = 最後月經第一天 + 280 天（40 週）。本計算僅供參考，實際以醫師為準。
+      </p>
+    </div>
+  </section>
+
+  <!-- 模式 6：紀念日 -->
+  <section class="mode-panel" id="panel-anniversary" style="display:none">
+    <div class="input-card">
+      <h2><span class="num">1</span>輸入紀念日</h2>
+      <div class="input-row">
+        <div class="input-group">
+          <label for="anniv-date">紀念日（交往日、結婚日等）</label>
+          <input type="date" id="anniv-date">
+        </div>
+        <div class="input-group">
+          <label for="anniv-name">名稱（選填）</label>
+          <input type="text" id="anniv-name" placeholder="例：在一起、結婚、認識">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 結果區 -->
+  <section class="result-section" id="result-section">
+
+    <!-- 大數字結果 -->
+    <div class="result-card" id="big-result-card">
+      <div class="big-result">
+        <div class="number" id="big-number">—</div>
+        <div class="unit" id="big-unit">—</div>
+        <div class="extra" id="big-extra"></div>
+      </div>
+      <div class="progress-wrap" id="progress-wrap" style="display:none">
+        <div class="progress-label">
+          <span id="progress-from">—</span>
+          <span id="progress-to">—</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 細部統計 -->
+    <div class="result-card" id="stats-card" style="display:none">
+      <h3>📊 細部統計</h3>
+      <div class="stats-grid" id="stats-grid"></div>
+    </div>
+
+    <!-- 場景提醒 -->
+    <div class="result-card" id="scenes-card" style="display:none">
+      <h3 id="scenes-title">🎯 重要里程碑</h3>
+      <div class="scenes" id="scenes-list"></div>
+    </div>
+
+    <!-- 動作按鈕 -->
+    <div class="actions">
+      <button class="action-btn primary" onclick="copyResult()">📋 複製結果</button>
+      <button class="action-btn" onclick="shareResult()">🔗 分享連結</button>
+    </div>
+  </section>
+
+  <!-- 空狀態 -->
+  <div class="empty-state" id="empty-state">
+    <div class="empty-icon">📅</div>
+    <div class="empty-text">在上方選擇模式並輸入日期，<br>結果會即時出現在這裡。</div>
+  </div>
+
+</main>
+
+<!-- Toast 提示 -->
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+
+// ============ 公用工具 ============
+const DAY_MS = 86400000;
+const $ = id => document.getElementById(id);
+const fmtDate = d => {
+  if (!(d instanceof Date) || isNaN(d)) return '—';
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}/${m}/${day}`;
+};
+const fmtDateFull = d => {
+  if (!(d instanceof Date) || isNaN(d)) return '—';
+  const week = ['週日','週一','週二','週三','週四','週五','週六'][d.getDay()];
+  return `${fmtDate(d)} (${week})`;
+};
+const dayDiff = (d1, d2) => Math.round((d2 - d1) / DAY_MS);
+const addDays = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+const today = () => { const t = new Date(); t.setHours(0,0,0,0); return t; };
+const parseDate = str => {
+  if (!str) return null;
+  const d = new Date(str);
+  if (isNaN(d)) return null;
+  d.setHours(0,0,0,0);
+  return d;
+};
+
+// 顯示 toast
+let toastTimer;
+const showToast = (msg, ms = 2000) => {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), ms);
+};
+
+// ============ 模式切換 ============
+let currentMode = 'diff';
+document.querySelectorAll('.mode-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mode-tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.mode-panel').forEach(p => p.style.display = 'none');
+    btn.classList.add('active');
+    currentMode = btn.dataset.mode;
+    $('panel-' + currentMode).style.display = '';
+    // 切換時不清結果，等使用者輸入新值
+    triggerCalculate();
+  });
+});
+
+// ============ 各模式計算 ============
+function calcDiff() {
+  const s = parseDate($('diff-start').value);
+  const e = parseDate($('diff-end').value);
+  if (!s || !e) return null;
+  const days = Math.abs(dayDiff(s, e));
+  const direction = e >= s ? '之間' : '相差';
+  const weeks = Math.floor(days / 7);
+  const months = Math.floor(days / 30);
+  const years = Math.floor(days / 365);
+
+  return {
+    big: { number: days, unit: '天', extra: `${fmtDate(s < e ? s : e)} 到 ${fmtDate(s < e ? e : s)}` },
+    stats: [
+      { label: '週數', value: weeks },
+      { label: '約月數', value: months },
+      { label: '約年數', value: years },
+      { label: '小時', value: (days * 24).toLocaleString() }
+    ]
+  };
+}
+
+function calcOffset() {
+  const base = parseDate($('offset-base').value);
+  const days = parseInt($('offset-days').value);
+  if (!base || isNaN(days)) return null;
+  const result = addDays(base, days);
+  return {
+    big: {
+      number: fmtDate(result),
+      unit: ['週日','週一','週二','週三','週四','週五','週六'][result.getDay()],
+      extra: days >= 0 ? `${fmtDate(base)} 之後 ${days} 天` : `${fmtDate(base)} 之前 ${Math.abs(days)} 天`
+    },
+    stats: [
+      { label: '距離今天', value: dayDiff(today(), result) + ' 天' },
+      { label: '是星期', value: ['日','一','二','三','四','五','六'][result.getDay()] }
+    ]
+  };
+}
+
+function calcCountdown() {
+  const target = parseDate($('countdown-target').value);
+  if (!target) return null;
+  const name = $('countdown-name').value.trim() || '目標日';
+  const t = today();
+  const days = dayDiff(t, target);
+  const past = days < 0;
+  const absDays = Math.abs(days);
+  const weeks = Math.floor(absDays / 7);
+  const weekDay = ['週日','週一','週二','週三','週四','週五','週六'][target.getDay()];
+
+  // 進度條（從今年初到目標日）
+  const yearStart = new Date(t.getFullYear(), 0, 1);
+  const totalSpan = Math.max(dayDiff(yearStart, target), 1);
+  const passedSpan = Math.max(dayDiff(yearStart, t), 0);
+  const progress = Math.min(Math.max((passedSpan / totalSpan) * 100, 0), 100);
+
+  return {
+    big: {
+      number: absDays,
+      unit: past ? `天前是 ${name}` : `天後是 ${name}`,
+      extra: `${fmtDate(target)} (${weekDay})`
+    },
+    progress: !past ? { from: fmtDate(yearStart), to: fmtDate(target), percent: progress } : null,
+    stats: [
+      { label: '週數', value: weeks + ' 週' + (absDays % 7) + ' 天' },
+      { label: '星期', value: weekDay.replace('週','') },
+      { label: '小時', value: (absDays * 24).toLocaleString() }
+    ]
+  };
+}
+
+function calcAge() {
+  const birth = parseDate($('age-birth').value);
+  if (!birth) return null;
+  const t = today();
+  if (birth > t) return null;
+  const totalDays = dayDiff(birth, t);
+
+  // 年齡 (年+月+天)
+  let years = t.getFullYear() - birth.getFullYear();
+  let months = t.getMonth() - birth.getMonth();
+  let days = t.getDate() - birth.getDate();
+  if (days < 0) {
+    months--;
+    const prevMonth = new Date(t.getFullYear(), t.getMonth(), 0);
+    days += prevMonth.getDate();
+  }
+  if (months < 0) {
+    years--;
+    months += 12;
+  }
+
+  // 下次生日
+  let nextBday = new Date(t.getFullYear(), birth.getMonth(), birth.getDate());
+  if (nextBday <= t) nextBday = new Date(t.getFullYear() + 1, birth.getMonth(), birth.getDate());
+  const nextBdayDays = dayDiff(t, nextBday);
+
+  // 場景：人生階段
+  const scenes = [
+    { emoji: '👶', name: '滿 1 歲', date: addDays(birth, 365) },
+    { emoji: '🎒', name: '小一入學（6 歲）', date: new Date(birth.getFullYear() + 6, 7, 1) },
+    { emoji: '🧑‍🎓', name: '高一入學（15 歲）', date: new Date(birth.getFullYear() + 15, 7, 1) },
+    { emoji: '🆔', name: '滿 18 歲（民法成年）', date: new Date(birth.getFullYear() + 18, birth.getMonth(), birth.getDate()) },
+    { emoji: '🎓', name: '滿 22 歲', date: new Date(birth.getFullYear() + 22, birth.getMonth(), birth.getDate()) },
+    { emoji: '🎂', name: '滿 30 歲', date: new Date(birth.getFullYear() + 30, birth.getMonth(), birth.getDate()) },
+    { emoji: '👔', name: '滿 40 歲（不惑）', date: new Date(birth.getFullYear() + 40, birth.getMonth(), birth.getDate()) },
+    { emoji: '🧓', name: '滿 65 歲（退休）', date: new Date(birth.getFullYear() + 65, birth.getMonth(), birth.getDate()) },
+  ];
+
+  return {
+    big: { number: `${years}`, unit: '歲', extra: `又 ${months} 個月 ${days} 天 · 共 ${totalDays.toLocaleString()} 天` },
+    stats: [
+      { label: '下次生日', value: nextBdayDays + ' 天' },
+      { label: '已活週數', value: Math.floor(totalDays / 7).toLocaleString() },
+      { label: '已活月數', value: (years * 12 + months) },
+      { label: '已活小時', value: (totalDays * 24).toLocaleString() }
+    ],
+    scenes: { title: '🎯 人生階段', items: scenes.map(s => ({ ...s, days: dayDiff(t, s.date) })) }
+  };
+}
+
+function calcPregnancy() {
+  const date = parseDate($('preg-date').value);
+  if (!date) return null;
+  const type = $('preg-type').value;
+  // 計算 LMP 跟 EDD
+  let lmp, edd;
+  if (type === 'lmp') {
+    lmp = date;
+    edd = addDays(date, 280);
+  } else {
+    edd = date;
+    lmp = addDays(date, -280);
+  }
+  const t = today();
+  const gestationDays = dayDiff(lmp, t);
+
+  if (gestationDays < 0) {
+    return {
+      big: { number: '—', unit: '尚未開始', extra: `LMP 為 ${fmtDate(lmp)}，還未到` }
+    };
+  }
+
+  const weeks = Math.floor(gestationDays / 7);
+  const days = gestationDays % 7;
+  const daysToEdd = dayDiff(t, edd);
+
+  // 孕期階段
+  let stage = '';
+  if (weeks < 13) stage = '第一孕期（初期）';
+  else if (weeks < 28) stage = '第二孕期（穩定期）';
+  else if (weeks < 42) stage = '第三孕期（後期）';
+  else stage = '超過預產期';
+
+  // 重要產檢里程碑
+  const milestones = [
+    { emoji: '💗', name: '滿 12 週（初期結束）', week: 12 },
+    { emoji: '🔬', name: '第 16 週（唐氏症初篩）', week: 16 },
+    { emoji: '🩺', name: '第 20 週（高層次超音波）', week: 20 },
+    { emoji: '🍬', name: '第 24-28 週（妊娠糖尿病篩檢）', week: 26 },
+    { emoji: '🤰', name: '第 28 週（進入第三孕期）', week: 28 },
+    { emoji: '🌸', name: '第 36 週（足月即將到）', week: 36 },
+    { emoji: '🎉', name: '預產期', week: 40 }
+  ];
+
+  return {
+    big: {
+      number: `${weeks}`,
+      unit: `週 + ${days} 天`,
+      extra: `${stage} · 距預產期 ${daysToEdd >= 0 ? '剩 ' + daysToEdd + ' 天' : '已過 ' + Math.abs(daysToEdd) + ' 天'}`
+    },
+    stats: [
+      { label: 'LMP', value: fmtDate(lmp).slice(5) },
+      { label: '預產期', value: fmtDate(edd).slice(5) },
+      { label: '懷孕天數', value: gestationDays + ' 天' },
+      { label: '孕期', value: stage.split('（')[0] }
+    ],
+    scenes: {
+      title: '🎯 產檢里程碑',
+      items: milestones.map(m => ({
+        emoji: m.emoji,
+        name: m.name,
+        date: addDays(lmp, m.week * 7),
+        days: dayDiff(t, addDays(lmp, m.week * 7))
+      }))
+    }
+  };
+}
+
+function calcAnniversary() {
+  const anniv = parseDate($('anniv-date').value);
+  if (!anniv) return null;
+  const name = $('anniv-name').value.trim() || '紀念日';
+  const t = today();
+  const days = dayDiff(anniv, t);
+  const past = days >= 0;
+
+  if (!past) {
+    // 紀念日在未來
+    return {
+      big: { number: Math.abs(days), unit: `天後是${name}`, extra: fmtDateFull(anniv) }
+    };
+  }
+
+  // 計算年月日差
+  let years = t.getFullYear() - anniv.getFullYear();
+  let months = t.getMonth() - anniv.getMonth();
+  let dayDiffR = t.getDate() - anniv.getDate();
+  if (dayDiffR < 0) {
+    months--;
+    const prevMonth = new Date(t.getFullYear(), t.getMonth(), 0);
+    dayDiffR += prevMonth.getDate();
+  }
+  if (months < 0) {
+    years--;
+    months += 12;
+  }
+
+  // 場景：里程碑日
+  const milestones = [];
+
+  // 100 天倍數
+  const next100 = Math.ceil((days + 1) / 100) * 100;
+  milestones.push({ emoji: '💯', name: `滿 ${next100} 天`, date: addDays(anniv, next100) });
+
+  // 整千天
+  const next1000 = Math.ceil((days + 1) / 1000) * 1000;
+  if (next1000 - days <= 3650) {  // 10 年內才顯示
+    milestones.push({ emoji: '🌟', name: `滿 ${next1000} 天`, date: addDays(anniv, next1000) });
+  }
+
+  // 下個整數年
+  let nextAnnv = new Date(anniv.getFullYear() + years + 1, anniv.getMonth(), anniv.getDate());
+  milestones.push({ emoji: '🎂', name: `滿 ${years + 1} 週年`, date: nextAnnv });
+
+  // 5 / 10 / 20 / 50 週年
+  [5, 10, 20, 30, 50].forEach(y => {
+    if (y > years) {
+      milestones.push({
+        emoji: '🎊',
+        name: `滿 ${y} 週年`,
+        date: new Date(anniv.getFullYear() + y, anniv.getMonth(), anniv.getDate())
+      });
+    }
+  });
+
+  // 按距今天數排序
+  milestones.sort((a, b) => a.date - b.date);
+
+  return {
+    big: {
+      number: days,
+      unit: `天的${name}`,
+      extra: `${years} 年 ${months} 個月 ${dayDiffR} 天 · ${fmtDate(anniv)} 至今`
+    },
+    stats: [
+      { label: '總天數', value: days.toLocaleString() },
+      { label: '總週數', value: Math.floor(days / 7).toLocaleString() },
+      { label: '總月數', value: (years * 12 + months) },
+      { label: '已過年份', value: years }
+    ],
+    scenes: {
+      title: '🎯 下個里程碑',
+      items: milestones.slice(0, 6).map(m => ({
+        ...m,
+        days: dayDiff(t, m.date)
+      }))
+    }
+  };
+}
+
+// ============ 結果渲染 ============
+function render(data) {
+  const empty = $('empty-state');
+  const result = $('result-section');
+
+  if (!data) {
+    empty.style.display = '';
+    result.classList.remove('show');
+    return;
+  }
+
+  empty.style.display = 'none';
+  result.classList.add('show');
+
+  // 大數字
+  $('big-number').textContent = data.big.number;
+  $('big-unit').textContent = data.big.unit;
+  $('big-extra').textContent = data.big.extra || '';
+
+  // 進度條
+  if (data.progress) {
+    $('progress-wrap').style.display = '';
+    $('progress-from').textContent = data.progress.from;
+    $('progress-to').textContent = data.progress.to;
+    $('progress-fill').style.width = data.progress.percent + '%';
+  } else {
+    $('progress-wrap').style.display = 'none';
+  }
+
+  // 細部統計
+  if (data.stats && data.stats.length > 0) {
+    $('stats-card').style.display = '';
+    $('stats-grid').innerHTML = data.stats.map(s => `
+      <div class="stat-item">
+        <div class="label">${s.label}</div>
+        <div class="value">${s.value}</div>
+      </div>
+    `).join('');
+  } else {
+    $('stats-card').style.display = 'none';
+  }
+
+  // 場景提醒
+  if (data.scenes && data.scenes.items.length > 0) {
+    $('scenes-card').style.display = '';
+    $('scenes-title').textContent = data.scenes.title;
+    $('scenes-list').innerHTML = data.scenes.items.map(s => {
+      const passed = s.days < 0;
+      let highlight = '';
+      if (!passed && s.days <= 30 && s.days > 0) highlight = 'highlight';
+      const daysText = passed ? `已過 ${Math.abs(s.days)} 天` : (s.days === 0 ? '就是今天！' : `還有 ${s.days} 天`);
+      return `
+        <div class="scene-item ${passed ? 'passed' : ''} ${highlight}">
+          <div class="scene-info">
+            <div class="scene-emoji">${s.emoji}</div>
+            <div class="scene-text">
+              <div class="scene-name">${s.name}</div>
+              <div class="scene-date">${fmtDate(s.date)}</div>
+            </div>
+          </div>
+          <div class="scene-days">${daysText}</div>
+        </div>
+      `;
+    }).join('');
+  } else {
+    $('scenes-card').style.display = 'none';
+  }
+}
+
+// ============ 觸發計算 ============
+let calcMap = {
+  diff: calcDiff,
+  offset: calcOffset,
+  countdown: calcCountdown,
+  age: calcAge,
+  pregnancy: calcPregnancy,
+  anniversary: calcAnniversary
+};
+
+function triggerCalculate() {
+  try {
+    const data = calcMap[currentMode]();
+    render(data);
+  } catch (e) {
+    console.error(e);
+    render(null);
+  }
+}
+
+// 所有 input 監聽
+document.querySelectorAll('input, select').forEach(el => {
+  el.addEventListener('input', triggerCalculate);
+  el.addEventListener('change', triggerCalculate);
+});
+
+// 快捷按鈕
+function setDiffQuick(type) {
+  const t = today();
+  if (type === 'today-end') {
+    $('diff-start').value = t.toISOString().slice(0, 10);
+    $('diff-end').value = `${t.getFullYear()}-12-31`;
+  } else if (type === 'thisyear') {
+    $('diff-start').value = `${t.getFullYear()}-01-01`;
+    $('diff-end').value = `${t.getFullYear()}-12-31`;
+  } else if (type === 'reset') {
+    $('diff-start').value = '';
+    $('diff-end').value = '';
+  }
+  triggerCalculate();
+}
+
+function setOffsetQuick(days) {
+  const t = today();
+  $('offset-base').value = t.toISOString().slice(0, 10);
+  $('offset-days').value = days;
+  triggerCalculate();
+}
+
+// ============ 複製 + 分享 ============
+function copyResult() {
+  const big = $('big-number').textContent + ' ' + $('big-unit').textContent;
+  const extra = $('big-extra').textContent;
+  const text = `${big}\n${extra}\n\n— 來自歪腦袋日期計算 https://wonky-brain.vercel.app/tool-date.html`;
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('已複製到剪貼簿 ✨');
+  }).catch(() => {
+    showToast('複製失敗，請手動選取');
+  });
+}
+
+function shareResult() {
+  const params = new URLSearchParams();
+  params.set('m', currentMode);
+  // 蒐集當前 mode 的輸入
+  const panel = $('panel-' + currentMode);
+  panel.querySelectorAll('input, select').forEach(el => {
+    if (el.value) params.set(el.id, el.value);
+  });
+  const url = `${location.origin}${location.pathname}?${params.toString()}`;
+  navigator.clipboard.writeText(url).then(() => {
+    showToast('分享連結已複製 🔗');
+  }).catch(() => {
+    showToast('複製失敗');
+  });
+}
+
+// ============ 載入時讀 URL 參數 ============
+window.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(location.search);
+  const m = params.get('m');
+  if (m && calcMap[m]) {
+    document.querySelector(`.mode-tab[data-mode="${m}"]`).click();
+    params.forEach((v, k) => {
+      const el = $(k);
+      if (el) el.value = v;
+    });
+    triggerCalculate();
+  } else {
+    // 預設：兩日期相差設定為「今天到今年底」
+    setDiffQuick('today-end');
+  }
+});
+</script>
+
+</body>
+</html>

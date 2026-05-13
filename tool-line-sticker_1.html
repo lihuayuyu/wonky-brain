@@ -1,0 +1,1918 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LINE 貼圖工具・自動偵測 × 去背 × 三尺寸輸出｜歪腦袋小工具</title>
+<meta name="description" content="LINE 貼圖製作工具：上傳一張圖，自動去背、智慧偵測主體、切成 LINE 貼圖官方三尺寸（370×320、240×240、96×74）並打包下載。免登入、純前端、隱私安全。">
+<meta name="keywords" content="LINE 貼圖分割, LINE 貼圖去背, LINE 貼圖製作, LINE 貼圖尺寸, 貼圖切尺寸, 線上去背工具, LINE 貼圖打包">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=JetBrains+Mono:wght@400;600&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+  :root {
+    --bg: #FFE4F0;
+    --bg-paper: #FFFFFF;
+    --ink: #4A3A5C;
+    --ink-soft: #8B7BA0;
+    --accent: #00b900;
+    --accent-deep: #008c00;
+    --warn: #d64a2a;
+    --line: #E8D4F0;
+    --highlight: #ffd60a;
+    --blue: #2563eb;
+    --shadow: 0 2px 0 var(--ink), 4px 6px 0 rgba(74,58,92,0.12);
+    --shadow-sm: 0 1px 0 var(--ink), 2px 3px 0 rgba(74,58,92,0.1);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--ink); font-family: 'Noto Sans TC', sans-serif; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  body {
+    background: linear-gradient(135deg, #FFE4F0 0%, #FFD6EA 50%, #F5DCFF 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+
+  header {
+    border-bottom: 2px solid var(--ink);
+    padding: 18px 32px 14px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    background: var(--bg-paper);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .brand { display: flex; align-items: baseline; gap: 14px; }
+  .brand h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: 30px;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .brand .green-dot {
+    display: inline-block;
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 3px var(--bg-paper), 0 0 0 4px var(--ink);
+    margin-right: 2px;
+    transform: translateY(-2px);
+  }
+  .brand .sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-soft);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .header-info {
+    font-size: 11px;
+    color: var(--ink-soft);
+    text-align: right;
+    line-height: 1.6;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .header-info b { color: var(--ink); }
+
+  main {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    min-height: calc(100vh - 70px);
+  }
+  @media (max-width: 980px) { main { grid-template-columns: 1fr; } }
+
+  .workspace {
+    padding: 28px;
+    border-right: 2px solid var(--ink);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    min-width: 0;
+  }
+  .sidebar {
+    padding: 24px;
+    background: var(--bg-paper);
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    max-height: calc(100vh - 70px);
+    overflow-y: auto;
+    font-size: 15px;
+  }
+
+  .dropzone {
+    border: 2px dashed var(--ink);
+    background: var(--bg-paper);
+    padding: 50px 32px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .dropzone:hover, .dropzone.drag {
+    background: #fff8d6;
+    transform: translate(-2px, -2px);
+    box-shadow: var(--shadow);
+  }
+  .dropzone::before {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    border: 1px solid var(--ink);
+    pointer-events: none;
+    opacity: 0.3;
+  }
+  .dropzone-icon { font-family: 'Fraunces', serif; font-size: 52px; font-weight: 800; line-height: 1; margin-bottom: 12px; }
+  .dropzone-text { font-family: 'Fraunces', serif; font-size: 24px; font-weight: 600; margin-bottom: 6px; }
+  .dropzone-hint { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--ink-soft); letter-spacing: 0.08em; }
+
+  .canvas-wrap {
+    background: var(--bg-paper);
+    border: 2px solid var(--ink);
+    padding: 16px;
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: var(--shadow);
+  }
+  .canvas-wrap.active { display: flex; }
+  .canvas-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    color: var(--ink-soft);
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 10px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .canvas-header .stats { display: flex; gap: 18px; flex-wrap: wrap; }
+  .canvas-header b { color: var(--ink); font-size: 14px; }
+  .canvas-container {
+    position: relative;
+    background: repeating-conic-gradient(#e8e3d4 0% 25%, #faf7f0 0% 50%) 50% / 16px 16px;
+    overflow: auto;
+    user-select: none;
+    touch-action: none;
+    min-height: 320px;
+    max-height: 65vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #imgCanvas { display: block; }
+
+  .det-box {
+    position: absolute;
+    border: 2px solid var(--blue);
+    background: rgba(37,99,235,0.08);
+    cursor: pointer;
+    font-family: 'JetBrains Mono', monospace;
+    transition: background 0.15s, border-color 0.15s, opacity 0.15s;
+  }
+  .det-box:hover { background: rgba(37,99,235,0.18); border-color: var(--ink); }
+  .det-box.selected { border-color: var(--accent); background: rgba(0,185,0,0.18); }
+  .det-box.excluded { border-color: var(--warn); background: rgba(214,74,42,0.08); opacity: 0.5; }
+  .det-box.merging { border-color: var(--highlight); background: rgba(255,214,10,0.3); }
+  .det-box.drop-target { border-color: var(--highlight); background: rgba(255,214,10,0.45); border-style: dashed; }
+  .det-box-label {
+    position: absolute;
+    top: -2px; left: -2px;
+    background: var(--blue);
+    color: white;
+    padding: 1px 5px;
+    font-size: 10px;
+    line-height: 1.3;
+    font-weight: 700;
+    pointer-events: none;
+  }
+  .det-box.selected .det-box-label { background: var(--accent); }
+  .det-box.excluded .det-box-label { background: var(--warn); }
+  .det-box .det-box-close {
+    position: absolute;
+    top: -10px; right: -10px;
+    width: 22px; height: 22px;
+    background: var(--ink);
+    color: white;
+    border: 1.5px solid var(--ink);
+    cursor: pointer;
+    font-size: 15px;
+    line-height: 1;
+    padding: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-weight: 700;
+    z-index: 10;
+  }
+  .det-box:hover .det-box-close { display: flex; }
+  .det-box.editing .det-box-close { display: flex; background: var(--warn); }
+  .det-handle {
+    position: absolute;
+    width: 14px; height: 14px;
+    background: white;
+    border: 2px solid var(--ink);
+    display: none;
+    z-index: 5;
+  }
+  .det-box.editing .det-handle { display: block; }
+  .det-handle.nw { top: -8px; left: -8px; cursor: nwse-resize; }
+  .det-handle.ne { top: -8px; right: -8px; cursor: nesw-resize; }
+  .det-handle.sw { bottom: -8px; left: -8px; cursor: nesw-resize; }
+  .det-handle.se { bottom: -8px; right: -8px; cursor: nwse-resize; }
+  .det-box.editing { cursor: move; border-width: 3px; border-color: var(--highlight); background: rgba(255,214,10,0.2); }
+  .det-box.editing .det-box-label { background: var(--highlight); color: var(--ink); }
+
+  /* Grid divider lines */
+  .grid-line {
+    position: absolute;
+    background: var(--blue);
+    z-index: 8;
+    transition: background 0.15s;
+  }
+  .grid-line:hover, .grid-line.dragging {
+    background: var(--highlight);
+    box-shadow: 0 0 0 2px var(--ink);
+  }
+  .grid-line.vertical {
+    width: 3px;
+    cursor: ew-resize;
+    transform: translateX(-1.5px);
+  }
+  .grid-line.horizontal {
+    height: 3px;
+    cursor: ns-resize;
+    transform: translateY(-1.5px);
+  }
+  .grid-line::before {
+    content: '';
+    position: absolute;
+    inset: -8px;
+  }
+  .grid-line-handle {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    background: var(--blue);
+    border: 2px solid white;
+    box-shadow: 0 0 0 1.5px var(--ink);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  .grid-line:hover .grid-line-handle, .grid-line.dragging .grid-line-handle {
+    background: var(--highlight);
+  }
+  .grid-line.vertical .grid-line-handle {
+    left: -8px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  .grid-line.horizontal .grid-line-handle {
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .btn-row { display: flex; flex-wrap: wrap; gap: 10px; }
+  .btn {
+    font-family: 'Noto Sans TC', sans-serif;
+    font-weight: 500;
+    font-size: 15px;
+    padding: 11px 18px;
+    background: var(--bg-paper);
+    border: 1.5px solid var(--ink);
+    color: var(--ink);
+    cursor: pointer;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    line-height: 1;
+  }
+  .btn:hover:not(:disabled) { transform: translate(-1px, -1px); box-shadow: var(--shadow-sm); }
+  .btn:active:not(:disabled) { transform: translate(0, 0); box-shadow: none; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn.primary { background: var(--accent); color: white; border-color: var(--ink); font-weight: 700; }
+  .btn.primary:hover:not(:disabled) { background: var(--accent-deep); }
+  .btn.danger { background: var(--warn); color: white; }
+  .btn.blue { background: var(--blue); color: white; }
+  .btn.sm { padding: 8px 12px; font-size: 13px; }
+
+  .section { display: flex; flex-direction: column; gap: 10px; }
+  .section-title {
+    font-family: 'Fraunces', serif;
+    font-size: 19px;
+    font-weight: 700;
+    padding-bottom: 8px;
+    border-bottom: 1.5px solid var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .section-title .badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    background: var(--ink);
+    color: var(--bg);
+    padding: 3px 8px;
+    font-weight: 400;
+  }
+  .control-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 15px;
+  }
+  .control-group label { color: var(--ink-soft); flex: 1; }
+  .control-group .swatch {
+    width: 32px; height: 32px;
+    border: 1.5px solid var(--ink);
+    background: repeating-conic-gradient(#ddd 0% 25%, #fff 0% 50%) 50% / 8px 8px;
+  }
+  .control-group input[type=number] {
+    width: 80px;
+    padding: 6px 8px;
+    border: 1.5px solid var(--ink);
+    background: white;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+  }
+  .slider-row { display: flex; align-items: center; gap: 10px; flex: 0 0 60%; }
+  .slider-row input[type=range] { flex: 1; }
+  .slider-row .val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    min-width: 34px; text-align: right;
+    font-weight: 700;
+  }
+
+  .preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 14px;
+  }
+  .preview-empty {
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 16px;
+    padding: 50px 16px;
+    border: 1.5px dashed var(--line);
+    font-style: italic;
+    background: var(--bg-paper);
+  }
+  .preview-card {
+    border: 1.5px solid var(--ink);
+    background: white;
+    padding: 8px;
+    position: relative;
+    transition: all 0.15s;
+  }
+  .preview-card:hover { transform: translate(-1px, -1px); box-shadow: var(--shadow-sm); }
+  .preview-card .thumb {
+    width: 100%;
+    aspect-ratio: 1;
+    background: repeating-conic-gradient(#e8e3d4 0% 25%, #faf7f0 0% 50%) 50% / 8px 8px;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+    margin-bottom: 6px;
+  }
+  .preview-card .thumb img { max-width: 100%; max-height: 100%; }
+  .preview-card .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-soft);
+    text-align: center;
+    line-height: 1.4;
+  }
+  .preview-card .label b { color: var(--ink); font-size: 13px; }
+  .preview-card .del {
+    position: absolute;
+    top: 4px; right: 4px;
+    width: 26px; height: 26px;
+    background: var(--warn);
+    color: white;
+    border: 1.5px solid var(--ink);
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.15s;
+    font-weight: 700;
+  }
+  .preview-card:hover .del { opacity: 1; }
+  .preview-card.special { background: #fff8d6; }
+  .preview-card.special .label b { color: var(--accent-deep); }
+  .preview-card .role-tag {
+    position: absolute;
+    top: 4px; left: 4px;
+    background: var(--blue);
+    color: white;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 2px 6px;
+    font-weight: 700;
+    z-index: 1;
+  }
+  .preview-card.special .role-tag { background: var(--accent); }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--ink);
+    color: var(--bg);
+    padding: 12px 20px;
+    font-size: 13px;
+    border: 2px solid var(--ink);
+    box-shadow: 4px 4px 0 var(--accent);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s;
+    z-index: 1000;
+    max-width: 90vw;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.err { box-shadow: 4px 4px 0 var(--warn); }
+
+  .info-note {
+    background: #fff8d6;
+    border: 1.5px solid var(--ink);
+    padding: 14px 16px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--ink);
+  }
+  .info-note b { color: var(--accent-deep); font-weight: 700; }
+
+  .role-tabs { display: flex; border: 1.5px solid var(--ink); }
+  .role-tab {
+    flex: 1;
+    padding: 11px 8px;
+    text-align: center;
+    background: white;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    border-right: 1.5px solid var(--ink);
+    transition: all 0.15s;
+  }
+  .role-tab:last-child { border-right: none; }
+  .role-tab.active { background: var(--ink); color: var(--bg); }
+  .role-tab:hover:not(.active) { background: #fff8d6; }
+
+  .mode-banner {
+    background: var(--blue);
+    color: white;
+    padding: 10px 14px;
+    font-size: 14px;
+    line-height: 1.4;
+    border: 1.5px solid var(--ink);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  .mode-banner.green { background: var(--accent); }
+  .mode-banner b { font-weight: 700; }
+
+  #cropOverlay {
+    position: absolute;
+    border: 2px solid var(--accent);
+    box-shadow: 0 0 0 9999px rgba(26,22,18,0.5);
+    cursor: move;
+    display: none;
+  }
+  .crop-handle {
+    position: absolute;
+    width: 12px; height: 12px;
+    background: var(--accent);
+    border: 1.5px solid var(--ink);
+  }
+  .crop-handle.nw { top: -7px; left: -7px; cursor: nwse-resize; }
+  .crop-handle.ne { top: -7px; right: -7px; cursor: nesw-resize; }
+  .crop-handle.sw { bottom: -7px; left: -7px; cursor: nesw-resize; }
+  .crop-handle.se { bottom: -7px; right: -7px; cursor: nwse-resize; }
+
+  /* preview panel that lives in workspace, under canvas */
+  .preview-panel {
+    background: var(--bg-paper);
+    border: 2px solid var(--ink);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .preview-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 12px;
+  }
+  .preview-panel-title {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .preview-panel-title .badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    background: var(--ink);
+    color: var(--bg);
+    padding: 3px 9px;
+    font-weight: 400;
+  }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--ink); border: 1px solid var(--bg); }
+
+  /* === 歪腦袋導覽列（沿用主站風格） === */
+  .wonky-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 2rem;
+    background: rgba(255, 228, 240, 0.92);
+    backdrop-filter: blur(8px);
+    border-bottom: 3px solid var(--ink);
+    font-family: 'Noto Sans TC', sans-serif;
+  }
+  .wonky-logo {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--ink);
+    text-decoration: none;
+    letter-spacing: -0.02em;
+  }
+  .wonky-logo .wonky-dot {
+    color: #FF8FAF;
+    margin-left: 2px;
+  }
+  .wonky-nav-links {
+    display: flex;
+    gap: 1.5rem;
+  }
+  .wonky-nav-links a {
+    color: var(--ink);
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    padding: 0.3rem 0.6rem;
+    border-radius: 6px;
+    transition: all 0.15s;
+  }
+  .wonky-nav-links a:hover {
+    background: #FF8FAF;
+    color: white;
+    transform: rotate(-3deg);
+  }
+  .wonky-nav-links a.active {
+    background: #4F8FED;
+    color: white;
+  }
+  @media (max-width: 640px) {
+    .wonky-nav {
+      padding: 0.8rem 1rem;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+    .wonky-nav-links {
+      gap: 0.8rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .wonky-nav-links a {
+      font-size: 0.85rem;
+      padding: 0.25rem 0.5rem;
+    }
+  }
+</style>
+</head>
+<body>
+
+<nav class="wonky-nav">
+  <a href="index.html" class="wonky-logo">歪腦袋<span class="wonky-dot">.</span></a>
+  <div class="wonky-nav-links">
+    <a href="index.html">首頁</a>
+    <a href="blog.html">部落格</a>
+    <a href="music.html">音樂</a>
+    <a href="game.html">遊戲</a>
+    <a href="tools.html" class="active">工具</a>
+  </div>
+</nav>
+
+<header>
+  <div class="brand">
+    <h1><span class="green-dot"></span>StickerForge</h1>
+    <div class="sub">Grid · Auto-Detect · v5.1</div>
+  </div>
+  <div class="header-info">
+    貼圖 <b>80~370 × 80~320</b> · 偶數 · PNG<br>
+    主頁圖 <b>240×240</b> · 標籤 <b>96×74</b>
+  </div>
+</header>
+
+<main>
+  <div class="workspace">
+
+    <div class="dropzone" id="dropzone">
+      <div class="dropzone-icon">↓</div>
+      <div class="dropzone-text">拖曳圖片到這裡，或點擊上傳</div>
+      <div class="dropzone-hint">一張圖內含多個貼圖也 OK · 自動偵測切割</div>
+      <input type="file" id="fileInput" accept="image/*" style="display:none">
+    </div>
+
+    <div class="canvas-wrap" id="canvasWrap">
+      <div class="canvas-header">
+        <div class="stats">
+          <span>檔案 <b id="statFile">—</b></span>
+          <span>尺寸 <b id="statDim">—</b></span>
+          <span>偵測到 <b id="statCount">0</b> 張</span>
+        </div>
+        <div class="stats">
+          <span>已選 <b id="statSel">0</b> 張</span>
+        </div>
+      </div>
+
+      <div id="modeTabs" class="role-tabs" style="margin-bottom: 4px;">
+        <div class="role-tab active" data-mode="grid">⊞ 網格切割</div>
+        <div class="role-tab" data-mode="detect">⚉ 自動偵測</div>
+      </div>
+
+      <div id="modeBanner" class="mode-banner">
+        <span>⊞ <b>網格模式</b>：拖藍線可微調分隔位置 · 框可雙擊編輯</span>
+      </div>
+
+      <div class="canvas-container" id="canvasContainer">
+        <canvas id="imgCanvas"></canvas>
+        <div id="cropOverlay">
+          <div class="crop-handle nw"></div>
+          <div class="crop-handle ne"></div>
+          <div class="crop-handle sw"></div>
+          <div class="crop-handle se"></div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn primary" id="btnApplySelected">✦ 加入所選貼圖（套用目前角色）</button>
+        <button class="btn" id="btnRedetect">↻ 重新偵測</button>
+        <button class="btn" id="btnSelectAll">全選</button>
+        <button class="btn" id="btnSelectNone">全不選</button>
+        <button class="btn" id="btnAddBox">＋ 新增框</button>
+        <button class="btn blue" id="btnManualMode">✂ 手動裁切</button>
+      </div>
+    </div>
+
+    <!-- 預覽面板（在大圖下方） -->
+    <div class="preview-panel">
+      <div class="preview-panel-header">
+        <div class="preview-panel-title">
+          裁切預覽
+          <span class="badge" id="cntBadge">0</span>
+        </div>
+        <div class="btn-row">
+          <button class="btn primary" id="btnDownload" disabled>⬇ 下載 ZIP</button>
+          <button class="btn danger" id="btnClearAll">✕ 清空</button>
+        </div>
+      </div>
+      <div id="previewArea" class="preview-empty">尚未加入任何貼圖 · 在上方選好框後按「加入所選貼圖」</div>
+    </div>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="info-note">
+      <b>使用流程：</b><br>
+      1. 上傳整張大圖<br>
+      2. 預設用<b>「網格模式」</b>（4×4 均分）<br>
+      &nbsp;&nbsp;• 拖藍色分隔線可微調<br>
+      &nbsp;&nbsp;• 右側可改欄數、列數<br>
+      3. 不規則排版 → 切到<b>「自動偵測」</b>模式<br>
+      4. 框錯了？<br>
+      &nbsp;&nbsp;• 點框 = 排除（變紅）<br>
+      &nbsp;&nbsp;• <b>拖框到另一框上 = 合併</b><br>
+      &nbsp;&nbsp;• 雙擊框 = 編輯（拉大小、× 刪除）<br>
+      5. 切換「輸出角色」→ 加入所選
+    </div>
+
+    <div class="section">
+      <div class="section-title">輸出角色</div>
+      <div class="role-tabs">
+        <div class="role-tab active" data-role="sticker">貼圖</div>
+        <div class="role-tab" data-role="main">主頁圖 main</div>
+        <div class="role-tab" data-role="tab">標籤 tab</div>
+      </div>
+      <div style="font-size:11px;color:var(--ink-soft);font-family:'JetBrains Mono',monospace;margin-top:4px;">
+        切換後，按「加入所選貼圖」會輸出對應尺寸
+      </div>
+    </div>
+
+    <div class="section" id="gridSettings">
+      <div class="section-title">網格設定</div>
+      <div class="control-group">
+        <label>欄數（橫）</label>
+        <input type="number" id="gridCols" value="4" min="1" max="20" step="1">
+      </div>
+      <div class="control-group">
+        <label>列數（縱）</label>
+        <input type="number" id="gridRows" value="4" min="1" max="20" step="1">
+      </div>
+      <div class="control-group">
+        <label>內縮 (px)</label>
+        <input type="number" id="gridInset" value="4" min="0" max="50" step="1">
+      </div>
+      <div style="font-size:12px;color:var(--ink-soft);line-height:1.5;">
+        💡 拖藍色分隔線可微調位置<br>
+        💡 改欄/列數後會重置分隔線
+      </div>
+      <button class="btn sm" id="btnResetGrid" style="margin-top:4px;">↺ 重置網格</button>
+    </div>
+
+    <div class="section" id="detectSettings">
+      <div class="section-title">偵測設定</div>
+      <div class="control-group">
+        <label>背景色（自動偵測）</label>
+        <div class="swatch" id="bgSwatch"></div>
+      </div>
+      <div class="control-group">
+        <label>顏色容差</label>
+        <div class="slider-row">
+          <input type="range" id="tolerance" min="0" max="120" value="40">
+          <span class="val" id="tolVal">40</span>
+        </div>
+      </div>
+      <div class="control-group">
+        <label>最小貼圖尺寸 (px)</label>
+        <input type="number" id="minSize" value="40" min="10" max="500" step="5">
+      </div>
+      <div class="control-group">
+        <label>邊距 (px)</label>
+        <input type="number" id="padding" value="6" min="0" max="50" step="2">
+      </div>
+      <label class="control-group" style="cursor:pointer;">
+        <input type="checkbox" id="chkRmbg" checked style="width:16px;height:16px;accent-color:var(--accent);">
+        <span style="flex:1;">輸出時去背</span>
+      </label>
+    </div>
+
+    <div class="section">
+      <div class="section-title">貼圖目標最大邊</div>
+      <div class="control-group">
+        <label>最長邊 (px)</label>
+        <input type="number" id="maxEdge" value="370" min="80" max="370" step="2">
+      </div>
+      <div style="font-size:11px;color:var(--ink-soft);font-family:'JetBrains Mono',monospace;">
+        LINE 上限 370 · 自動湊偶數
+      </div>
+      <label class="control-group" style="cursor:pointer;margin-top:6px;">
+        <input type="checkbox" id="chkUniformCanvas" checked style="width:16px;height:16px;accent-color:var(--accent);">
+        <span style="flex:1;">統一畫布尺寸（透明背景）</span>
+      </label>
+      <div class="control-group" id="uniformSizeRow" style="display:flex;">
+        <label>畫布尺寸</label>
+        <div style="display:flex;gap:4px;align-items:center;font-family:'JetBrains Mono',monospace;font-size:12px;">
+          <input type="number" id="canvasW" value="370" min="80" max="370" step="2" style="width:60px;padding:4px 6px;border:1.5px solid var(--ink);background:white;">
+          <span>×</span>
+          <input type="number" id="canvasH" value="320" min="80" max="320" step="2" style="width:60px;padding:4px 6px;border:1.5px solid var(--ink);background:white;">
+        </div>
+      </div>
+      <div id="uniformHint" style="font-size:11px;color:var(--accent-deep);font-family:'JetBrains Mono',monospace;display:block;">
+        ✓ 原圖不縮放、置中、補透明背景 · 避免 LINE 上傳錯誤
+      </div>
+    </div>
+
+  </aside>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const state = {
+  fileName: '',
+  img: null,
+  imgW: 0, imgH: 0,
+  bgColor: null,
+  scale: 1,
+  detections: [],
+  role: 'sticker',
+  results: [],
+  mainResult: null,
+  tabResult: null,
+  manualMode: false,
+  manualBox: null,
+  mode: 'grid',           // 'grid' | 'detect'
+  gridCols: 4,
+  gridRows: 4,
+  gridVLines: [],         // x positions of vertical dividers (image coords)
+  gridHLines: [],         // y positions of horizontal dividers (image coords)
+};
+
+const SIZE_TARGETS = {
+  sticker: { maxEdge: 370, fixed: false },
+  main:    { w: 240, h: 240, fixed: true },
+  tab:     { w: 96,  h: 74,  fixed: true },
+};
+
+const $ = id => document.getElementById(id);
+
+function toast(msg, err = false) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (err ? ' err' : '');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.className = 'toast', 2600);
+}
+
+const dropzone = $('dropzone');
+const fileInput = $('fileInput');
+
+dropzone.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', e => {
+  if (e.target.files[0]) handleFile(e.target.files[0]);
+});
+['dragenter','dragover'].forEach(ev => dropzone.addEventListener(ev, e => {
+  e.preventDefault(); dropzone.classList.add('drag');
+}));
+['dragleave','drop'].forEach(ev => dropzone.addEventListener(ev, e => {
+  e.preventDefault(); dropzone.classList.remove('drag');
+}));
+dropzone.addEventListener('drop', e => {
+  if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+});
+
+async function handleFile(file) {
+  if (!file.type.startsWith('image/')) { toast('不是有效的圖片檔', true); return; }
+  state.fileName = file.name;
+  try {
+    state.img = await loadImage(file);
+    state.imgW = state.img.naturalWidth;
+    state.imgH = state.img.naturalHeight;
+    $('canvasWrap').classList.add('active');
+    renderImage();
+    detectBgColor();
+    if (state.mode === 'grid') {
+      generateGrid();
+      toast(`已載入 · 套用 ${state.gridCols}×${state.gridRows} 網格`);
+    } else {
+      runDetection();
+      toast(`已載入 · 偵測到 ${state.detections.length} 張貼圖`);
+    }
+  } catch (e) {
+    console.error(e);
+    toast('圖片載入失敗', true);
+  }
+}
+
+function loadImage(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => {
+      const img = new Image();
+      img.onload = () => res(img);
+      img.onerror = rej;
+      img.src = r.result;
+    };
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+const canvas = $('imgCanvas');
+const ctx = canvas.getContext('2d');
+
+function renderImage() {
+  const container = $('canvasContainer');
+  const maxW = container.clientWidth - 32;
+  const maxH = window.innerHeight * 0.6;
+  state.scale = Math.min(maxW / state.imgW, maxH / state.imgH, 1);
+  canvas.width = Math.round(state.imgW * state.scale);
+  canvas.height = Math.round(state.imgH * state.scale);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(state.img, 0, 0, canvas.width, canvas.height);
+  $('statFile').textContent = state.fileName;
+  $('statDim').textContent = `${state.imgW}×${state.imgH}`;
+}
+
+function detectBgColor() {
+  const c = document.createElement('canvas');
+  c.width = state.imgW; c.height = state.imgH;
+  const cx = c.getContext('2d');
+  cx.drawImage(state.img, 0, 0);
+  const data = cx.getImageData(0, 0, state.imgW, state.imgH).data;
+
+  const samples = [];
+  const sampleEdge = (x, y) => {
+    const i = (y * state.imgW + x) * 4;
+    if (data[i + 3] < 10) samples.push([0,0,0,true]);
+    else samples.push([data[i], data[i+1], data[i+2], false]);
+  };
+  for (let x = 0; x < state.imgW; x += Math.max(1, Math.floor(state.imgW / 50))) {
+    sampleEdge(x, 0);
+    sampleEdge(x, state.imgH - 1);
+  }
+  for (let y = 0; y < state.imgH; y += Math.max(1, Math.floor(state.imgH / 50))) {
+    sampleEdge(0, y);
+    sampleEdge(state.imgW - 1, y);
+  }
+
+  const transCount = samples.filter(s => s[3]).length;
+  if (transCount > samples.length / 2) {
+    state.bgColor = { r: 0, g: 0, b: 0, transparent: true };
+    $('bgSwatch').style.background = 'repeating-conic-gradient(#ddd 0% 25%, #fff 0% 50%) 50% / 6px 6px';
+    return;
+  }
+
+  const opaque = samples.filter(s => !s[3]);
+  opaque.sort((a,b) => a[0] - b[0]);
+  const med = opaque[Math.floor(opaque.length / 2)];
+  state.bgColor = { r: med[0], g: med[1], b: med[2], transparent: false };
+  $('bgSwatch').style.background = `rgb(${med[0]},${med[1]},${med[2]})`;
+}
+
+function buildMask() {
+  const c = document.createElement('canvas');
+  c.width = state.imgW; c.height = state.imgH;
+  const cx = c.getContext('2d');
+  cx.drawImage(state.img, 0, 0);
+  const d = cx.getImageData(0, 0, state.imgW, state.imgH).data;
+
+  const tol = parseInt($('tolerance').value);
+  const mask = new Uint8Array(state.imgW * state.imgH);
+  const bg = state.bgColor;
+
+  if (bg.transparent) {
+    for (let i = 0, j = 0; i < d.length; i += 4, j++) {
+      mask[j] = d[i + 3] > 16 ? 1 : 0;
+    }
+  } else {
+    const tolSq = tol * tol;
+    for (let i = 0, j = 0; i < d.length; i += 4, j++) {
+      if (d[i + 3] < 10) { mask[j] = 0; continue; }
+      const dr = d[i] - bg.r, dg = d[i+1] - bg.g, db = d[i+2] - bg.b;
+      mask[j] = (dr*dr + dg*dg + db*db) > tolSq ? 1 : 0;
+    }
+  }
+  return mask;
+}
+
+function findComponents(mask) {
+  const W = state.imgW, H = state.imgH;
+  const visited = new Uint8Array(W * H);
+  const components = [];
+  const minSize = parseInt($('minSize').value);
+  const minPixels = Math.max(50, minSize * minSize / 4);
+
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      const idx = y * W + x;
+      if (!mask[idx] || visited[idx]) continue;
+      let minX = x, maxX = x, minY = y, maxY = y;
+      let pixelCount = 0;
+      const stack = [idx];
+      visited[idx] = 1;
+      while (stack.length) {
+        const p = stack.pop();
+        const px = p % W, py = (p / W) | 0;
+        pixelCount++;
+        if (px < minX) minX = px;
+        if (px > maxX) maxX = px;
+        if (py < minY) minY = py;
+        if (py > maxY) maxY = py;
+        // 4-connectivity neighbors (with proper x boundary check for left/right)
+        if (px > 0) {
+          const np = p - 1;
+          if (!visited[np] && mask[np]) { visited[np] = 1; stack.push(np); }
+        }
+        if (px < W - 1) {
+          const np = p + 1;
+          if (!visited[np] && mask[np]) { visited[np] = 1; stack.push(np); }
+        }
+        if (py > 0) {
+          const np = p - W;
+          if (!visited[np] && mask[np]) { visited[np] = 1; stack.push(np); }
+        }
+        if (py < H - 1) {
+          const np = p + W;
+          if (!visited[np] && mask[np]) { visited[np] = 1; stack.push(np); }
+        }
+      }
+      const cw = maxX - minX + 1;
+      const ch = maxY - minY + 1;
+      if (pixelCount >= minPixels && cw >= minSize && ch >= minSize) {
+        components.push({ x: minX, y: minY, w: cw, h: ch, pixels: pixelCount });
+      }
+    }
+  }
+  return components;
+}
+
+function mergeBoxes(boxes, gap) {
+  let changed = true;
+  let arr = boxes.map(b => ({...b}));
+  while (changed) {
+    changed = false;
+    outer: for (let i = 0; i < arr.length; i++) {
+      for (let j = i + 1; j < arr.length; j++) {
+        const a = arr[i], b = arr[j];
+        const ax1 = a.x - gap, ay1 = a.y - gap, ax2 = a.x + a.w + gap, ay2 = a.y + a.h + gap;
+        const bx1 = b.x, by1 = b.y, bx2 = b.x + b.w, by2 = b.y + b.h;
+        if (ax1 < bx2 && ax2 > bx1 && ay1 < by2 && ay2 > by1) {
+          const nx = Math.min(a.x, b.x);
+          const ny = Math.min(a.y, b.y);
+          const nx2 = Math.max(a.x + a.w, b.x + b.w);
+          const ny2 = Math.max(a.y + a.h, b.y + b.h);
+          arr[i] = { x: nx, y: ny, w: nx2 - nx, h: ny2 - ny, pixels: a.pixels + b.pixels };
+          arr.splice(j, 1);
+          changed = true;
+          break outer;
+        }
+      }
+    }
+  }
+  return arr;
+}
+
+function runDetection() {
+  if (!state.img) return;
+  const mask = buildMask();
+  let comps = findComponents(mask);
+  const minSize = parseInt($('minSize').value);
+  const mergeGap = Math.max(4, minSize / 4);
+  comps = mergeBoxes(comps, mergeGap);
+
+  const pad = parseInt($('padding').value);
+  comps = comps.map(c => {
+    const nx = Math.max(0, c.x - pad);
+    const ny = Math.max(0, c.y - pad);
+    return {
+      x: nx, y: ny,
+      w: Math.min(state.imgW - nx, c.w + (c.x - nx) + pad),
+      h: Math.min(state.imgH - ny, c.h + (c.y - ny) + pad),
+      selected: true,
+      excluded: false,
+    };
+  });
+
+  if (comps.length) {
+    const avgH = comps.reduce((s, c) => s + c.h, 0) / comps.length;
+    const rowThr = avgH * 0.5;
+    comps.sort((a, b) => {
+      if (Math.abs(a.y - b.y) > rowThr) return a.y - b.y;
+      return a.x - b.x;
+    });
+  }
+
+  state.detections = comps;
+  $('statCount').textContent = comps.length;
+  renderDetections();
+  updateSelCount();
+}
+
+/* ─────────────────────────────────────────────
+   GRID MODE: equal split into cols × rows
+   Divider lines can be dragged to adjust
+   ───────────────────────────────────────────── */
+function generateGrid() {
+  state.gridCols = Math.max(1, Math.min(20, parseInt($('gridCols').value) || 4));
+  state.gridRows = Math.max(1, Math.min(20, parseInt($('gridRows').value) || 4));
+  // initial divider positions: equal spacing
+  state.gridVLines = [];
+  for (let i = 1; i < state.gridCols; i++) {
+    state.gridVLines.push((state.imgW * i) / state.gridCols);
+  }
+  state.gridHLines = [];
+  for (let i = 1; i < state.gridRows; i++) {
+    state.gridHLines.push((state.imgH * i) / state.gridRows);
+  }
+  buildGridDetections();
+}
+
+function buildGridDetections() {
+  // build cell boundaries from divider positions
+  const xs = [0, ...state.gridVLines.slice().sort((a,b)=>a-b), state.imgW];
+  const ys = [0, ...state.gridHLines.slice().sort((a,b)=>a-b), state.imgH];
+  const inset = Math.max(0, parseInt($('gridInset').value) || 0);
+  const boxes = [];
+  for (let r = 0; r < state.gridRows; r++) {
+    for (let c = 0; c < state.gridCols; c++) {
+      const x = xs[c] + inset;
+      const y = ys[r] + inset;
+      const w = (xs[c+1] - xs[c]) - inset * 2;
+      const h = (ys[r+1] - ys[r]) - inset * 2;
+      if (w > 5 && h > 5) {
+        boxes.push({
+          x, y, w, h,
+          selected: true, excluded: false, editing: false,
+        });
+      }
+    }
+  }
+  state.detections = boxes;
+  $('statCount').textContent = boxes.length;
+  renderDetections();
+  renderGridLines();
+  updateSelCount();
+}
+
+function renderGridLines() {
+  // remove old lines
+  document.querySelectorAll('.grid-line').forEach(l => l.remove());
+  if (state.mode !== 'grid' || !state.img) return;
+  const container = $('canvasContainer');
+  const offX = canvas.offsetLeft;
+  const offY = canvas.offsetTop;
+  const s = state.scale;
+
+  state.gridVLines.forEach((x, i) => {
+    const line = document.createElement('div');
+    line.className = 'grid-line vertical';
+    line.style.left = (offX + x * s) + 'px';
+    line.style.top  = offY + 'px';
+    line.style.height = (state.imgH * s) + 'px';
+    line.dataset.kind = 'v';
+    line.dataset.idx = i;
+    const handle = document.createElement('div');
+    handle.className = 'grid-line-handle';
+    line.appendChild(handle);
+    attachGridLineDrag(line);
+    container.appendChild(line);
+  });
+
+  state.gridHLines.forEach((y, i) => {
+    const line = document.createElement('div');
+    line.className = 'grid-line horizontal';
+    line.style.top  = (offY + y * s) + 'px';
+    line.style.left = offX + 'px';
+    line.style.width = (state.imgW * s) + 'px';
+    line.dataset.kind = 'h';
+    line.dataset.idx = i;
+    const handle = document.createElement('div');
+    handle.className = 'grid-line-handle';
+    line.appendChild(handle);
+    attachGridLineDrag(line);
+    container.appendChild(line);
+  });
+}
+
+function attachGridLineDrag(line) {
+  let startMouse = 0;
+  let startVal = 0;
+  let kind, idx;
+
+  function onMove(e) {
+    const delta = (kind === 'v' ? e.clientX - startMouse : e.clientY - startMouse) / state.scale;
+    let v = startVal + delta;
+    // clamp between neighbors
+    const arr = kind === 'v' ? state.gridVLines : state.gridHLines;
+    const limit = kind === 'v' ? state.imgW : state.imgH;
+    const sorted = arr.slice().sort((a,b)=>a-b);
+    const currVal = arr[idx];
+    const sortedIdx = sorted.indexOf(currVal);
+    const minVal = sortedIdx === 0 ? 10 : sorted[sortedIdx - 1] + 10;
+    const maxVal = sortedIdx === sorted.length - 1 ? limit - 10 : sorted[sortedIdx + 1] - 10;
+    v = Math.max(minVal, Math.min(maxVal, v));
+    arr[idx] = v;
+    // live update DOM
+    if (kind === 'v') {
+      line.style.left = (canvas.offsetLeft + v * state.scale) + 'px';
+    } else {
+      line.style.top = (canvas.offsetTop + v * state.scale) + 'px';
+    }
+  }
+  function onUp() {
+    line.classList.remove('dragging');
+    window.removeEventListener('mousemove', onMove);
+    window.removeEventListener('mouseup', onUp);
+    buildGridDetections();
+  }
+  line.addEventListener('mousedown', e => {
+    e.stopPropagation();
+    e.preventDefault();
+    kind = line.dataset.kind;
+    idx = parseInt(line.dataset.idx);
+    startMouse = (kind === 'v' ? e.clientX : e.clientY);
+    startVal = (kind === 'v' ? state.gridVLines : state.gridHLines)[idx];
+    line.classList.add('dragging');
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  });
+}
+
+function renderDetections() {
+  document.querySelectorAll('.det-box').forEach(b => b.remove());
+  const container = $('canvasContainer');
+  const offX = canvas.offsetLeft;
+  const offY = canvas.offsetTop;
+  const s = state.scale;
+
+  state.detections.forEach((d, i) => {
+    const el = document.createElement('div');
+    el.className = 'det-box' + (d.excluded ? ' excluded' : (d.selected ? ' selected' : ''));
+    if (d.editing) el.classList.add('editing');
+    el.style.left = (offX + d.x * s) + 'px';
+    el.style.top  = (offY + d.y * s) + 'px';
+    el.style.width  = (d.w * s) + 'px';
+    el.style.height = (d.h * s) + 'px';
+    el.dataset.idx = i;
+
+    const lbl = document.createElement('div');
+    lbl.className = 'det-box-label';
+    lbl.textContent = (i + 1).toString().padStart(2, '0');
+    el.appendChild(lbl);
+
+    // close button
+    const close = document.createElement('button');
+    close.className = 'det-box-close';
+    close.textContent = '×';
+    close.title = '刪除這個框';
+    close.addEventListener('click', e => {
+      e.stopPropagation();
+      state.detections.splice(i, 1);
+      $('statCount').textContent = state.detections.length;
+      renderDetections();
+      updateSelCount();
+    });
+    el.appendChild(close);
+
+    // 4 resize handles
+    ['nw','ne','sw','se'].forEach(pos => {
+      const h = document.createElement('div');
+      h.className = 'det-handle ' + pos;
+      h.dataset.pos = pos;
+      el.appendChild(h);
+    });
+
+    attachDetBoxInteraction(el, d, i);
+    container.appendChild(el);
+  });
+  renderGridLines();
+}
+
+// global last-click tracker for double-click detection (survives DOM rebuilds)
+let _lastClickInfo = { idx: -1, time: 0 };
+
+// click vs drag vs double-click handling
+function attachDetBoxInteraction(el, d, idx) {
+  let downAt = 0;
+  let downPos = null;
+  let dragging = false;
+  let resizeHandle = null;
+  let startBox = null;
+  let dropTarget = null;
+
+  function onWindowMove(e) {
+    if (!downPos) return;
+    const moved = Math.abs(e.clientX - downPos.x) + Math.abs(e.clientY - downPos.y);
+    if (!dragging && !resizeHandle && moved > 4) {
+      dragging = true;
+      el.classList.add('merging');
+    }
+
+    const dx = (e.clientX - downPos.x) / state.scale;
+    const dy = (e.clientY - downPos.y) / state.scale;
+
+    if (resizeHandle) {
+      const b = { ...startBox };
+      if (resizeHandle.includes('w')) { b.x = startBox.x + dx; b.w = startBox.w - dx; }
+      if (resizeHandle.includes('e')) { b.w = startBox.w + dx; }
+      if (resizeHandle.includes('n')) { b.y = startBox.y + dy; b.h = startBox.h - dy; }
+      if (resizeHandle.includes('s')) { b.h = startBox.h + dy; }
+      if (b.w < 10) b.w = 10;
+      if (b.h < 10) b.h = 10;
+      b.x = Math.max(0, b.x); b.y = Math.max(0, b.y);
+      if (b.x + b.w > state.imgW) b.w = state.imgW - b.x;
+      if (b.y + b.h > state.imgH) b.h = state.imgH - b.y;
+      Object.assign(d, b);
+      // re-position only this element to avoid re-binding all events mid-drag
+      const s = state.scale;
+      el.style.left = (canvas.offsetLeft + d.x * s) + 'px';
+      el.style.top  = (canvas.offsetTop + d.y * s) + 'px';
+      el.style.width  = (d.w * s) + 'px';
+      el.style.height = (d.h * s) + 'px';
+      return;
+    }
+
+    if (dragging) {
+      d.x = Math.max(0, Math.min(state.imgW - d.w, startBox.x + dx));
+      d.y = Math.max(0, Math.min(state.imgH - d.h, startBox.y + dy));
+      const s = state.scale;
+      el.style.left = (canvas.offsetLeft + d.x * s) + 'px';
+      el.style.top  = (canvas.offsetTop + d.y * s) + 'px';
+
+      // detect drop target by center point
+      const cx = d.x + d.w / 2, cy = d.y + d.h / 2;
+      dropTarget = null;
+      state.detections.forEach((other, oi) => {
+        if (oi === idx) return;
+        if (cx >= other.x && cx <= other.x + other.w &&
+            cy >= other.y && cy <= other.y + other.h) {
+          dropTarget = oi;
+        }
+      });
+      // visual: highlight drop target only
+      document.querySelectorAll('.det-box').forEach(b => b.classList.remove('drop-target'));
+      if (dropTarget !== null) {
+        const targetEl = document.querySelector(`.det-box[data-idx="${dropTarget}"]`);
+        if (targetEl) targetEl.classList.add('drop-target');
+      }
+    }
+  }
+
+  function onWindowUp(e) {
+    window.removeEventListener('mousemove', onWindowMove);
+    window.removeEventListener('mouseup', onWindowUp);
+    if (!downPos) return;
+
+    const elapsed = Date.now() - downAt;
+    document.querySelectorAll('.det-box').forEach(b => b.classList.remove('drop-target', 'merging'));
+
+    if (resizeHandle) {
+      resizeHandle = null;
+      downPos = null;
+      startBox = null;
+      renderDetections();
+      return;
+    }
+
+    if (dragging) {
+      if (dropTarget !== null) {
+        const a = state.detections[idx];
+        const b = state.detections[dropTarget];
+        const nx = Math.min(a.x, b.x);
+        const ny = Math.min(a.y, b.y);
+        const nx2 = Math.max(a.x + a.w, b.x + b.w);
+        const ny2 = Math.max(a.y + a.h, b.y + b.h);
+        const merged = {
+          x: nx, y: ny,
+          w: nx2 - nx, h: ny2 - ny,
+          selected: true, excluded: false, editing: false,
+        };
+        const lower = Math.min(idx, dropTarget);
+        const higher = Math.max(idx, dropTarget);
+        state.detections.splice(higher, 1);
+        state.detections.splice(lower, 1);
+        state.detections.splice(lower, 0, merged);
+        $('statCount').textContent = state.detections.length;
+        toast('✓ 已合併兩個框');
+      }
+      dragging = false;
+      dropTarget = null;
+      downPos = null;
+      startBox = null;
+      renderDetections();
+      updateSelCount();
+      return;
+    }
+
+    // click (no drag, no resize)
+    if (elapsed < 350) {
+      // check for double-click using global tracker (survives DOM rebuilds)
+      const now = Date.now();
+      const isDouble = (_lastClickInfo.idx === idx) && (now - _lastClickInfo.time < 400);
+      _lastClickInfo = { idx, time: now };
+
+      if (isDouble) {
+        // double-click → enter edit mode
+        state.detections.forEach(x => { if (x !== d) x.editing = false; });
+        d.editing = true;
+        d.selected = true;
+        d.excluded = false;
+        // reset tracker so triple-click doesn't immediately exit
+        _lastClickInfo = { idx: -1, time: 0 };
+        toast('進入編輯模式 · 拖角點調大小 · × 刪除');
+      } else {
+        // single click → toggle select / exclude (or exit edit mode if editing)
+        if (d.editing) {
+          d.editing = false;
+        } else {
+          if (d.excluded) { d.excluded = false; d.selected = true; }
+          else { d.excluded = true; d.selected = false; }
+        }
+      }
+      renderDetections();
+      updateSelCount();
+    }
+    downPos = null;
+    startBox = null;
+  }
+
+  el.addEventListener('mousedown', e => {
+    if (state.manualMode) return;
+    if (e.target.classList.contains('det-box-close')) return;
+    e.stopPropagation();
+
+    if (e.target.classList.contains('det-handle')) {
+      resizeHandle = e.target.dataset.pos;
+      startBox = { ...d };
+      downPos = { x: e.clientX, y: e.clientY };
+      downAt = Date.now();
+      window.addEventListener('mousemove', onWindowMove);
+      window.addEventListener('mouseup', onWindowUp);
+      return;
+    }
+
+    downAt = Date.now();
+    downPos = { x: e.clientX, y: e.clientY };
+    startBox = { ...d };
+    dragging = false;
+    window.addEventListener('mousemove', onWindowMove);
+    window.addEventListener('mouseup', onWindowUp);
+  });
+}
+
+function boxesOverlap(a, b, gap) {
+  return a.x - gap < b.x + b.w && a.x + a.w + gap > b.x &&
+         a.y - gap < b.y + b.h && a.y + a.h + gap > b.y;
+}
+
+function updateSelCount() {
+  const sel = state.detections.filter(d => d.selected).length;
+  $('statSel').textContent = sel;
+}
+
+$('btnRedetect').addEventListener('click', () => {
+  if (!state.img) return;
+  if (state.mode === 'grid') {
+    generateGrid();
+    toast(`重新套用 ${state.gridCols}×${state.gridRows} 網格`);
+  } else {
+    detectBgColor();
+    runDetection();
+    toast(`重新偵測 · ${state.detections.length} 張`);
+  }
+});
+$('btnSelectAll').addEventListener('click', () => {
+  state.detections.forEach(d => { d.selected = true; d.excluded = false; });
+  renderDetections(); updateSelCount();
+});
+$('btnSelectNone').addEventListener('click', () => {
+  state.detections.forEach(d => { d.selected = false; d.excluded = true; });
+  renderDetections(); updateSelCount();
+});
+
+$('btnAddBox').addEventListener('click', () => {
+  if (!state.img) { toast('請先上傳圖片', true); return; }
+  const w = Math.min(150, state.imgW / 4);
+  const h = Math.min(150, state.imgH / 4);
+  const newBox = {
+    x: (state.imgW - w) / 2,
+    y: (state.imgH - h) / 2,
+    w, h,
+    selected: true, excluded: false, editing: true,
+  };
+  state.detections.forEach(d => d.editing = false);
+  state.detections.push(newBox);
+  $('statCount').textContent = state.detections.length;
+  renderDetections();
+  updateSelCount();
+  toast('已新增一個框 · 拖移或拉角調整');
+});
+
+// MODE switching
+document.querySelectorAll('#modeTabs .role-tab').forEach(t => {
+  t.addEventListener('click', () => {
+    const mode = t.dataset.mode;
+    if (mode === state.mode) return;
+    state.mode = mode;
+    document.querySelectorAll('#modeTabs .role-tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    // toggle settings visibility
+    $('gridSettings').style.display = mode === 'grid' ? 'flex' : 'none';
+    $('detectSettings').style.display = mode === 'detect' ? 'flex' : 'none';
+    // update mode banner
+    if (mode === 'grid') {
+      $('modeBanner').innerHTML = '<span>⊞ <b>網格模式</b>：拖藍線可微調分隔位置 · 框可雙擊編輯</span>';
+    } else {
+      $('modeBanner').innerHTML = '<span>⚉ <b>自動偵測</b>：點框=排除 · 雙擊=編輯 · 拖框到另一框上=合併</span>';
+    }
+    if (state.img) {
+      if (mode === 'grid') generateGrid();
+      else { detectBgColor(); runDetection(); }
+      toast(mode === 'grid' ? '切換到網格模式' : '切換到自動偵測模式');
+    }
+  });
+});
+
+// Grid input changes
+['gridCols', 'gridRows'].forEach(id => {
+  $(id).addEventListener('change', () => {
+    if (state.img && state.mode === 'grid') generateGrid();
+  });
+});
+$('gridInset').addEventListener('change', () => {
+  if (state.img && state.mode === 'grid') buildGridDetections();
+});
+$('btnResetGrid').addEventListener('click', () => {
+  if (state.img && state.mode === 'grid') {
+    generateGrid();
+    toast('網格已重置');
+  }
+});
+
+['tolerance', 'minSize', 'padding'].forEach(id => {
+  $(id).addEventListener('change', () => {
+    if (state.img && state.mode === 'detect') runDetection();
+  });
+});
+$('tolerance').addEventListener('input', e => $('tolVal').textContent = e.target.value);
+
+$('chkUniformCanvas').addEventListener('change', e => {
+  const on = e.target.checked;
+  $('uniformSizeRow').style.display = on ? 'flex' : 'none';
+  $('uniformHint').style.display = on ? 'block' : 'none';
+});
+
+const cropOverlay = $('cropOverlay');
+$('btnManualMode').addEventListener('click', () => {
+  state.manualMode = !state.manualMode;
+  if (state.manualMode) {
+    $('btnManualMode').textContent = '✕ 退出手動模式';
+    $('btnManualMode').classList.remove('blue');
+    $('btnManualMode').classList.add('danger');
+    $('modeBanner').className = 'mode-banner green';
+    $('modeBanner').innerHTML = '<span>✂ <b>手動模式</b>：在圖上拖曳畫框 → 點下方「加入手動裁切」</span>';
+    $('btnApplySelected').textContent = '✦ 加入手動裁切';
+    document.querySelectorAll('.det-box').forEach(b => b.style.display = 'none');
+  } else {
+    $('btnManualMode').textContent = '✂ 切換手動裁切';
+    $('btnManualMode').classList.add('blue');
+    $('btnManualMode').classList.remove('danger');
+    $('modeBanner').className = 'mode-banner';
+    $('modeBanner').innerHTML = '<span>📍 <b>偵測模式</b>：點藍框 = 切換選取 / 排除 · 預設全選</span>';
+    $('btnApplySelected').textContent = '✦ 加入所選貼圖（套用目前角色）';
+    state.manualBox = null;
+    cropOverlay.style.display = 'none';
+    document.querySelectorAll('.det-box').forEach(b => b.style.display = '');
+  }
+});
+
+let dragMode = null;
+let dragStart = null;
+let originalBox = null;
+
+cropOverlay.addEventListener('mousedown', e => {
+  e.stopPropagation();
+  const cls = e.target.classList;
+  if (cls.contains('crop-handle')) {
+    dragMode = ['nw','ne','sw','se'].find(x => cls.contains(x));
+  } else {
+    dragMode = 'move';
+  }
+  dragStart = { x: e.clientX, y: e.clientY };
+  originalBox = { ...state.manualBox };
+});
+
+$('canvasContainer').addEventListener('mousedown', e => {
+  if (!state.manualMode) return;
+  if (e.target.tagName === 'CANVAS') {
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / state.scale;
+    const y = (e.clientY - rect.top) / state.scale;
+    state.manualBox = { x, y, w: 1, h: 1 };
+    dragMode = 'new';
+    dragStart = { x: e.clientX, y: e.clientY };
+    originalBox = { x, y, w: 0, h: 0 };
+    drawManualCrop();
+  }
+});
+
+window.addEventListener('mousemove', e => {
+  if (!dragMode) return;
+  const dx = (e.clientX - dragStart.x) / state.scale;
+  const dy = (e.clientY - dragStart.y) / state.scale;
+  const b = { ...originalBox };
+  if (dragMode === 'move') {
+    b.x = Math.max(0, Math.min(state.imgW - b.w, originalBox.x + dx));
+    b.y = Math.max(0, Math.min(state.imgH - b.h, originalBox.y + dy));
+  } else if (dragMode === 'new') {
+    b.x = Math.min(originalBox.x, originalBox.x + dx);
+    b.y = Math.min(originalBox.y, originalBox.y + dy);
+    b.w = Math.abs(dx);
+    b.h = Math.abs(dy);
+    b.x = Math.max(0, b.x); b.y = Math.max(0, b.y);
+    if (b.x + b.w > state.imgW) b.w = state.imgW - b.x;
+    if (b.y + b.h > state.imgH) b.h = state.imgH - b.y;
+  } else {
+    if (dragMode.includes('w')) { b.x = originalBox.x + dx; b.w = originalBox.w - dx; }
+    if (dragMode.includes('e')) { b.w = originalBox.w + dx; }
+    if (dragMode.includes('n')) { b.y = originalBox.y + dy; b.h = originalBox.h - dy; }
+    if (dragMode.includes('s')) { b.h = originalBox.h + dy; }
+    if (b.w < 5) b.w = 5;
+    if (b.h < 5) b.h = 5;
+    b.x = Math.max(0, b.x); b.y = Math.max(0, b.y);
+    if (b.x + b.w > state.imgW) b.w = state.imgW - b.x;
+    if (b.y + b.h > state.imgH) b.h = state.imgH - b.y;
+  }
+  state.manualBox = b;
+  drawManualCrop();
+});
+
+window.addEventListener('mouseup', () => {
+  dragMode = null;
+  dragStart = null;
+  originalBox = null;
+});
+
+function drawManualCrop() {
+  if (!state.manualBox) { cropOverlay.style.display = 'none'; return; }
+  const offX = canvas.offsetLeft;
+  const offY = canvas.offsetTop;
+  const s = state.scale;
+  const b = state.manualBox;
+  cropOverlay.style.display = 'block';
+  cropOverlay.style.left = (offX + b.x * s) + 'px';
+  cropOverlay.style.top  = (offY + b.y * s) + 'px';
+  cropOverlay.style.width  = (b.w * s) + 'px';
+  cropOverlay.style.height = (b.h * s) + 'px';
+}
+
+window.addEventListener('resize', () => {
+  if (state.img) {
+    renderImage();
+    renderDetections();
+    if (state.manualBox) drawManualCrop();
+  }
+});
+
+$('btnApplySelected').addEventListener('click', async () => {
+  if (state.manualMode) {
+    if (!state.manualBox || state.manualBox.w < 10) {
+      toast('請先在圖上拖曳畫出裁切框', true); return;
+    }
+    await processOne(state.manualBox);
+    state.manualBox = null;
+    cropOverlay.style.display = 'none';
+    toast(`已加入 1 張 · 角色：${roleName(state.role)}`);
+    return;
+  }
+  const sel = state.detections.filter(d => d.selected);
+  if (!sel.length) { toast('沒有選取任何貼圖', true); return; }
+  for (const d of sel) {
+    await processOne(d);
+  }
+  toast(`已加入 ${sel.length} 張 · 角色：${roleName(state.role)}`);
+});
+
+function roleName(r) {
+  return r === 'sticker' ? '貼圖' : r === 'main' ? '主頁圖' : '標籤圖';
+}
+
+async function processOne(box) {
+  let work = document.createElement('canvas');
+  work.width = Math.round(box.w);
+  work.height = Math.round(box.h);
+  work.getContext('2d').drawImage(state.img, box.x, box.y, box.w, box.h, 0, 0, work.width, work.height);
+
+  if ($('chkRmbg').checked && !state.bgColor.transparent) {
+    work = removeBackground(work);
+  }
+  work = trimTransparent(work);
+
+  const role = state.role;
+  const target = SIZE_TARGETS[role];
+  let outCanvas;
+  if (target.fixed) {
+    // main / tab: fixed size, contain
+    outCanvas = fitInto(work, target.w, target.h);
+  } else {
+    // sticker
+    const maxEdge = parseInt($('maxEdge').value) || 370;
+    const scaled = scaleAndEvenize(work, maxEdge);
+    if ($('chkUniformCanvas').checked) {
+      // pad to uniform canvas WITHOUT scaling content
+      let cw = parseInt($('canvasW').value) || 370;
+      let ch = parseInt($('canvasH').value) || 320;
+      cw = Math.max(80, Math.min(370, cw));
+      ch = Math.max(80, Math.min(320, ch));
+      if (cw % 2 !== 0) cw -= 1;
+      if (ch % 2 !== 0) ch -= 1;
+      // ensure content fits — if too big, downscale just enough to fit
+      let contentW = scaled.width, contentH = scaled.height;
+      if (contentW > cw || contentH > ch) {
+        const k = Math.min(cw / contentW, ch / contentH);
+        contentW = Math.round(contentW * k);
+        contentH = Math.round(contentH * k);
+        if (contentW % 2 !== 0) contentW -= 1;
+        if (contentH % 2 !== 0) contentH -= 1;
+      }
+      outCanvas = padToCanvas(scaled, cw, ch, contentW, contentH);
+    } else {
+      outCanvas = scaled;
+    }
+  }
+
+  const dataURL = outCanvas.toDataURL('image/png');
+  const w = outCanvas.width, h = outCanvas.height;
+
+  if (role === 'main') state.mainResult = { role, dataURL, w, h };
+  else if (role === 'tab') state.tabResult = { role, dataURL, w, h };
+  else state.results.push({ id: Date.now() + Math.random(), role, dataURL, w, h });
+  renderPreviews();
+}
+
+// pad content into a fixed transparent canvas (centered), preserve original size if possible
+function padToCanvas(src, canvasW, canvasH, contentW, contentH) {
+  const out = document.createElement('canvas');
+  out.width = canvasW;
+  out.height = canvasH;
+  const cx = out.getContext('2d');
+  cx.imageSmoothingQuality = 'high';
+  // src is already at the desired pixel size (no scaling) — just center
+  // if contentW/contentH differ from src.width/height it means we had to downscale
+  const x = Math.round((canvasW - contentW) / 2);
+  const y = Math.round((canvasH - contentH) / 2);
+  if (contentW === src.width && contentH === src.height) {
+    cx.drawImage(src, x, y);
+  } else {
+    cx.drawImage(src, 0, 0, src.width, src.height, x, y, contentW, contentH);
+  }
+  return out;
+}
+
+function removeBackground(srcCanvas) {
+  const tol = parseInt($('tolerance').value);
+  const bg = state.bgColor;
+  const cx = srcCanvas.getContext('2d');
+  const imgData = cx.getImageData(0, 0, srcCanvas.width, srcCanvas.height);
+  const d = imgData.data;
+  const tolSq = tol * tol;
+  const fadeSq = (tol + 24) * (tol + 24);
+  for (let i = 0; i < d.length; i += 4) {
+    if (d[i + 3] < 10) continue;
+    const dr = d[i] - bg.r, dg = d[i+1] - bg.g, db = d[i+2] - bg.b;
+    const distSq = dr*dr + dg*dg + db*db;
+    if (distSq <= tolSq) {
+      d[i+3] = 0;
+    } else if (distSq <= fadeSq) {
+      const t = (Math.sqrt(distSq) - tol) / 24;
+      d[i+3] = Math.round(d[i+3] * t);
+    }
+  }
+  cx.putImageData(imgData, 0, 0);
+  return srcCanvas;
+}
+
+function trimTransparent(canvas) {
+  const cx = canvas.getContext('2d');
+  const { width: w, height: h } = canvas;
+  const d = cx.getImageData(0, 0, w, h).data;
+  let minX = w, minY = h, maxX = -1, maxY = -1;
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      if (d[(y*w + x)*4 + 3] > 10) {
+        if (x < minX) minX = x;
+        if (y < minY) minY = y;
+        if (x > maxX) maxX = x;
+        if (y > maxY) maxY = y;
+      }
+    }
+  }
+  if (maxX < 0) return canvas;
+  const cw = maxX - minX + 1, ch = maxY - minY + 1;
+  const out = document.createElement('canvas');
+  out.width = cw; out.height = ch;
+  out.getContext('2d').drawImage(canvas, minX, minY, cw, ch, 0, 0, cw, ch);
+  return out;
+}
+
+function fitInto(src, targetW, targetH) {
+  const out = document.createElement('canvas');
+  out.width = targetW; out.height = targetH;
+  const cx = out.getContext('2d');
+  cx.imageSmoothingQuality = 'high';
+  const scale = Math.min(targetW / src.width, targetH / src.height);
+  const w = src.width * scale;
+  const h = src.height * scale;
+  const x = (targetW - w) / 2;
+  const y = (targetH - h) / 2;
+  cx.drawImage(src, x, y, w, h);
+  return out;
+}
+
+function scaleAndEvenize(src, maxEdge) {
+  const scale = maxEdge / Math.max(src.width, src.height);
+  let w = Math.round(src.width * scale);
+  let h = Math.round(src.height * scale);
+  if (h > 320) { const k = 320 / h; w = Math.round(w * k); h = 320; }
+  if (w > 370) { const k = 370 / w; w = 370; h = Math.round(h * k); }
+  if (w % 2 !== 0) w += (w < 370 ? 1 : -1);
+  if (h % 2 !== 0) h += (h < 320 ? 1 : -1);
+  if (w < 80) w = 80;
+  if (h < 80) h = 80;
+  const out = document.createElement('canvas');
+  out.width = w; out.height = h;
+  const cx = out.getContext('2d');
+  cx.imageSmoothingQuality = 'high';
+  cx.drawImage(src, 0, 0, w, h);
+  return out;
+}
+
+function renderPreviews() {
+  const area = $('previewArea');
+  const total = state.results.length + (state.mainResult ? 1 : 0) + (state.tabResult ? 1 : 0);
+  $('cntBadge').textContent = total;
+  $('btnDownload').disabled = total === 0;
+  if (total === 0) {
+    area.className = 'preview-empty';
+    area.innerHTML = '尚未加入任何貼圖';
+    return;
+  }
+  area.className = 'preview-grid';
+  let html = '';
+  if (state.mainResult) html += previewCard(state.mainResult, 'main.png', true, 'MAIN', 'main');
+  if (state.tabResult)  html += previewCard(state.tabResult, 'tab.png', true, 'TAB', 'tab');
+  state.results.forEach((r, i) => {
+    const n = String(i + 1).padStart(2, '0');
+    html += previewCard(r, `${n}.png`, false, n, r.id);
+  });
+  area.innerHTML = html;
+  area.querySelectorAll('.del').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const id = btn.dataset.id;
+      if (id === 'main') state.mainResult = null;
+      else if (id === 'tab') state.tabResult = null;
+      else state.results = state.results.filter(r => String(r.id) !== id);
+      renderPreviews();
+    });
+  });
+}
+
+function previewCard(r, filename, special, label, id) {
+  return `
+    <div class="preview-card${special ? ' special' : ''}">
+      <div class="role-tag">${label}</div>
+      <button class="del" data-id="${id}" title="刪除">×</button>
+      <div class="thumb"><img src="${r.dataURL}"></div>
+      <div class="label"><b>${filename}</b><br>${r.w}×${r.h}</div>
+    </div>
+  `;
+}
+
+document.querySelectorAll('.role-tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.role-tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    state.role = t.dataset.role;
+    toast(`輸出角色：${t.textContent}`);
+  });
+});
+
+$('btnClearAll').addEventListener('click', () => {
+  if (!confirm('確定要清空所有裁切結果？')) return;
+  state.results = []; state.mainResult = null; state.tabResult = null;
+  renderPreviews();
+  toast('已清空所有結果');
+});
+
+$('btnDownload').addEventListener('click', async () => {
+  const zip = new JSZip();
+  if (state.mainResult) zip.file('main.png', dataURLToBlob(state.mainResult.dataURL));
+  if (state.tabResult)  zip.file('tab.png',  dataURLToBlob(state.tabResult.dataURL));
+  state.results.forEach((r, i) => {
+    const n = String(i + 1).padStart(2, '0');
+    zip.file(`${n}.png`, dataURLToBlob(r.dataURL));
+  });
+  const blob = await zip.generateAsync({ type: 'blob' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `line-stickers-${Date.now()}.zip`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('ZIP 已下載 · 解壓即可上傳到 LINE Creators Market');
+});
+
+function dataURLToBlob(dataURL) {
+  const [meta, b64] = dataURL.split(',');
+  const mime = meta.match(/:(.*?);/)[1];
+  const bin = atob(b64);
+  const arr = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  return new Blob([arr], { type: mime });
+}
+
+renderPreviews();
+// init: hide detect settings since default mode is grid
+$('detectSettings').style.display = 'none';
+</script>
+</body>
+</html>
