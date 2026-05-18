@@ -3,77 +3,144 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LINE 貼圖工具・自動偵測 × 去背 × 三尺寸輸出｜歪腦袋小工具</title>
-<meta name="description" content="LINE 貼圖製作工具：上傳一張圖，自動去背、智慧偵測主體、切成 LINE 貼圖官方三尺寸（370×320、240×240、96×74）並打包下載。免登入、純前端、隱私安全。">
-<meta name="keywords" content="LINE 貼圖分割, LINE 貼圖去背, LINE 貼圖製作, LINE 貼圖尺寸, 貼圖切尺寸, 線上去背工具, LINE 貼圖打包">
+<title>LINE 貼圖工具・自動偵測 × 去背 × 三尺寸輸出</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=JetBrains+Mono:wght@400;600&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Dancing+Script:wght@400;500;600;700&family=Kaisei+Decol:wght@400;500;700&family=Zen+Maru+Gothic:wght@400;500;700;900&family=Noto+Sans+TC:wght@400;500;700;900&family=Liu+Jian+Mao+Cao&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
   :root {
-    --bg: #FFE4F0;
+    /* 歪腦袋色票（從 wonky-brain 直接抓） */
+    --bg: #FFF5FA;
     --bg-paper: #FFFFFF;
     --ink: #4A3A5C;
     --ink-soft: #8B7BA0;
-    --accent: #00b900;
-    --accent-deep: #008c00;
-    --warn: #d64a2a;
-    --line: #E8D4F0;
-    --highlight: #ffd60a;
-    --blue: #2563eb;
-    --shadow: 0 2px 0 var(--ink), 4px 6px 0 rgba(74,58,92,0.12);
-    --shadow-sm: 0 1px 0 var(--ink), 2px 3px 0 rgba(74,58,92,0.1);
+    --pink: #FF8FAF;
+    --pink-soft: #FFC8DD;
+    --pink-deep: #E8538A;
+    --blue: #A8C8FF;
+    --blue-soft: #D4E2FF;
+    --blue-deep: #6B9DFF;
+    --yellow: #FFE9A8;
+    --yellow-soft: #FFF5D1;
+    --green: #B8E5C8;
+    --green-deep: #6BC48F;
+    --purple: #D4C0FF;
+    --purple-deep: #B294E0;
+    --grid-line: rgba(232, 83, 138, 0.18);
+    --line: rgba(74, 58, 92, 0.15);
+    --line-soft: rgba(74, 58, 92, 0.08);
+    /* 對應原工具變數 */
+    --accent: var(--pink-deep);
+    --accent-deep: #C03872;
+    --warn: #E8538A;
+    --highlight: var(--yellow);
+    --shadow: 3px 3px 0 var(--ink);
+    --shadow-sm: 2px 2px 0 var(--ink);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { background: var(--bg); color: var(--ink); font-family: 'Noto Sans TC', sans-serif; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  html, body {
+    color: var(--ink);
+    font-family: 'Kaisei Decol', 'Noto Sans TC', serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
   body {
     background: linear-gradient(135deg, #FFE4F0 0%, #FFD6EA 50%, #F5DCFF 100%);
-    background-attachment: fixed;
     min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
   }
 
+  /* 夢幻雲朵漸層 */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(255, 150, 195, 0.5) 0%, transparent 35%),
+      radial-gradient(circle at 80% 15%, rgba(220, 200, 255, 0.45) 0%, transparent 40%),
+      radial-gradient(circle at 50% 60%, rgba(255, 195, 220, 0.5) 0%, transparent 45%),
+      radial-gradient(circle at 90% 75%, rgba(230, 200, 255, 0.45) 0%, transparent 35%),
+      radial-gradient(circle at 10% 85%, rgba(255, 180, 210, 0.5) 0%, transparent 40%);
+    pointer-events: none;
+    z-index: 0;
+    filter: blur(2px);
+  }
+
+  /* 手帳紙格線 */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 35px 35px;
+    pointer-events: none;
+    z-index: 1;
+    mix-blend-mode: multiply;
+  }
+
+  /* 確保內容在裝飾上方 */
+  header, main, .toast { position: relative; z-index: 2; }
+
   header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(255, 228, 240, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border-bottom: 2px solid var(--ink);
-    padding: 18px 32px 14px;
+    padding: 16px 32px 14px;
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
     gap: 24px;
-    background: var(--bg-paper);
-    position: sticky; top: 0; z-index: 100;
   }
   .brand { display: flex; align-items: baseline; gap: 14px; }
   .brand h1 {
-    font-family: 'Fraunces', serif;
-    font-weight: 800;
-    font-size: 30px;
-    letter-spacing: -0.02em;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: 900;
+    font-size: 28px;
+    letter-spacing: 0.04em;
     line-height: 1;
+    color: var(--ink);
+    transform: rotate(-2deg);
+    position: relative;
+  }
+  .brand h1::after {
+    content: '✦';
+    position: absolute;
+    top: -8px;
+    right: -16px;
+    font-size: 14px;
+    color: var(--pink);
+    transform: rotate(2deg);
   }
   .brand .green-dot {
     display: inline-block;
-    width: 12px; height: 12px; border-radius: 50%;
-    background: var(--accent);
-    box-shadow: 0 0 0 3px var(--bg-paper), 0 0 0 4px var(--ink);
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--pink-deep);
     margin-right: 2px;
     transform: translateY(-2px);
   }
   .brand .sub {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: var(--ink-soft);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
+    font-family: 'Caveat', cursive;
+    font-size: 18px;
+    color: var(--pink-deep);
+    font-weight: 600;
+    transform: rotate(-1deg);
   }
   .header-info {
-    font-size: 11px;
+    font-size: 12px;
     color: var(--ink-soft);
     text-align: right;
     line-height: 1.6;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
   }
-  .header-info b { color: var(--ink); }
+  .header-info b { color: var(--ink); font-weight: 700; }
 
   main {
     display: grid;
@@ -89,29 +156,36 @@
     flex-direction: column;
     gap: 24px;
     min-width: 0;
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
   }
   .sidebar {
     padding: 24px;
-    background: var(--bg-paper);
+    background: rgba(255, 245, 250, 0.75);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     display: flex;
     flex-direction: column;
     gap: 22px;
     max-height: calc(100vh - 70px);
     overflow-y: auto;
     font-size: 15px;
+    font-family: 'Noto Sans TC', sans-serif;
   }
 
   .dropzone {
     border: 2px dashed var(--ink);
-    background: var(--bg-paper);
+    background: rgba(255, 255, 255, 0.6);
     padding: 50px 32px;
     text-align: center;
     cursor: pointer;
     transition: all 0.2s;
     position: relative;
+    border-radius: 24px;
   }
   .dropzone:hover, .dropzone.drag {
-    background: #fff8d6;
+    background: rgba(255, 232, 240, 0.85);
     transform: translate(-2px, -2px);
     box-shadow: var(--shadow);
   }
@@ -119,22 +193,24 @@
     content: '';
     position: absolute;
     inset: 6px;
-    border: 1px solid var(--ink);
+    border: 1px solid var(--pink);
     pointer-events: none;
     opacity: 0.3;
+    border-radius: 18px;
   }
-  .dropzone-icon { font-family: 'Fraunces', serif; font-size: 52px; font-weight: 800; line-height: 1; margin-bottom: 12px; }
-  .dropzone-text { font-family: 'Fraunces', serif; font-size: 24px; font-weight: 600; margin-bottom: 6px; }
-  .dropzone-hint { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--ink-soft); letter-spacing: 0.08em; }
+  .dropzone-icon { font-family: 'Kaisei Decol', serif; font-size: 52px; font-weight: 700; line-height: 1; margin-bottom: 12px; color: var(--pink-deep); }
+  .dropzone-text { font-family: 'Kaisei Decol', 'Noto Sans TC', serif; font-size: 24px; font-weight: 700; margin-bottom: 6px; color: var(--ink); }
+  .dropzone-hint { font-family: 'Caveat', cursive; font-size: 18px; color: var(--ink-soft); letter-spacing: 0.02em; font-weight: 600; }
 
   .canvas-wrap {
-    background: var(--bg-paper);
+    background: rgba(255, 255, 255, 0.85);
     border: 2px solid var(--ink);
     padding: 16px;
     display: none;
     flex-direction: column;
     gap: 12px;
     box-shadow: var(--shadow);
+    border-radius: 18px;
   }
   .canvas-wrap.active { display: flex; }
   .canvas-header {
@@ -168,30 +244,31 @@
 
   .det-box {
     position: absolute;
-    border: 2px solid var(--blue);
-    background: rgba(37,99,235,0.08);
+    border: 2px solid var(--blue-deep);
+    background: rgba(107,157,255,0.12);
     cursor: pointer;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     transition: background 0.15s, border-color 0.15s, opacity 0.15s;
   }
-  .det-box:hover { background: rgba(37,99,235,0.18); border-color: var(--ink); }
-  .det-box.selected { border-color: var(--accent); background: rgba(0,185,0,0.18); }
-  .det-box.excluded { border-color: var(--warn); background: rgba(214,74,42,0.08); opacity: 0.5; }
-  .det-box.merging { border-color: var(--highlight); background: rgba(255,214,10,0.3); }
-  .det-box.drop-target { border-color: var(--highlight); background: rgba(255,214,10,0.45); border-style: dashed; }
+  .det-box:hover { background: rgba(107,157,255,0.25); border-color: var(--ink); }
+  .det-box.selected { border-color: var(--green-deep); background: rgba(107,196,143,0.22); }
+  .det-box.excluded { border-color: var(--pink-deep); background: rgba(232,83,138,0.15); opacity: 0.5; }
+  .det-box.merging { border-color: var(--yellow); background: rgba(255,233,168,0.5); }
+  .det-box.drop-target { border-color: var(--yellow); background: rgba(255,233,168,0.6); border-style: dashed; }
   .det-box-label {
     position: absolute;
     top: -2px; left: -2px;
-    background: var(--blue);
+    background: var(--blue-deep);
     color: white;
-    padding: 1px 5px;
-    font-size: 10px;
+    padding: 2px 7px;
+    font-size: 11px;
     line-height: 1.3;
     font-weight: 700;
     pointer-events: none;
+    border-radius: 6px 0 6px 0;
   }
-  .det-box.selected .det-box-label { background: var(--accent); }
-  .det-box.excluded .det-box-label { background: var(--warn); }
+  .det-box.selected .det-box-label { background: var(--green-deep); }
+  .det-box.excluded .det-box-label { background: var(--pink-deep); }
   .det-box .det-box-close {
     position: absolute;
     top: -10px; right: -10px;
@@ -221,22 +298,51 @@
     z-index: 5;
   }
   .det-box.editing .det-handle { display: block; }
+  /* 解鎖後也直接顯示角點 */
+  .det-box.unlocked .det-handle { display: block; }
   .det-handle.nw { top: -8px; left: -8px; cursor: nwse-resize; }
   .det-handle.ne { top: -8px; right: -8px; cursor: nesw-resize; }
   .det-handle.sw { bottom: -8px; left: -8px; cursor: nesw-resize; }
   .det-handle.se { bottom: -8px; right: -8px; cursor: nwse-resize; }
-  .det-box.editing { cursor: move; border-width: 3px; border-color: var(--highlight); background: rgba(255,214,10,0.2); }
-  .det-box.editing .det-box-label { background: var(--highlight); color: var(--ink); }
+  .det-box.editing { cursor: move; border-width: 3px; border-color: var(--yellow); background: rgba(255,233,168,0.35); }
+  .det-box.editing .det-box-label { background: var(--yellow); color: var(--ink); }
+  .det-box.unlocked { cursor: move; }
+
+  /* Unlocked grid cell (free-form, but still tracks grid offset) */
+  .det-box.unlocked { border-style: dashed; border-color: var(--accent-deep); }
+  .det-box.unlocked .det-box-label { background: var(--accent-deep); }
+
+  .det-box-unlock {
+    position: absolute;
+    bottom: -10px; right: -10px;
+    width: 22px; height: 22px;
+    background: var(--accent-deep);
+    color: white;
+    border: 1.5px solid var(--ink);
+    cursor: pointer;
+    font-size: 11px;
+    line-height: 1;
+    padding: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-weight: 700;
+    z-index: 10;
+    border-radius: 50%;
+  }
+  .det-box:hover .det-box-unlock { display: flex; }
+  .det-box.unlocked .det-box-unlock { display: flex; background: var(--warn); }
 
   /* Grid divider lines */
   .grid-line {
     position: absolute;
-    background: var(--blue);
+    background: var(--blue-deep);
     z-index: 8;
     transition: background 0.15s;
   }
   .grid-line:hover, .grid-line.dragging {
-    background: var(--highlight);
+    background: var(--yellow);
     box-shadow: 0 0 0 2px var(--ink);
   }
   .grid-line.vertical {
@@ -258,14 +364,14 @@
     position: absolute;
     width: 18px;
     height: 18px;
-    background: var(--blue);
+    background: var(--blue-deep);
     border: 2px solid white;
     box-shadow: 0 0 0 1.5px var(--ink);
     border-radius: 50%;
     pointer-events: none;
   }
   .grid-line:hover .grid-line-handle, .grid-line.dragging .grid-line-handle {
-    background: var(--highlight);
+    background: var(--yellow);
   }
   .grid-line.vertical .grid-line-handle {
     left: -8px;
@@ -280,47 +386,57 @@
 
   .btn-row { display: flex; flex-wrap: wrap; gap: 10px; }
   .btn {
-    font-family: 'Noto Sans TC', sans-serif;
-    font-weight: 500;
+    font-family: 'Zen Maru Gothic', 'Noto Sans TC', sans-serif;
+    font-weight: 700;
     font-size: 15px;
-    padding: 11px 18px;
-    background: var(--bg-paper);
-    border: 1.5px solid var(--ink);
+    padding: 11px 20px;
+    background: white;
+    border: 2px solid var(--ink);
     color: var(--ink);
     cursor: pointer;
-    transition: all 0.15s;
+    transition: all 0.2s;
     display: inline-flex;
     align-items: center;
     gap: 6px;
     line-height: 1;
+    border-radius: 999px;
+    box-shadow: var(--shadow-sm);
   }
-  .btn:hover:not(:disabled) { transform: translate(-1px, -1px); box-shadow: var(--shadow-sm); }
-  .btn:active:not(:disabled) { transform: translate(0, 0); box-shadow: none; }
+  .btn:hover:not(:disabled) {
+    transform: translate(-1px, -1px);
+    box-shadow: var(--shadow);
+    background: var(--pink-soft);
+  }
+  .btn:active:not(:disabled) { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--ink); }
   .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .btn.primary { background: var(--accent); color: white; border-color: var(--ink); font-weight: 700; }
-  .btn.primary:hover:not(:disabled) { background: var(--accent-deep); }
-  .btn.danger { background: var(--warn); color: white; }
-  .btn.blue { background: var(--blue); color: white; }
-  .btn.sm { padding: 8px 12px; font-size: 13px; }
+  .btn.primary { background: var(--pink-deep); color: white; }
+  .btn.primary:hover:not(:disabled) { background: var(--pink); }
+  .btn.danger { background: var(--pink); color: white; }
+  .btn.danger:hover:not(:disabled) { background: var(--pink-deep); }
+  .btn.blue { background: var(--blue-deep); color: white; }
+  .btn.blue:hover:not(:disabled) { background: var(--blue); }
+  .btn.sm { padding: 8px 14px; font-size: 13px; }
 
   .section { display: flex; flex-direction: column; gap: 10px; }
   .section-title {
-    font-family: 'Fraunces', serif;
-    font-size: 19px;
+    font-family: 'Kaisei Decol', 'Noto Sans TC', serif;
+    font-size: 20px;
     font-weight: 700;
     padding-bottom: 8px;
-    border-bottom: 1.5px solid var(--ink);
+    border-bottom: 2px solid var(--ink);
     display: flex;
     align-items: center;
     justify-content: space-between;
+    color: var(--ink);
   }
   .section-title .badge {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 13px;
     background: var(--ink);
-    color: var(--bg);
-    padding: 3px 8px;
-    font-weight: 400;
+    color: white;
+    padding: 3px 9px;
+    font-weight: 500;
+    border-radius: 999px;
   }
   .control-group {
     display: flex;
@@ -346,10 +462,76 @@
   .slider-row { display: flex; align-items: center; gap: 10px; flex: 0 0 60%; }
   .slider-row input[type=range] { flex: 1; }
   .slider-row .val {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 14px;
     min-width: 34px; text-align: right;
     font-weight: 700;
+  }
+
+  /* 描邊顏色選擇器 */
+  .color-picker {
+    width: 44px; height: 32px;
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    cursor: pointer;
+    padding: 2px;
+    background: white;
+  }
+  .color-presets {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+  .color-preset {
+    width: 28px; height: 28px;
+    border: 2px solid var(--ink);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+  .color-preset:hover { transform: scale(1.15); }
+  .color-preset.active {
+    box-shadow: 0 0 0 2px var(--pink-deep);
+    transform: scale(1.1);
+  }
+
+  /* 斗內按鈕（套用使用者提供的 boba 樣式，微調寬度與圖片尺寸） */
+  .donate-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 40px;
+    padding: 6px 14px;
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    border-radius: 12px;
+    color: #F8E0BE;
+    background-color: #AD5138;
+    border: 2px solid var(--ink);
+    text-decoration: none;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s;
+    gap: 8px;
+    white-space: nowrap;
+  }
+  .donate-btn:hover {
+    text-decoration: none;
+    transform: translate(-1px, -1px);
+    box-shadow: var(--shadow);
+    background-color: #C25E45;
+  }
+  .donate-btn .donate-icon {
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
+    display: block;
+  }
+  .donate-btn .donate-text {
+    text-align: center;
   }
 
   .preview-grid {
@@ -367,30 +549,72 @@
     background: var(--bg-paper);
   }
   .preview-card {
-    border: 1.5px solid var(--ink);
+    border: 2px solid var(--ink);
     background: white;
     padding: 8px;
     position: relative;
     transition: all 0.15s;
+    border-radius: 12px;
   }
   .preview-card:hover { transform: translate(-1px, -1px); box-shadow: var(--shadow-sm); }
   .preview-card .thumb {
     width: 100%;
     aspect-ratio: 1;
-    background: repeating-conic-gradient(#e8e3d4 0% 25%, #faf7f0 0% 50%) 50% / 8px 8px;
+    background: repeating-conic-gradient(#FFE4F0 0% 25%, #FFFFFF 0% 50%) 50% / 8px 8px;
     display: flex; align-items: center; justify-content: center;
     overflow: hidden;
     margin-bottom: 6px;
+    border-radius: 8px;
+    transition: background 0.2s;
   }
+  /* 預覽底色切換 */
+  .preview-panel[data-bg="dark"] .preview-card .thumb {
+    background: #1a1a1a;
+  }
+  .preview-panel[data-bg="pink"] .preview-card .thumb {
+    background: #FFC8DD;
+  }
+  .preview-panel[data-bg="line"] .preview-card .thumb {
+    background: #8FB8DB; /* LINE 對話視窗背景藍 */
+  }
+
+  /* 背景切換按鈕組 */
+  .bg-toggle {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    padding: 3px;
+    background: white;
+    box-shadow: var(--shadow-sm);
+  }
+  .bg-toggle-btn {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    padding: 0;
+    transition: all 0.15s;
+    position: relative;
+  }
+  .bg-toggle-btn:hover { transform: scale(1.1); }
+  .bg-toggle-btn.active { border-color: var(--ink); box-shadow: 0 0 0 2px var(--pink-deep); }
+  .bg-toggle-btn[data-bg="check"] {
+    background: repeating-conic-gradient(#FFE4F0 0% 25%, #FFFFFF 0% 50%) 50% / 6px 6px;
+  }
+  .bg-toggle-btn[data-bg="dark"] { background: #1a1a1a; }
+  .bg-toggle-btn[data-bg="pink"] { background: #FFC8DD; }
+  .bg-toggle-btn[data-bg="line"] { background: #8FB8DB; }
   .preview-card .thumb img { max-width: 100%; max-height: 100%; }
   .preview-card .label {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 12px;
     color: var(--ink-soft);
     text-align: center;
     line-height: 1.4;
   }
-  .preview-card .label b { color: var(--ink); font-size: 13px; }
+  .preview-card .label b { color: var(--ink); font-size: 13px; font-weight: 700; }
   .preview-card .del {
     position: absolute;
     top: 4px; right: 4px;
@@ -431,31 +655,43 @@
     left: 50%;
     transform: translateX(-50%) translateY(20px);
     background: var(--ink);
-    color: var(--bg);
-    padding: 12px 20px;
-    font-size: 13px;
+    color: white;
+    padding: 12px 22px;
+    font-size: 14px;
     border: 2px solid var(--ink);
-    box-shadow: 4px 4px 0 var(--accent);
+    box-shadow: 4px 4px 0 var(--pink-deep);
     opacity: 0;
     pointer-events: none;
     transition: all 0.3s;
     z-index: 1000;
     max-width: 90vw;
+    border-radius: 999px;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-weight: 500;
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  .toast.err { box-shadow: 4px 4px 0 var(--warn); }
+  .toast.err { box-shadow: 4px 4px 0 var(--pink); }
 
   .info-note {
-    background: #fff8d6;
-    border: 1.5px solid var(--ink);
+    background: var(--yellow-soft);
+    border: 2px solid var(--ink);
     padding: 14px 16px;
     font-size: 14px;
     line-height: 1.7;
     color: var(--ink);
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    font-family: 'Noto Sans TC', sans-serif;
   }
-  .info-note b { color: var(--accent-deep); font-weight: 700; }
+  .info-note b { color: var(--pink-deep); font-weight: 700; }
 
-  .role-tabs { display: flex; border: 1.5px solid var(--ink); }
+  .role-tabs {
+    display: flex;
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    overflow: hidden;
+    background: white;
+  }
   .role-tab {
     flex: 1;
     padding: 11px 8px;
@@ -463,27 +699,32 @@
     background: white;
     cursor: pointer;
     font-size: 14px;
-    font-weight: 600;
-    border-right: 1.5px solid var(--ink);
-    transition: all 0.15s;
+    font-weight: 700;
+    font-family: 'Noto Sans TC', sans-serif;
+    border-right: 2px solid var(--ink);
+    transition: all 0.2s;
+    color: var(--ink);
   }
   .role-tab:last-child { border-right: none; }
-  .role-tab.active { background: var(--ink); color: var(--bg); }
-  .role-tab:hover:not(.active) { background: #fff8d6; }
+  .role-tab.active { background: var(--ink); color: white; }
+  .role-tab:hover:not(.active) { background: var(--pink-soft); }
 
   .mode-banner {
-    background: var(--blue);
+    background: var(--blue-deep);
     color: white;
     padding: 10px 14px;
     font-size: 14px;
     line-height: 1.4;
-    border: 1.5px solid var(--ink);
+    border: 2px solid var(--ink);
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 12px;
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    font-family: 'Noto Sans TC', sans-serif;
   }
-  .mode-banner.green { background: var(--accent); }
+  .mode-banner.green { background: var(--green-deep); }
   .mode-banner b { font-weight: 700; }
 
   #cropOverlay {
@@ -506,10 +747,11 @@
 
   /* preview panel that lives in workspace, under canvas */
   .preview-panel {
-    background: var(--bg-paper);
+    background: rgba(255, 255, 255, 0.85);
     border: 2px solid var(--ink);
     padding: 20px;
     box-shadow: var(--shadow);
+    border-radius: 18px;
     display: flex;
     flex-direction: column;
     gap: 14px;
@@ -524,109 +766,57 @@
     padding-bottom: 12px;
   }
   .preview-panel-title {
-    font-family: 'Fraunces', serif;
+    font-family: 'Kaisei Decol', 'Noto Sans TC', serif;
     font-size: 22px;
-    font-weight: 800;
+    font-weight: 700;
     display: flex;
     align-items: center;
     gap: 12px;
+    color: var(--ink);
   }
   .preview-panel-title .badge {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 14px;
     background: var(--ink);
-    color: var(--bg);
-    padding: 3px 9px;
-    font-weight: 400;
+    color: white;
+    padding: 3px 11px;
+    font-weight: 500;
+    border-radius: 999px;
   }
 
   ::-webkit-scrollbar { width: 8px; height: 8px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
   ::-webkit-scrollbar-thumb { background: var(--ink); border: 1px solid var(--bg); }
-
-  /* === 歪腦袋導覽列（沿用主站風格） === */
-  .wonky-nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1rem 2rem;
-    background: rgba(255, 228, 240, 0.92);
-    backdrop-filter: blur(8px);
-    border-bottom: 3px solid var(--ink);
-    font-family: 'Noto Sans TC', sans-serif;
-  }
-  .wonky-logo {
-    font-size: 1.4rem;
-    font-weight: 800;
-    color: var(--ink);
-    text-decoration: none;
-    letter-spacing: -0.02em;
-  }
-  .wonky-logo .wonky-dot {
-    color: #FF8FAF;
-    margin-left: 2px;
-  }
-  .wonky-nav-links {
-    display: flex;
-    gap: 1.5rem;
-  }
-  .wonky-nav-links a {
-    color: var(--ink);
-    text-decoration: none;
-    font-size: 0.95rem;
-    font-weight: 500;
-    padding: 0.3rem 0.6rem;
-    border-radius: 6px;
-    transition: all 0.15s;
-  }
-  .wonky-nav-links a:hover {
-    background: #FF8FAF;
-    color: white;
-    transform: rotate(-3deg);
-  }
-  .wonky-nav-links a.active {
-    background: #4F8FED;
-    color: white;
-  }
-  @media (max-width: 640px) {
-    .wonky-nav {
-      padding: 0.8rem 1rem;
-      flex-direction: column;
-      gap: 0.6rem;
-    }
-    .wonky-nav-links {
-      gap: 0.8rem;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    .wonky-nav-links a {
-      font-size: 0.85rem;
-      padding: 0.25rem 0.5rem;
-    }
-  }
 </style>
 </head>
 <body>
 
-<nav class="wonky-nav">
-  <a href="index.html" class="wonky-logo">歪腦袋<span class="wonky-dot">.</span></a>
-  <div class="wonky-nav-links">
-    <a href="index.html">首頁</a>
-    <a href="blog.html">部落格</a>
-    <a href="music.html">音樂</a>
-    <a href="game.html">遊戲</a>
-    <a href="tools.html" class="active">工具</a>
-  </div>
-</nav>
-
 <header>
   <div class="brand">
     <h1><span class="green-dot"></span>StickerForge</h1>
-    <div class="sub">Grid · Auto-Detect · v5.1</div>
+    <div class="sub">歪腦袋小工具 · v6.6</div>
   </div>
-  <div class="header-info">
-    貼圖 <b>80~370 × 80~320</b> · 偶數 · PNG<br>
-    主頁圖 <b>240×240</b> · 標籤 <b>96×74</b>
+  <div style="display:flex;align-items:center;gap:20px;">
+    <div class="header-info">
+      貼圖 <b>80~370 × 80~320</b> · 偶數 · PNG<br>
+      主頁圖 <b>240×240</b> · 標籤 <b>96×74</b>
+    </div>
+    <a class="donate-btn" href="https://fernfern.bobaboba.me" target="_blank" rel="noopener">
+      <svg class="donate-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-label="boba">
+        <!-- 杯子身體 -->
+        <path d="M5 7 L7.5 21 Q7.7 22.2 9 22.2 L15 22.2 Q16.3 22.2 16.5 21 L19 7 Z" fill="#F8E0BE" stroke="#3A2618" stroke-width="1.3" stroke-linejoin="round"/>
+        <!-- 上方茶面 -->
+        <ellipse cx="12" cy="7" rx="7" ry="1.6" fill="#C48A60" stroke="#3A2618" stroke-width="1.3"/>
+        <!-- 吸管 -->
+        <path d="M14 2 L13 8" stroke="#E85A5A" stroke-width="1.8" stroke-linecap="round"/>
+        <!-- 珍珠 -->
+        <circle cx="10" cy="17" r="1.3" fill="#3A2618"/>
+        <circle cx="13" cy="18.5" r="1.3" fill="#3A2618"/>
+        <circle cx="11" cy="14" r="1.2" fill="#3A2618"/>
+        <circle cx="14" cy="15.5" r="1.2" fill="#3A2618"/>
+      </svg>
+      <div class="donate-text">歡迎餵食我 🤤</div>
+    </a>
   </div>
 </header>
 
@@ -682,15 +872,26 @@
     </div>
 
     <!-- 預覽面板（在大圖下方） -->
-    <div class="preview-panel">
+    <div class="preview-panel" id="previewPanel" data-bg="check">
       <div class="preview-panel-header">
         <div class="preview-panel-title">
           裁切預覽
           <span class="badge" id="cntBadge">0</span>
         </div>
-        <div class="btn-row">
-          <button class="btn primary" id="btnDownload" disabled>⬇ 下載 ZIP</button>
-          <button class="btn danger" id="btnClearAll">✕ 清空</button>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:12px;color:var(--ink-soft);font-family:'DM Mono',monospace;line-height:1.3;white-space:nowrap;">預覽底色<br><span style="color:var(--pink-deep);font-weight:700;">⚠ 不影響輸出</span></span>
+            <div class="bg-toggle" title="僅切換預覽顯示用底色，下載的 PNG 永遠是透明背景">
+              <button class="bg-toggle-btn active" data-bg="check" title="透明（格紋）"></button>
+              <button class="bg-toggle-btn" data-bg="dark" title="深色"></button>
+              <button class="bg-toggle-btn" data-bg="pink" title="粉色"></button>
+              <button class="bg-toggle-btn" data-bg="line" title="LINE 對話"></button>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn primary" id="btnDownload" disabled>⬇ 下載 ZIP</button>
+            <button class="btn danger" id="btnClearAll">✕ 清空</button>
+          </div>
         </div>
       </div>
       <div id="previewArea" class="preview-empty">尚未加入任何貼圖 · 在上方選好框後按「加入所選貼圖」</div>
@@ -703,14 +904,16 @@
       <b>使用流程：</b><br>
       1. 上傳整張大圖<br>
       2. 預設用<b>「網格模式」</b>（4×4 均分）<br>
-      &nbsp;&nbsp;• 拖藍色分隔線可微調<br>
+      &nbsp;&nbsp;• 拖藍色分隔線可整列/整欄一起動<br>
       &nbsp;&nbsp;• 右側可改欄數、列數<br>
+      &nbsp;&nbsp;• <b>🔒 解鎖某格 → 完全獨立，不受網格線影響</b><br>
       3. 不規則排版 → 切到<b>「自動偵測」</b>模式<br>
       4. 框錯了？<br>
       &nbsp;&nbsp;• 點框 = 排除（變紅）<br>
       &nbsp;&nbsp;• <b>拖框到另一框上 = 合併</b><br>
       &nbsp;&nbsp;• 雙擊框 = 編輯（拉大小、× 刪除）<br>
-      5. 切換「輸出角色」→ 加入所選
+      5. 切換「輸出角色」→ 加入所選<br>
+      6. <b>主體加描邊</b> → 顏色淺的貼圖更顯眼
     </div>
 
     <div class="section">
@@ -767,10 +970,44 @@
         <label>邊距 (px)</label>
         <input type="number" id="padding" value="6" min="0" max="50" step="2">
       </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">輸出處理</div>
       <label class="control-group" style="cursor:pointer;">
         <input type="checkbox" id="chkRmbg" checked style="width:16px;height:16px;accent-color:var(--accent);">
         <span style="flex:1;">輸出時去背</span>
       </label>
+      <label class="control-group" style="cursor:pointer;">
+        <input type="checkbox" id="chkStroke" style="width:16px;height:16px;accent-color:var(--accent);">
+        <span style="flex:1;">加貼紙底板（白邊效果）</span>
+      </label>
+      <div id="strokeSettings" style="display:none;flex-direction:column;gap:8px;padding-left:4px;">
+        <div class="control-group">
+          <label>底板顏色</label>
+          <input type="color" id="strokeColor" value="#FFFFFF" class="color-picker">
+        </div>
+        <div class="color-presets">
+          <div class="color-preset active" style="background:#FFFFFF" data-color="#FFFFFF" title="白色"></div>
+          <div class="color-preset" style="background:#000000" data-color="#000000" title="黑色"></div>
+          <div class="color-preset" style="background:#FF8FAF" data-color="#FF8FAF" title="粉紅"></div>
+          <div class="color-preset" style="background:#6B9DFF" data-color="#6B9DFF" title="藍"></div>
+          <div class="color-preset" style="background:#6BC48F" data-color="#6BC48F" title="綠"></div>
+          <div class="color-preset" style="background:#FFE9A8" data-color="#FFE9A8" title="黃"></div>
+          <div class="color-preset" style="background:#B294E0" data-color="#B294E0" title="紫"></div>
+        </div>
+        <div class="control-group">
+          <label>厚度 (px)</label>
+          <div class="slider-row">
+            <input type="range" id="strokeWidth" min="2" max="30" value="10">
+            <span class="val" id="strokeWidthVal">10</span>
+          </div>
+        </div>
+        <div style="font-size:12px;color:var(--ink-soft);line-height:1.5;">
+          💡 沿主體輪廓向外擴展一塊底板，像 LINE 貼紙的「白邊」效果<br>
+          建議 8~15px，太薄看不出來
+        </div>
+      </div>
     </div>
 
     <div class="section">
@@ -1110,21 +1347,64 @@ function buildGridDetections() {
   const xs = [0, ...state.gridVLines.slice().sort((a,b)=>a-b), state.imgW];
   const ys = [0, ...state.gridHLines.slice().sort((a,b)=>a-b), state.imgH];
   const inset = Math.max(0, parseInt($('gridInset').value) || 0);
+
+  // preserve unlocked cells with their ABSOLUTE positions (frozen, ignore grid changes)
+  const frozen = {};
+  state.detections.forEach(d => {
+    if (d.unlocked && d.gridRow != null && d.gridCol != null) {
+      frozen[`${d.gridRow}_${d.gridCol}`] = {
+        x: d.x, y: d.y, w: d.w, h: d.h,
+        selected: d.selected, excluded: d.excluded,
+      };
+    }
+  });
+
   const boxes = [];
   for (let r = 0; r < state.gridRows; r++) {
     for (let c = 0; c < state.gridCols; c++) {
-      const x = xs[c] + inset;
-      const y = ys[r] + inset;
-      const w = (xs[c+1] - xs[c]) - inset * 2;
-      const h = (ys[r+1] - ys[r]) - inset * 2;
-      if (w > 5 && h > 5) {
-        boxes.push({
-          x, y, w, h,
-          selected: true, excluded: false, editing: false,
-        });
+      const baseX = xs[c] + inset;
+      const baseY = ys[r] + inset;
+      const baseW = (xs[c+1] - xs[c]) - inset * 2;
+      const baseH = (ys[r+1] - ys[r]) - inset * 2;
+      if (baseW > 5 && baseH > 5) {
+        const key = `${r}_${c}`;
+        const f = frozen[key];
+        if (f) {
+          // unlocked: use frozen absolute position, ignore grid lines
+          boxes.push({
+            x: f.x, y: f.y, w: f.w, h: f.h,
+            gridRow: r, gridCol: c,
+            unlocked: true,
+            selected: f.selected, excluded: f.excluded,
+            editing: false,
+          });
+        } else {
+          // locked: follow grid
+          boxes.push({
+            x: baseX, y: baseY, w: baseW, h: baseH,
+            gridRow: r, gridCol: c,
+            unlocked: false,
+            selected: true, excluded: false, editing: false,
+          });
+        }
       }
     }
   }
+  // preserve selection state of locked cells too (when changing grid params)
+  // — keyed by gridRow_gridCol
+  const prevState = {};
+  state.detections.forEach(d => {
+    if (d.gridRow != null && !d.unlocked) {
+      prevState[`${d.gridRow}_${d.gridCol}`] = { selected: d.selected, excluded: d.excluded };
+    }
+  });
+  boxes.forEach(b => {
+    if (!b.unlocked) {
+      const p = prevState[`${b.gridRow}_${b.gridCol}`];
+      if (p) { b.selected = p.selected; b.excluded = p.excluded; }
+    }
+  });
+
   state.detections = boxes;
   $('statCount').textContent = boxes.length;
   renderDetections();
@@ -1227,6 +1507,7 @@ function renderDetections() {
     const el = document.createElement('div');
     el.className = 'det-box' + (d.excluded ? ' excluded' : (d.selected ? ' selected' : ''));
     if (d.editing) el.classList.add('editing');
+    if (d.unlocked) el.classList.add('unlocked');
     el.style.left = (offX + d.x * s) + 'px';
     el.style.top  = (offY + d.y * s) + 'px';
     el.style.width  = (d.w * s) + 'px';
@@ -1251,6 +1532,30 @@ function renderDetections() {
       updateSelCount();
     });
     el.appendChild(close);
+
+    // unlock button (only in grid mode, for cells that have grid metadata)
+    if (state.mode === 'grid' && d.gridRow != null) {
+      const unlock = document.createElement('button');
+      unlock.className = 'det-box-unlock';
+      // 圖示邏輯：鎖定中顯示 🔒（按下會解鎖），已解鎖顯示 🔓（按下會鎖回）
+      unlock.textContent = d.unlocked ? '🔓' : '🔒';
+      unlock.title = d.unlocked ? '鎖回網格（重設位置）' : '解鎖這格，可獨立調整大小、位置';
+      unlock.addEventListener('click', e => {
+        e.stopPropagation();
+        if (d.unlocked) {
+          // re-lock: reset offsets, rebuild from grid
+          d.unlocked = false;
+          d.ox = d.oy = d.ow = d.oh = 0;
+          buildGridDetections();
+          toast('已鎖回網格');
+        } else {
+          d.unlocked = true;
+          renderDetections();
+          toast('已解鎖 · 可拖角點調大小或拖框移動');
+        }
+      });
+      el.appendChild(unlock);
+    }
 
     // 4 resize handles
     ['nw','ne','sw','se'].forEach(pos => {
@@ -1280,8 +1585,10 @@ function attachDetBoxInteraction(el, d, idx) {
 
   function onWindowMove(e) {
     if (!downPos) return;
+    const isLockedGrid = state.mode === 'grid' && d.gridRow != null && !d.unlocked;
     const moved = Math.abs(e.clientX - downPos.x) + Math.abs(e.clientY - downPos.y);
     if (!dragging && !resizeHandle && moved > 4) {
+      if (isLockedGrid) return; // don't start drag on locked grid cells
       dragging = true;
       el.classList.add('merging');
     }
@@ -1297,9 +1604,12 @@ function attachDetBoxInteraction(el, d, idx) {
       if (resizeHandle.includes('s')) { b.h = startBox.h + dy; }
       if (b.w < 10) b.w = 10;
       if (b.h < 10) b.h = 10;
-      b.x = Math.max(0, b.x); b.y = Math.max(0, b.y);
-      if (b.x + b.w > state.imgW) b.w = state.imgW - b.x;
-      if (b.y + b.h > state.imgH) b.h = state.imgH - b.y;
+      // Allow out-of-bounds for unlocked grid cells
+      if (!d.unlocked) {
+        b.x = Math.max(0, b.x); b.y = Math.max(0, b.y);
+        if (b.x + b.w > state.imgW) b.w = state.imgW - b.x;
+        if (b.y + b.h > state.imgH) b.h = state.imgH - b.y;
+      }
       Object.assign(d, b);
       // re-position only this element to avoid re-binding all events mid-drag
       const s = state.scale;
@@ -1311,8 +1621,15 @@ function attachDetBoxInteraction(el, d, idx) {
     }
 
     if (dragging) {
-      d.x = Math.max(0, Math.min(state.imgW - d.w, startBox.x + dx));
-      d.y = Math.max(0, Math.min(state.imgH - d.h, startBox.y + dy));
+      // unlocked grid cell or detect-mode box: can drag freely (incl. out of bounds for unlocked)
+      const allowOutOfBounds = d.unlocked;
+      if (allowOutOfBounds) {
+        d.x = startBox.x + dx;
+        d.y = startBox.y + dy;
+      } else {
+        d.x = Math.max(0, Math.min(state.imgW - d.w, startBox.x + dx));
+        d.y = Math.max(0, Math.min(state.imgH - d.h, startBox.y + dy));
+      }
       const s = state.scale;
       el.style.left = (canvas.offsetLeft + d.x * s) + 'px';
       el.style.top  = (canvas.offsetTop + d.y * s) + 'px';
@@ -1345,10 +1662,14 @@ function attachDetBoxInteraction(el, d, idx) {
     document.querySelectorAll('.det-box').forEach(b => b.classList.remove('drop-target', 'merging'));
 
     if (resizeHandle) {
+      // sync changes back to grid offsets if this is an unlocked grid cell
+      syncGridOffsets(d);
       resizeHandle = null;
       downPos = null;
       startBox = null;
-      renderDetections();
+      // don't rebuild DOM — handle position/size already synced inline during drag
+      // just update the stats badge
+      updateSelCount();
       return;
     }
 
@@ -1372,6 +1693,9 @@ function attachDetBoxInteraction(el, d, idx) {
         state.detections.splice(lower, 0, merged);
         $('statCount').textContent = state.detections.length;
         toast('✓ 已合併兩個框');
+      } else {
+        // moved without merging — sync grid offsets
+        syncGridOffsets(d);
       }
       dragging = false;
       dropTarget = null;
@@ -1390,17 +1714,16 @@ function attachDetBoxInteraction(el, d, idx) {
       _lastClickInfo = { idx, time: now };
 
       if (isDouble) {
-        // double-click → enter edit mode
-        state.detections.forEach(x => { if (x !== d) x.editing = false; });
-        d.editing = true;
-        d.selected = true;
-        d.excluded = false;
-        // reset tracker so triple-click doesn't immediately exit
+        // double-click → toggle exclude (works for any cell, locked or unlocked)
+        if (d.excluded) { d.excluded = false; d.selected = true; }
+        else { d.excluded = true; d.selected = false; }
         _lastClickInfo = { idx: -1, time: 0 };
-        toast('進入編輯模式 · 拖角點調大小 · × 刪除');
       } else {
-        // single click → toggle select / exclude (or exit edit mode if editing)
-        if (d.editing) {
+        // single click — but unlocked cells in grid mode shouldn't toggle on click
+        // (they're "always in edit mode" — the click might be missed handle drag)
+        if (d.unlocked) {
+          // do nothing on plain click for unlocked cells; use 🔒 to lock back or × to delete
+        } else if (d.editing) {
           d.editing = false;
         } else {
           if (d.excluded) { d.excluded = false; d.selected = true; }
@@ -1417,9 +1740,14 @@ function attachDetBoxInteraction(el, d, idx) {
   el.addEventListener('mousedown', e => {
     if (state.manualMode) return;
     if (e.target.classList.contains('det-box-close')) return;
+    if (e.target.classList.contains('det-box-unlock')) return;
     e.stopPropagation();
 
+    // In grid mode, locked cells can only be toggled (no drag/resize/edit)
+    const isLockedGrid = state.mode === 'grid' && d.gridRow != null && !d.unlocked;
+
     if (e.target.classList.contains('det-handle')) {
+      if (isLockedGrid) return; // locked grid cells cannot be resized
       resizeHandle = e.target.dataset.pos;
       startBox = { ...d };
       downPos = { x: e.clientX, y: e.clientY };
@@ -1433,6 +1761,8 @@ function attachDetBoxInteraction(el, d, idx) {
     downPos = { x: e.clientX, y: e.clientY };
     startBox = { ...d };
     dragging = false;
+    // mark this for the up handler
+    el._lockedGrid = isLockedGrid;
     window.addEventListener('mousemove', onWindowMove);
     window.addEventListener('mouseup', onWindowUp);
   });
@@ -1442,6 +1772,9 @@ function boxesOverlap(a, b, gap) {
   return a.x - gap < b.x + b.w && a.x + a.w + gap > b.x &&
          a.y - gap < b.y + b.h && a.y + a.h + gap > b.y;
 }
+
+// no-op kept for compat (unlocked grid cells now store absolute positions directly)
+function syncGridOffsets(d) { /* no longer needed */ }
 
 function updateSelCount() {
   const sel = state.detections.filter(d => d.selected).length;
@@ -1538,6 +1871,26 @@ $('chkUniformCanvas').addEventListener('change', e => {
   const on = e.target.checked;
   $('uniformSizeRow').style.display = on ? 'flex' : 'none';
   $('uniformHint').style.display = on ? 'block' : 'none';
+});
+
+// Stroke settings
+$('chkStroke').addEventListener('change', e => {
+  $('strokeSettings').style.display = e.target.checked ? 'flex' : 'none';
+});
+$('strokeWidth').addEventListener('input', e => {
+  $('strokeWidthVal').textContent = e.target.value;
+});
+document.querySelectorAll('.color-preset').forEach(swatch => {
+  swatch.addEventListener('click', () => {
+    const c = swatch.dataset.color;
+    $('strokeColor').value = c;
+    document.querySelectorAll('.color-preset').forEach(s => s.classList.remove('active'));
+    swatch.classList.add('active');
+  });
+});
+$('strokeColor').addEventListener('input', () => {
+  // user picked custom color, remove preset highlight
+  document.querySelectorAll('.color-preset').forEach(s => s.classList.remove('active'));
 });
 
 const cropOverlay = $('cropOverlay');
@@ -1686,6 +2039,14 @@ async function processOne(box) {
   }
   work = trimTransparent(work);
 
+  // Add sticker backdrop (the "white sticker" effect) BEFORE resize
+  // so the backdrop becomes part of the content sizing.
+  if ($('chkStroke').checked) {
+    const strokeColor = $('strokeColor').value;
+    const strokeWidth = parseInt($('strokeWidth').value) || 6;
+    work = addStroke(work, strokeColor, strokeWidth);
+  }
+
   const role = state.role;
   const target = SIZE_TARGETS[role];
   let outCanvas;
@@ -1793,6 +2154,77 @@ function trimTransparent(canvas) {
   return out;
 }
 
+/* Add sticker backdrop around opaque content (like LINE/Telegram sticker outline).
+   Expand canvas by `width` on all sides so the backdrop fits completely.
+   Approach: build mask in backdrop color, stamp it in a disc pattern,
+   then composite original image on top. */
+function addStroke(srcCanvas, color, width) {
+  const w = srcCanvas.width, h = srcCanvas.height;
+  // expand canvas to accommodate backdrop extending outward
+  const pad = Math.ceil(width) + 1;
+  const newW = w + pad * 2;
+  const newH = h + pad * 2;
+
+  const out = document.createElement('canvas');
+  out.width = newW; out.height = newH;
+  const cx = out.getContext('2d');
+
+  // Step 1: build colored mask (opaque content recolored to backdrop color)
+  const mask = document.createElement('canvas');
+  mask.width = newW; mask.height = newH;
+  const mcx = mask.getContext('2d');
+  mcx.drawImage(srcCanvas, pad, pad);
+  const md = mcx.getImageData(0, 0, newW, newH);
+  const dat = md.data;
+  const [r, g, b] = hexToRgb(color);
+  for (let i = 0; i < dat.length; i += 4) {
+    if (dat[i + 3] > 10) {
+      dat[i] = r; dat[i + 1] = g; dat[i + 2] = b;
+      dat[i + 3] = 255;
+    }
+  }
+  mcx.putImageData(md, 0, 0);
+
+  // Step 2: stamp the mask in a disc pattern to create thick backdrop
+  if (width <= 4) {
+    // small width: sample every offset within disc
+    for (let dy = -width; dy <= width; dy++) {
+      for (let dx = -width; dx <= width; dx++) {
+        if (dx * dx + dy * dy <= width * width) {
+          cx.drawImage(mask, dx, dy);
+        }
+      }
+    }
+  } else {
+    // larger width: concentric ring sampling for performance
+    for (let radius = 0; radius <= width; radius += 1) {
+      const angSteps = Math.max(8, Math.floor(radius * 8));
+      for (let k = 0; k < angSteps; k++) {
+        const a = (k / angSteps) * Math.PI * 2;
+        const dx = Math.round(Math.cos(a) * radius);
+        const dy = Math.round(Math.sin(a) * radius);
+        cx.drawImage(mask, dx, dy);
+      }
+    }
+  }
+
+  // Step 3: composite the original image on top (in the centered position)
+  cx.drawImage(srcCanvas, pad, pad);
+  return out;
+}
+
+function hexToRgb(hex) {
+  const m = hex.replace('#', '');
+  const full = m.length === 3
+    ? m.split('').map(c => c + c).join('')
+    : m;
+  return [
+    parseInt(full.slice(0, 2), 16),
+    parseInt(full.slice(2, 4), 16),
+    parseInt(full.slice(4, 6), 16),
+  ];
+}
+
 function fitInto(src, targetW, targetH) {
   const out = document.createElement('canvas');
   out.width = targetW; out.height = targetH;
@@ -1877,10 +2309,38 @@ document.querySelectorAll('.role-tab').forEach(t => {
 });
 
 $('btnClearAll').addEventListener('click', () => {
-  if (!confirm('確定要清空所有裁切結果？')) return;
-  state.results = []; state.mainResult = null; state.tabResult = null;
-  renderPreviews();
-  toast('已清空所有結果');
+  const total = state.results.length + (state.mainResult ? 1 : 0) + (state.tabResult ? 1 : 0);
+  if (total === 0) {
+    toast('沒有要清空的內容', true);
+    return;
+  }
+  // double-click to confirm (避免 confirm() 被 iframe 擋)
+  const btn = $('btnClearAll');
+  if (btn.dataset.confirming === '1') {
+    state.results = []; state.mainResult = null; state.tabResult = null;
+    renderPreviews();
+    toast(`已清空 ${total} 張`);
+    btn.dataset.confirming = '0';
+    btn.textContent = '✕ 清空';
+    return;
+  }
+  btn.dataset.confirming = '1';
+  btn.textContent = '⚠ 再按一次確認';
+  toast('再按一次清空按鈕以確認', true);
+  setTimeout(() => {
+    btn.dataset.confirming = '0';
+    btn.textContent = '✕ 清空';
+  }, 3000);
+});
+
+// 預覽底色切換
+document.querySelectorAll('.bg-toggle-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const bg = btn.dataset.bg;
+    $('previewPanel').dataset.bg = bg;
+    document.querySelectorAll('.bg-toggle-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
 });
 
 $('btnDownload').addEventListener('click', async () => {
