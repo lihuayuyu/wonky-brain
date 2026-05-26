@@ -353,6 +353,8 @@ main.container {
 .tool-card.c7 .tool-cover { background: linear-gradient(135deg, var(--pink), var(--yellow)); }
 .tool-card.c8 .tool-cover { background: linear-gradient(135deg, var(--green), var(--blue)); }
 .tool-card.c9 .tool-cover { background: linear-gradient(135deg, var(--blue), var(--purple)); }
+.tool-card.c10 .tool-cover { background: linear-gradient(135deg, #FFB833, var(--pink)); }
+.tool-card.c11 .tool-cover { background: linear-gradient(135deg, var(--purple-deep), var(--blue)); }
 
 .tool-cover::before {
   content: '';
@@ -594,12 +596,12 @@ main.container {
 <main class="container">
 
   <div class="category-bar">
-    <a href="#" class="cat-btn active">全部 <span class="count">9</span></a>
+    <a href="#" class="cat-btn active">全部 <span class="count">11</span></a>
     <a href="#" class="cat-btn">隨機決策 <span class="count">3</span></a>
     <a href="#" class="cat-btn">計算工具 <span class="count">2</span></a>
     <a href="#" class="cat-btn">文字處理 <span class="count">2</span></a>
     <a href="#" class="cat-btn">休閒娛樂 <span class="count">1</span></a>
-    <a href="#" class="cat-btn">創作工具 <span class="count">1</span></a>
+    <a href="#" class="cat-btn">創作工具 <span class="count">3</span></a>
   </div>
 
   <div class="tools-grid">
@@ -621,8 +623,34 @@ main.container {
       <div class="tool-cover"><span class="tool-icon">Sticker</span></div>
       <div class="tool-content">
         <span class="tool-cat-tag create">創作工具</span>
-        <h3 class="tool-name">LINE 貼圖分割器</h3>
-        <p class="tool-desc">上傳一張圖，自動去背、切成 LINE 貼圖三尺寸並打包下載。</p>
+        <h3 class="tool-name">LINE 貼圖製作器</h3>
+        <p class="tool-desc">整張圖自動切成 16 張貼圖、去背、加白邊底板、打包成 LINE 上架格式。</p>
+        <div class="tool-footer">
+          <span class="tool-meta">FREE · NO LOGIN</span>
+          <span class="tool-arrow">使用 →</span>
+        </div>
+      </div>
+    </a>
+
+    <a href="tool-image-merge.html" class="tool-card c10">
+      <div class="tool-cover"><span class="tool-icon">Merge</span></div>
+      <div class="tool-content">
+        <span class="tool-cat-tag create">創作工具</span>
+        <h3 class="tool-name">圖片合併器</h3>
+        <p class="tool-desc">把多張圖片合成一張長條圖，直式橫式都支援，可分段輸出 ZIP 或 PDF。</p>
+        <div class="tool-footer">
+          <span class="tool-meta">FREE · NO LOGIN</span>
+          <span class="tool-arrow">使用 →</span>
+        </div>
+      </div>
+    </a>
+
+    <a href="tool-image-split.html" class="tool-card c11">
+      <div class="tool-cover"><span class="tool-icon">Split</span></div>
+      <div class="tool-content">
+        <span class="tool-cat-tag create">創作工具</span>
+        <h3 class="tool-name">長圖拆分器</h3>
+        <p class="tool-desc">把超長截圖切成多段並排，變成 AI 看得清楚的寬版圖，方便餵給 Claude / GPT 讀取。</p>
         <div class="tool-footer">
           <span class="tool-meta">FREE · NO LOGIN</span>
           <span class="tool-arrow">使用 →</span>
