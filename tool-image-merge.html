@@ -1,0 +1,1919 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>圖片合併工具・長條圖製作 × 範圍裁切 × 分段輸出</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Kaisei+Decol:wght@400;500;700&family=Zen+Maru+Gothic:wght@400;500;700;900&family=Noto+Sans+TC:wght@400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #FFF5FA;
+    --bg-paper: #FFFFFF;
+    --ink: #4A3A5C;
+    --ink-soft: #8B7BA0;
+    --pink: #FF8FAF;
+    --pink-soft: #FFC8DD;
+    --pink-deep: #E8538A;
+    --blue: #A8C8FF;
+    --blue-soft: #D4E2FF;
+    --blue-deep: #6B9DFF;
+    --yellow: #FFE9A8;
+    --yellow-soft: #FFF5D1;
+    --green: #B8E5C8;
+    --green-deep: #6BC48F;
+    --purple: #D4C0FF;
+    --purple-deep: #B294E0;
+    --grid-line: rgba(232, 83, 138, 0.18);
+    --line: rgba(74, 58, 92, 0.15);
+    --warn: #E8538A;
+    --highlight: var(--yellow);
+    --shadow: 3px 3px 0 var(--ink);
+    --shadow-sm: 2px 2px 0 var(--ink);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    color: var(--ink);
+    font-family: 'Noto Sans TC', sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    background: linear-gradient(135deg, #FFE4F0 0%, #FFD6EA 50%, #F5DCFF 100%);
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(255, 150, 195, 0.5) 0%, transparent 35%),
+      radial-gradient(circle at 80% 15%, rgba(220, 200, 255, 0.45) 0%, transparent 40%),
+      radial-gradient(circle at 50% 60%, rgba(255, 195, 220, 0.5) 0%, transparent 45%),
+      radial-gradient(circle at 90% 75%, rgba(230, 200, 255, 0.45) 0%, transparent 35%),
+      radial-gradient(circle at 10% 85%, rgba(255, 180, 210, 0.5) 0%, transparent 40%);
+    pointer-events: none;
+    z-index: 0;
+    filter: blur(2px);
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 35px 35px;
+    pointer-events: none;
+    z-index: 1;
+    mix-blend-mode: multiply;
+  }
+  header, main, .toast { position: relative; z-index: 2; }
+
+  header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(255, 228, 240, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 2px solid var(--ink);
+    padding: 16px 32px 14px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+  }
+  .brand { display: flex; align-items: baseline; gap: 14px; }
+  .brand h1 {
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: 900;
+    font-size: 28px;
+    letter-spacing: 0.04em;
+    line-height: 1;
+    color: var(--ink);
+    transform: rotate(-2deg);
+    position: relative;
+  }
+  .brand h1::after {
+    content: '✦';
+    position: absolute;
+    top: -8px;
+    right: -16px;
+    font-size: 14px;
+    color: var(--pink);
+    transform: rotate(2deg);
+  }
+  .brand .sub {
+    font-family: 'Caveat', cursive;
+    font-size: 18px;
+    color: var(--pink-deep);
+    font-weight: 600;
+    transform: rotate(-1deg);
+  }
+  .donate-btn {
+    display: flex;
+    align-items: center;
+    height: 40px;
+    padding: 6px 14px;
+    border-radius: 12px;
+    color: #F8E0BE;
+    background-color: #AD5138;
+    border: 2px solid var(--ink);
+    text-decoration: none;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s;
+    gap: 8px;
+    white-space: nowrap;
+  }
+  .donate-btn:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: var(--shadow);
+    background-color: #C25E45;
+  }
+  .donate-icon { width: 26px; height: 26px; flex-shrink: 0; display: block; }
+
+  main {
+    display: grid;
+    grid-template-columns: 320px 1fr 320px;
+    min-height: calc(100vh - 70px);
+  }
+  @media (max-width: 1100px) {
+    main { grid-template-columns: 280px 1fr; }
+    .controls-panel { display: none; }
+  }
+  @media (max-width: 800px) {
+    main { grid-template-columns: 1fr; }
+    .file-panel { max-height: 40vh; }
+  }
+
+  /* ─── Left: File List ─── */
+  .file-panel {
+    padding: 20px;
+    background: rgba(255, 245, 250, 0.75);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-right: 2px solid var(--ink);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-height: calc(100vh - 70px);
+  }
+  .dropzone {
+    border: 2px dashed var(--ink);
+    background: rgba(255, 255, 255, 0.6);
+    padding: 24px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 16px;
+  }
+  .dropzone:hover, .dropzone.drag {
+    background: rgba(255, 232, 240, 0.85);
+    transform: translate(-1px, -1px);
+    box-shadow: var(--shadow-sm);
+  }
+  .dropzone-icon {
+    font-family: 'Kaisei Decol', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--pink-deep);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .dropzone-text {
+    font-family: 'Kaisei Decol', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .dropzone-hint {
+    font-family: 'Caveat', cursive;
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin-top: 2px;
+  }
+
+  .section-title {
+    font-family: 'Kaisei Decol', serif;
+    font-size: 17px;
+    font-weight: 700;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--ink);
+  }
+  .section-title .badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    background: var(--ink);
+    color: white;
+    padding: 2px 8px;
+    font-weight: 500;
+    border-radius: 999px;
+  }
+
+  .file-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  .file-list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-right: 4px;
+  }
+  .file-item {
+    background: white;
+    border: 2px solid var(--ink);
+    border-radius: 12px;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: grab;
+    transition: all 0.15s;
+    position: relative;
+  }
+  .file-item:hover {
+    background: var(--yellow-soft);
+    transform: translateX(2px);
+  }
+  .file-item.dragging { opacity: 0.4; }
+  .file-item.drag-over-top { border-top: 4px solid var(--pink-deep); }
+  .file-item.drag-over-bot { border-bottom: 4px solid var(--pink-deep); }
+  .file-thumb {
+    width: 42px; height: 42px;
+    flex-shrink: 0;
+    border: 1.5px solid var(--ink);
+    border-radius: 6px;
+    background: repeating-conic-gradient(#FFE4F0 0% 25%, #FFFFFF 0% 50%) 50% / 6px 6px;
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .file-thumb img { max-width: 100%; max-height: 100%; }
+  .file-info { flex: 1; min-width: 0; }
+  .file-idx {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--pink-deep);
+    font-weight: 700;
+  }
+  .file-name {
+    font-size: 12px;
+    color: var(--ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 500;
+  }
+  .file-dim {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-soft);
+  }
+  .file-del {
+    width: 22px; height: 22px;
+    background: var(--pink-deep);
+    color: white;
+    border: 1.5px solid var(--ink);
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1;
+    padding: 0;
+    flex-shrink: 0;
+    font-weight: 700;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .file-item:hover .file-del { opacity: 1; }
+
+  /* ─── Center: Merged Preview ─── */
+  .preview-panel {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    min-width: 0;
+    min-height: 500px;
+  }
+  .preview-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+    background: white;
+    border: 2px solid var(--ink);
+    border-radius: 14px;
+    padding: 10px 14px;
+    box-shadow: var(--shadow-sm);
+  }
+  .preview-stats {
+    display: flex;
+    gap: 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--ink-soft);
+    flex-wrap: wrap;
+  }
+  .preview-stats b { color: var(--ink); font-weight: 700; }
+
+  .merged-canvas-wrap {
+    flex: 1;
+    min-height: 500px;
+    max-height: calc(100vh - 180px);
+    background: white;
+    border: 2px solid var(--ink);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    overflow: auto;
+    position: relative;
+    padding: 16px;
+  }
+  .merged-canvas-inner {
+    position: relative;
+    user-select: none;
+    touch-action: none;
+    margin: 0 auto;
+    display: inline-block;
+    min-width: 0;
+  }
+  /* 用 wrapper 來實現置中（因為 inner 是 inline-block） */
+  .merged-canvas-wrap > .canvas-center {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100%;
+    min-width: 100%;
+  }
+  #mergedCanvas { display: block; background: white; border: 1px solid var(--line); }
+
+  /* image segment indicators */
+  .seg-marker {
+    position: absolute;
+    left: 0; right: 0;
+    pointer-events: none;
+  }
+  .seg-border {
+    position: absolute;
+    left: 0; right: 0;
+    border-top: 1.5px dashed rgba(74,58,92,0.3);
+    pointer-events: none;
+  }
+  .seg-label {
+    position: absolute;
+    right: 8px;
+    background: var(--ink);
+    color: white;
+    padding: 2px 8px;
+    font-size: 11px;
+    border-radius: 0 0 8px 8px;
+    font-family: 'DM Mono', monospace;
+    font-weight: 700;
+    pointer-events: none;
+  }
+
+  /* crop handle for trimming visible range — 小手柄樣式，不擋圖 */
+  .crop-handle {
+    position: absolute;
+    height: 18px;
+    width: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--pink-deep);
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    cursor: ns-resize;
+    z-index: 5;
+    transition: all 0.15s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  .crop-handle:hover, .crop-handle.dragging {
+    background: var(--ink);
+    transform: translateX(-50%) scale(1.1);
+  }
+  .crop-handle::before, .crop-handle::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 18px; height: 2px;
+    background: white;
+    border-radius: 1px;
+  }
+  .crop-handle::after { top: calc(50% - 4px); }
+  /* 橫式時，手柄變成左右取向 */
+  .crop-handle.horizontal {
+    width: 18px;
+    height: 60px;
+    left: auto;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: ew-resize;
+  }
+  .crop-handle.horizontal:hover, .crop-handle.horizontal.dragging {
+    transform: translateY(-50%) scale(1.1);
+  }
+  .crop-handle.horizontal::before, .crop-handle.horizontal::after {
+    width: 2px; height: 18px;
+  }
+  .crop-handle.horizontal::after { top: 50%; left: calc(50% - 4px); transform: translate(-50%, -50%); }
+  .crop-shade {
+    position: absolute;
+    left: 0; right: 0;
+    background: rgba(255, 200, 220, 0.5);
+    pointer-events: none;
+    z-index: 3;
+    border-left: 2px dashed var(--pink-deep);
+    border-right: 2px dashed var(--pink-deep);
+  }
+
+  /* output cut lines */
+  .cut-line {
+    position: absolute;
+    left: 0; right: 0;
+    height: 4px;
+    background: var(--blue-deep);
+    cursor: ns-resize;
+    z-index: 6;
+    transition: background 0.15s;
+    margin-top: -2px;
+  }
+  .cut-line:hover, .cut-line.dragging { background: var(--yellow); box-shadow: 0 0 0 2px var(--ink); }
+  .cut-line-label {
+    position: absolute;
+    left: 8px;
+    top: -8px;
+    background: var(--blue-deep);
+    color: white;
+    padding: 1px 8px;
+    font-size: 10px;
+    border-radius: 6px;
+    font-family: 'DM Mono', monospace;
+    font-weight: 700;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .cut-line:hover .cut-line-label, .cut-line.dragging .cut-line-label { background: var(--ink); }
+  .cut-line-del {
+    position: absolute;
+    right: 8px;
+    top: -10px;
+    width: 18px; height: 18px;
+    background: var(--pink-deep);
+    color: white;
+    border: 1.5px solid var(--ink);
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 11px;
+    line-height: 1;
+    padding: 0;
+    font-weight: 700;
+    display: none;
+  }
+  .cut-line:hover .cut-line-del { display: block; }
+
+  /* ─── Right: Controls ─── */
+  .controls-panel {
+    padding: 20px;
+    background: rgba(255, 245, 250, 0.75);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-left: 2px solid var(--ink);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    max-height: calc(100vh - 70px);
+    overflow-y: auto;
+    font-size: 14px;
+  }
+  .control-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 14px;
+  }
+  .control-group label { color: var(--ink-soft); flex: 1; }
+  .control-group input[type=number] {
+    width: 80px;
+    padding: 6px 8px;
+    border: 2px solid var(--ink);
+    background: white;
+    border-radius: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .control-group input[type=color] {
+    width: 44px; height: 32px;
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    cursor: pointer;
+    padding: 2px;
+    background: white;
+  }
+  .slider-row { display: flex; align-items: center; gap: 8px; flex: 0 0 60%; }
+  .slider-row input[type=range] { flex: 1; }
+  .slider-row .val {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    min-width: 36px; text-align: right;
+    font-weight: 700;
+  }
+
+  .info-note {
+    background: var(--yellow-soft);
+    border: 2px solid var(--ink);
+    padding: 12px 14px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--ink);
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+  }
+  .info-note b { color: var(--pink-deep); font-weight: 700; }
+
+  /* ─── Buttons ─── */
+  .btn {
+    font-family: 'Zen Maru Gothic', 'Noto Sans TC', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 9px 16px;
+    background: white;
+    border: 2px solid var(--ink);
+    color: var(--ink);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    line-height: 1;
+    border-radius: 999px;
+    box-shadow: var(--shadow-sm);
+    white-space: nowrap;
+  }
+  .btn:hover:not(:disabled) {
+    transform: translate(-1px, -1px);
+    box-shadow: var(--shadow);
+    background: var(--pink-soft);
+  }
+  .btn:active:not(:disabled) { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--ink); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn.primary { background: var(--pink-deep); color: white; }
+  .btn.primary:hover:not(:disabled) { background: var(--pink); }
+  .btn.danger { background: var(--pink); color: white; }
+  .btn.danger:hover:not(:disabled) { background: var(--pink-deep); }
+  .btn.blue { background: var(--blue-deep); color: white; }
+  .btn.blue:hover:not(:disabled) { background: var(--blue); }
+  .btn.sm { padding: 6px 12px; font-size: 12px; }
+  .btn.full { width: 100%; justify-content: center; }
+
+  /* mode tabs */
+  .mode-tabs {
+    display: flex;
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    overflow: hidden;
+    background: white;
+  }
+  .mode-tab {
+    flex: 1;
+    padding: 9px 8px;
+    text-align: center;
+    background: white;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 700;
+    border-right: 2px solid var(--ink);
+    transition: all 0.2s;
+    color: var(--ink);
+  }
+  .mode-tab:last-child { border-right: none; }
+  .mode-tab.active { background: var(--ink); color: white; }
+  .mode-tab:hover:not(.active) { background: var(--pink-soft); }
+
+  /* width-mode select */
+  select.styled {
+    width: 100%;
+    padding: 8px 12px;
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    background: white;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    cursor: pointer;
+  }
+
+  /* toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--ink);
+    color: white;
+    padding: 12px 22px;
+    font-size: 14px;
+    border: 2px solid var(--ink);
+    box-shadow: 4px 4px 0 var(--pink-deep);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s;
+    z-index: 1000;
+    max-width: 90vw;
+    border-radius: 999px;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-weight: 500;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.err { box-shadow: 4px 4px 0 var(--pink); }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--ink-soft); border-radius: 4px; }
+
+  /* empty state */
+  .empty-state {
+    text-align: center;
+    color: var(--ink-soft);
+    padding: 40px 20px;
+    font-size: 14px;
+    font-style: italic;
+  }
+
+  /* output preview */
+  .output-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .output-card {
+    border: 2px solid var(--ink);
+    background: white;
+    border-radius: 8px;
+    padding: 4px;
+    text-align: center;
+  }
+  .output-card .thumb {
+    width: 100%;
+    aspect-ratio: 9/16;
+    background: repeating-conic-gradient(#FFE4F0 0% 25%, #FFFFFF 0% 50%) 50% / 6px 6px;
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 4px;
+    margin-bottom: 4px;
+  }
+  .output-card .thumb img { max-width: 100%; max-height: 100%; }
+  .output-card .lbl {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--ink);
+    font-weight: 700;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <h1>圖片合併</h1>
+    <div class="sub">歪腦袋小工具 · v1.6</div>
+  </div>
+  <a class="donate-btn" href="https://fernfern.bobaboba.me" target="_blank" rel="noopener">
+    <svg class="donate-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-label="boba">
+      <path d="M5 7 L7.5 21 Q7.7 22.2 9 22.2 L15 22.2 Q16.3 22.2 16.5 21 L19 7 Z" fill="#F8E0BE" stroke="#3A2618" stroke-width="1.3" stroke-linejoin="round"/>
+      <ellipse cx="12" cy="7" rx="7" ry="1.6" fill="#C48A60" stroke="#3A2618" stroke-width="1.3"/>
+      <path d="M14 2 L13 8" stroke="#E85A5A" stroke-width="1.8" stroke-linecap="round"/>
+      <circle cx="10" cy="17" r="1.3" fill="#3A2618"/>
+      <circle cx="13" cy="18.5" r="1.3" fill="#3A2618"/>
+      <circle cx="11" cy="14" r="1.2" fill="#3A2618"/>
+      <circle cx="14" cy="15.5" r="1.2" fill="#3A2618"/>
+    </svg>
+    <div>歡迎餵食我 🤤</div>
+  </a>
+</header>
+
+<main>
+  <!-- ─── 左側：檔案列表 ─── -->
+  <aside class="file-panel">
+    <div class="dropzone" id="dropzone">
+      <div class="dropzone-icon">↓</div>
+      <div class="dropzone-text">拖曳或點擊上傳</div>
+      <div class="dropzone-hint">支援 100+ 張 · 可分次累加</div>
+      <input type="file" id="fileInput" accept="image/*" multiple style="display:none">
+    </div>
+
+    <div class="section-title">
+      檔案列表
+      <span class="badge" id="fileCount">0</span>
+    </div>
+
+    <div class="file-actions">
+      <button class="btn sm" id="btnSortName">⇅ 檔名排序</button>
+      <button class="btn sm" id="btnReverse">↕ 反轉</button>
+      <button class="btn sm danger" id="btnClearAll">✕ 全部清空</button>
+    </div>
+
+    <div class="file-list" id="fileList">
+      <div class="empty-state">尚未上傳檔案</div>
+    </div>
+  </aside>
+
+  <!-- ─── 中央：預覽區 ─── -->
+  <section class="preview-panel">
+    <div class="preview-toolbar">
+      <div class="preview-stats">
+        <span>合併寬 <b id="statW">—</b></span>
+        <span>總高 <b id="statH">—</b></span>
+        <span>分段 <b id="statSeg">—</b></span>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:6px;background:white;border:2px solid var(--ink);border-radius:999px;padding:4px 12px;box-shadow:var(--shadow-sm);">
+          <span style="font-size:12px;color:var(--ink-soft);font-family:'DM Mono',monospace;">縮放</span>
+          <input type="range" id="zoomSlider" min="5" max="300" value="100" style="width:140px;">
+          <span id="zoomVal" style="font-family:'DM Mono',monospace;font-size:12px;font-weight:700;color:var(--ink);min-width:38px;text-align:right;">50%</span>
+        </div>
+        <button class="btn sm" id="btnViewFit" title="自動縮到看得到整張">⊞ 全覽</button>
+        <button class="btn sm primary" id="btnViewWidth" title="寬度填滿，高度超出可捲動（推薦）">↔ 寬度</button>
+        <button class="btn sm blue" id="btnDownloadPDF" disabled>📄 下載 PDF</button>
+        <button class="btn sm primary" id="btnDownload" disabled>⬇ 下載 ZIP</button>
+      </div>
+    </div>
+
+    <div class="merged-canvas-wrap" id="canvasWrap">
+      <div class="canvas-center">
+        <div class="merged-canvas-inner" id="canvasInner">
+          <canvas id="mergedCanvas"></canvas>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 右側：控制區 ─── -->
+  <aside class="controls-panel">
+
+    <div class="info-note">
+      <b>使用流程：</b><br>
+      1. 上傳所有圖片（左側）<br>
+      2. 拖曳列表項調整順序<br>
+      3. 預覽區<b>粉色手柄</b>可調整每張可視範圍<br>
+      &nbsp;&nbsp;💡 <b>頂部手柄偏左、底部手柄偏右</b><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;（避免相鄰圖手柄重疊互搶）<br>
+      &nbsp;&nbsp;💡 縮放太小時手柄會隱藏，放大就會出現<br>
+      4. 選擇分段方式 → 下載 ZIP
+    </div>
+
+    <div>
+      <div class="section-title" style="margin-bottom:10px;">合併方向</div>
+      <div class="mode-tabs">
+        <div class="mode-tab active" data-orient="vertical">↕ 直式（長條）</div>
+        <div class="mode-tab" data-orient="horizontal">↔ 橫式（橫條）</div>
+      </div>
+      <div style="font-size:12px;color:var(--ink-soft);line-height:1.5;margin-top:6px;">
+        💡 直式：上下接（適合長截圖、對話記錄）<br>
+        💡 橫式：左右接（適合 banner、橫向拼貼）
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title" style="margin-bottom:10px;"><span id="dimLabel">合併寬度</span></div>
+      <select class="styled" id="widthMode">
+        <option value="max" selected>依最寬/高那張為基準</option>
+        <option value="min">依最窄/低那張（其他裁切）</option>
+        <option value="custom">自訂尺寸</option>
+        <option value="original">保留原尺寸（補背景）</option>
+      </select>
+      <div class="control-group" id="customWidthRow" style="margin-top:8px;display:none;">
+        <label id="customWidthLabel">寬度 (px)</label>
+        <input type="number" id="customWidth" value="1080" min="100" max="8000" step="10">
+      </div>
+      <div class="control-group" style="margin-top:8px;">
+        <label>圖間距 (px)</label>
+        <input type="number" id="gap" value="0" min="0" max="200" step="2">
+      </div>
+      <div class="control-group">
+        <label>背景顏色</label>
+        <input type="color" id="bgColor" value="#FFFFFF">
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title" style="margin-bottom:10px;">分段輸出</div>
+      <div class="mode-tabs">
+        <div class="mode-tab active" data-cut-mode="count">張數平均切</div>
+        <div class="mode-tab" data-cut-mode="height">指定高度</div>
+        <div class="mode-tab" data-cut-mode="manual">手動切割線</div>
+      </div>
+
+      <div id="cutByCount" style="margin-top:10px;">
+        <div class="control-group">
+          <label>輸出張數</label>
+          <input type="number" id="cutCount" value="1" min="1" max="100" step="1">
+        </div>
+      </div>
+
+      <div id="cutByHeight" style="margin-top:10px;display:none;">
+        <div class="control-group">
+          <label>每張高度 (px)</label>
+          <input type="number" id="cutHeight" value="4000" min="100" max="20000" step="100">
+        </div>
+      </div>
+
+      <div id="cutManual" style="margin-top:10px;display:none;">
+        <div style="font-size:12px;color:var(--ink-soft);line-height:1.5;">
+          💡 在預覽圖上點任意位置加切割線<br>
+          💡 拖動切割線可調整位置<br>
+          💡 點切割線上的 × 可刪除
+        </div>
+        <button class="btn sm full" id="btnClearCuts" style="margin-top:8px;">↺ 清除所有切割線</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title" style="margin-bottom:10px;">PDF 設定</div>
+      <select class="styled" id="pdfMode">
+        <option value="separate" selected>每張圖獨立一頁（依檔名順序）</option>
+        <option value="merged">合併後分段 → 每段一頁</option>
+        <option value="single">合併後整張一頁（單張長條）</option>
+      </select>
+      <div class="control-group" style="margin-top:8px;">
+        <label>頁面大小</label>
+        <select class="styled" id="pdfPageSize" style="width:auto;flex:0 0 auto;padding:6px 10px;font-size:12px;">
+          <option value="auto" selected>自動（符合圖片）</option>
+          <option value="a4">A4</option>
+          <option value="letter">Letter</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>方向</label>
+        <select class="styled" id="pdfOrient" style="width:auto;flex:0 0 auto;padding:6px 10px;font-size:12px;">
+          <option value="auto" selected>自動</option>
+          <option value="portrait">直向</option>
+          <option value="landscape">橫向</option>
+        </select>
+      </div>
+      <div style="font-size:11px;color:var(--ink-soft);line-height:1.5;margin-top:6px;">
+        💡 「獨立一頁」最常用，每張原圖一頁<br>
+        💡 「自動」會依圖片比例自動調整紙張
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title" style="margin-bottom:10px;">輸出預覽</div>
+      <div id="outputPreview" class="output-grid">
+        <div class="empty-state" style="grid-column:1/-1;">需先上傳圖片</div>
+      </div>
+    </div>
+
+  </aside>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+const state = {
+  files: [],          // [{ id, name, img, w, h, cropTop, cropBottom, cropLeft, cropRight }]
+  mergedCanvas: null,
+  mergedW: 0,
+  mergedH: 0,
+  viewScale: 1,
+  yOffsets: [],       // 直式：Y 起始；橫式：X 起始
+  cutMode: 'count',
+  manualCuts: [],     // 直式：Y 座標；橫式：X 座標
+  orientation: 'vertical', // 'vertical' | 'horizontal'
+  viewMode: 'width',        // 'fit' | 'width' | 'manual' - 預設寬度貼齊
+  manualZoom: 100,
+};
+
+function toast(msg, err = false) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (err ? ' err' : '');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.className = 'toast', 2600);
+}
+
+/* ─── File loading ─── */
+$('dropzone').addEventListener('click', () => $('fileInput').click());
+$('fileInput').addEventListener('change', e => handleFiles(e.target.files));
+['dragenter','dragover'].forEach(ev => $('dropzone').addEventListener(ev, e => {
+  e.preventDefault(); $('dropzone').classList.add('drag');
+}));
+['dragleave','drop'].forEach(ev => $('dropzone').addEventListener(ev, e => {
+  e.preventDefault(); $('dropzone').classList.remove('drag');
+}));
+$('dropzone').addEventListener('drop', e => {
+  if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
+});
+
+async function handleFiles(fileList) {
+  const imgs = Array.from(fileList).filter(f => f.type.startsWith('image/'));
+  if (!imgs.length) { toast('沒有可用的圖片檔', true); return; }
+  toast(`載入中 · ${imgs.length} 張...`);
+  for (const f of imgs) {
+    try {
+      const img = await loadImage(f);
+      state.files.push({
+        id: Date.now() + Math.random(),
+        name: f.name,
+        img,
+        w: img.naturalWidth,
+        h: img.naturalHeight,
+        cropTop: 0,
+        cropBottom: 0,
+        cropLeft: 0,
+        cropRight: 0,
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  // sort by filename on initial load
+  if (state.files.length === imgs.length) {
+    state.files.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+  }
+  renderFileList();
+  rebuildMerged();
+  toast(`已載入 ${imgs.length} 張 · 共 ${state.files.length} 張`);
+}
+
+function loadImage(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => {
+      const img = new Image();
+      img.onload = () => res(img);
+      img.onerror = rej;
+      img.src = r.result;
+    };
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+/* ─── File list rendering + drag to reorder ─── */
+function renderFileList() {
+  $('fileCount').textContent = state.files.length;
+  const list = $('fileList');
+  if (!state.files.length) {
+    list.innerHTML = '<div class="empty-state">尚未上傳檔案</div>';
+    return;
+  }
+  list.innerHTML = '';
+  state.files.forEach((f, i) => {
+    const el = document.createElement('div');
+    el.className = 'file-item';
+    el.draggable = true;
+    el.dataset.idx = i;
+    el.innerHTML = `
+      <div class="file-thumb"><img src="${f.img.src}" alt=""></div>
+      <div class="file-info">
+        <div class="file-idx">${String(i + 1).padStart(2, '0')}</div>
+        <div class="file-name" title="${escapeHTML(f.name)}">${escapeHTML(f.name)}</div>
+        <div class="file-dim">${f.w}×${f.h}</div>
+      </div>
+      <button class="file-del" title="移除">×</button>
+    `;
+    el.querySelector('.file-del').addEventListener('click', e => {
+      e.stopPropagation();
+      state.files.splice(i, 1);
+      renderFileList();
+      rebuildMerged();
+    });
+    attachDragReorder(el, i);
+    list.appendChild(el);
+  });
+}
+
+function escapeHTML(s) {
+  return s.replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+}
+
+function attachDragReorder(el, idx) {
+  el.addEventListener('dragstart', e => {
+    e.dataTransfer.setData('text/plain', idx);
+    e.dataTransfer.effectAllowed = 'move';
+    el.classList.add('dragging');
+  });
+  el.addEventListener('dragend', () => {
+    el.classList.remove('dragging');
+    document.querySelectorAll('.file-item').forEach(x => {
+      x.classList.remove('drag-over-top', 'drag-over-bot');
+    });
+  });
+  el.addEventListener('dragover', e => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    const rect = el.getBoundingClientRect();
+    const mid = rect.top + rect.height / 2;
+    el.classList.toggle('drag-over-top', e.clientY < mid);
+    el.classList.toggle('drag-over-bot', e.clientY >= mid);
+  });
+  el.addEventListener('dragleave', () => {
+    el.classList.remove('drag-over-top', 'drag-over-bot');
+  });
+  el.addEventListener('drop', e => {
+    e.preventDefault();
+    const fromIdx = parseInt(e.dataTransfer.getData('text/plain'));
+    if (isNaN(fromIdx) || fromIdx === idx) return;
+    const rect = el.getBoundingClientRect();
+    const mid = rect.top + rect.height / 2;
+    let toIdx = e.clientY < mid ? idx : idx + 1;
+    if (fromIdx < toIdx) toIdx--;
+    const item = state.files.splice(fromIdx, 1)[0];
+    state.files.splice(toIdx, 0, item);
+    renderFileList();
+    rebuildMerged();
+  });
+}
+
+/* sort & reverse */
+$('btnSortName').addEventListener('click', () => {
+  if (!state.files.length) return;
+  state.files.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+  renderFileList();
+  rebuildMerged();
+  toast('已依檔名排序');
+});
+$('btnReverse').addEventListener('click', () => {
+  if (!state.files.length) return;
+  state.files.reverse();
+  renderFileList();
+  rebuildMerged();
+  toast('已反轉順序');
+});
+$('btnClearAll').addEventListener('click', () => {
+  if (!state.files.length) return;
+  const btn = $('btnClearAll');
+  if (btn.dataset.confirm === '1') {
+    state.files = [];
+    state.manualCuts = [];
+    renderFileList();
+    rebuildMerged();
+    btn.dataset.confirm = '0';
+    btn.textContent = '✕ 全部清空';
+    toast('已清空');
+    return;
+  }
+  btn.dataset.confirm = '1';
+  btn.textContent = '⚠ 再按一次';
+  setTimeout(() => {
+    btn.dataset.confirm = '0';
+    btn.textContent = '✕ 全部清空';
+  }, 3000);
+});
+
+/* ─── Width mode change ─── */
+$('widthMode').addEventListener('change', e => {
+  $('customWidthRow').style.display = e.target.value === 'custom' ? 'flex' : 'none';
+  rebuildMerged();
+});
+['customWidth', 'gap', 'bgColor'].forEach(id => {
+  $(id).addEventListener('change', rebuildMerged);
+});
+
+/* ─── Build merged canvas (off-screen) ─── */
+function rebuildMerged() {
+  if (!state.files.length) {
+    state.mergedCanvas = null;
+    state.mergedW = 0;
+    state.mergedH = 0;
+    state.yOffsets = [];
+    state.manualCuts = [];
+    drawMergedToScreen();
+    return;
+  }
+
+  const isHoriz = state.orientation === 'horizontal';
+  const mode = $('widthMode').value;
+  const gap = Math.max(0, parseInt($('gap').value) || 0);
+  const bg = $('bgColor').value;
+
+  // 計算每張圖的「可視區域」（去除 crop 後的尺寸，原圖座標系）
+  const visibleSizes = state.files.map(f => {
+    const vw = Math.max(1, f.w - (f.cropLeft || 0) - (f.cropRight || 0));
+    const vh = Math.max(1, f.h - (f.cropTop || 0) - (f.cropBottom || 0));
+    return { vw, vh };
+  });
+
+  // 決定「垂直於排列方向」的基準尺寸 (target perpendicular)
+  // 直式：target = 寬度；橫式：target = 高度
+  let targetPerp;
+  const perpDims = visibleSizes.map(v => isHoriz ? v.vh : v.vw);
+  if (mode === 'max') targetPerp = Math.max(...perpDims);
+  else if (mode === 'min') targetPerp = Math.min(...perpDims);
+  else if (mode === 'custom') targetPerp = Math.max(100, Math.min(8000, parseInt($('customWidth').value) || 1080));
+  else targetPerp = Math.max(...perpDims);
+
+  // 計算每張圖縮放後的尺寸與位置
+  let totalParallel = 0;
+  const layouts = state.files.map((f, i) => {
+    const { vw, vh } = visibleSizes[i];
+    const origPerp = isHoriz ? vh : vw;
+    const origParallel = isHoriz ? vw : vh;
+
+    let drawPerp, drawParallel;
+    if (mode === 'original') {
+      drawPerp = origPerp;
+      drawParallel = origParallel;
+    } else {
+      // 等比縮放：perp 維度縮到 targetPerp
+      const k = targetPerp / origPerp;
+      drawPerp = targetPerp;
+      drawParallel = Math.max(1, Math.round(origParallel * k));
+    }
+    const pos = totalParallel;
+    totalParallel += drawParallel;
+    if (i < state.files.length - 1) totalParallel += gap;
+    return { f, vw, vh, drawPerp, drawParallel, pos };
+  });
+
+  const fullPerp = mode === 'original' ? Math.max(...layouts.map(l => l.drawPerp)) : targetPerp;
+  const fullW = isHoriz ? totalParallel : fullPerp;
+  const fullH = isHoriz ? fullPerp : totalParallel;
+  state.mergedW = fullW;
+  state.mergedH = fullH;
+  state.yOffsets = layouts.map(l => l.pos);
+
+  // OOM 保護
+  const MAX_CANVAS_AREA = 268435456;
+  if (fullW * fullH > MAX_CANVAS_AREA) {
+    toast(`合併圖過大 (${fullW}×${fullH})，請降低尺寸`, true);
+    state.mergedCanvas = null;
+    drawMergedToScreen();
+    return;
+  }
+
+  // 建立離屏 canvas
+  const c = document.createElement('canvas');
+  c.width = fullW;
+  c.height = fullH;
+  const cx = c.getContext('2d');
+  cx.fillStyle = bg;
+  cx.fillRect(0, 0, fullW, fullH);
+  cx.imageSmoothingQuality = 'high';
+
+  layouts.forEach(l => {
+    const { f, vw, vh, drawPerp, drawParallel, pos } = l;
+    // 來源座標（原圖中要繪製的區域）
+    const sx = f.cropLeft || 0;
+    const sy = f.cropTop || 0;
+    const sw = vw;
+    const sh = vh;
+    // 目標座標（在合併畫布上）
+    let dx, dy, dw, dh;
+    if (isHoriz) {
+      // 橫式：parallel 是 X，perp 是 Y
+      dx = pos;
+      dy = mode === 'original' ? Math.round((fullH - drawPerp) / 2) : 0;
+      dw = drawParallel;
+      dh = drawPerp;
+    } else {
+      // 直式：parallel 是 Y，perp 是 X
+      dx = mode === 'original' ? Math.round((fullW - drawPerp) / 2) : 0;
+      dy = pos;
+      dw = drawPerp;
+      dh = drawParallel;
+    }
+    try {
+      cx.drawImage(f.img, sx, sy, sw, sh, dx, dy, dw, dh);
+    } catch (err) {
+      console.error('drawImage failed:', err, { sx, sy, sw, sh, dx, dy, dw, dh });
+    }
+  });
+
+  state.mergedCanvas = c;
+  drawMergedToScreen();
+  updateOutputPreview();
+}
+
+/* ─── Draw scaled merged canvas to the on-screen one ─── */
+function drawMergedToScreen() {
+  const canvas = $('mergedCanvas');
+  const wrap = $('canvasWrap');
+  $('statW').textContent = state.mergedW || '—';
+  $('statH').textContent = state.mergedH || '—';
+
+  if (!state.mergedCanvas) {
+    canvas.width = 1; canvas.height = 1;
+    document.querySelectorAll('.seg-marker, .seg-border, .seg-label, .crop-handle, .crop-shade, .cut-line').forEach(e => e.remove());
+    return;
+  }
+
+  let wrapW = wrap.clientWidth - 32;
+  if (wrapW < 100) wrapW = 600;
+  let wrapH = wrap.clientHeight - 32;
+  if (wrapH < 100) wrapH = 600;
+
+  const widthScale = wrapW / state.mergedW;
+  const heightScale = wrapH / state.mergedH;
+  const isHoriz = state.orientation === 'horizontal';
+
+  let scale;
+  if (state.viewMode === 'manual') {
+    // 手動縮放：直接用滑桿百分比（可超過 100%）
+    scale = state.manualZoom / 100;
+  } else if (state.viewMode === 'fit') {
+    scale = Math.min(1, widthScale, heightScale);
+  } else {
+    // width 模式
+    if (isHoriz) scale = Math.min(1, heightScale);
+    else scale = Math.min(1, widthScale);
+  }
+
+  // 安全上限：避免畫布過大造成卡頓（但 manual 放大時放寬一點）
+  const MAX_PIXELS = state.viewMode === 'manual' ? 24000 : 16000;
+  const longDim = Math.max(state.mergedW, state.mergedH);
+  if (longDim * scale > MAX_PIXELS) scale = MAX_PIXELS / longDim;
+  if (scale <= 0 || !isFinite(scale)) scale = 0.5;
+
+  state.viewScale = scale;
+  canvas.width = Math.max(1, Math.round(state.mergedW * scale));
+  canvas.height = Math.max(1, Math.round(state.mergedH * scale));
+  const cx = canvas.getContext('2d');
+  cx.imageSmoothingQuality = 'high';
+  cx.drawImage(state.mergedCanvas, 0, 0, canvas.width, canvas.height);
+
+  // 同步滑桿顯示
+  const zoomPct = Math.round(scale * 100);
+  $('zoomSlider').value = Math.max(5, Math.min(300, zoomPct));
+  $('zoomVal').textContent = zoomPct + '%';
+
+  renderSegmentMarkers();
+  renderCropHandles();
+  renderCutLines();
+}
+
+/* segment borders (between images) */
+function renderSegmentMarkers() {
+  const inner = $('canvasInner');
+  document.querySelectorAll('.seg-marker, .seg-border, .seg-label').forEach(e => e.remove());
+  const canvas = $('mergedCanvas');
+  const offX = canvas.offsetLeft;
+  const offY = canvas.offsetTop;
+  const isHoriz = state.orientation === 'horizontal';
+  state.yOffsets.forEach((pos, i) => {
+    const lbl = document.createElement('div');
+    lbl.className = 'seg-label';
+    lbl.textContent = `#${String(i + 1).padStart(2, '0')}`;
+    if (isHoriz) {
+      lbl.style.top = offY + 'px';
+      lbl.style.left = (offX + pos * state.viewScale) + 'px';
+      lbl.style.right = 'auto';
+      lbl.style.borderRadius = '0 0 8px 0';
+    } else {
+      lbl.style.top = (offY + pos * state.viewScale) + 'px';
+      lbl.style.left = 'auto';
+      lbl.style.right = '8px';
+      lbl.style.borderRadius = '0 0 8px 8px';
+    }
+    inner.appendChild(lbl);
+
+    if (i === 0) return;
+    const line = document.createElement('div');
+    line.className = 'seg-border';
+    if (isHoriz) {
+      line.style.left = (offX + pos * state.viewScale) + 'px';
+      line.style.top = offY + 'px';
+      line.style.right = 'auto';
+      line.style.bottom = 'auto';
+      line.style.height = canvas.height + 'px';
+      line.style.width = '0';
+      line.style.borderTop = 'none';
+      line.style.borderLeft = '1.5px dashed rgba(74,58,92,0.3)';
+    } else {
+      line.style.top = (offY + pos * state.viewScale) + 'px';
+    }
+    inner.appendChild(line);
+  });
+}
+
+/* crop handles (top/bottom for vertical, left/right for horizontal) */
+function renderCropHandles() {
+  const inner = $('canvasInner');
+  document.querySelectorAll('.crop-handle, .crop-shade').forEach(e => e.remove());
+  const canvas = $('mergedCanvas');
+  const offX = canvas.offsetLeft;
+  const offY = canvas.offsetTop;
+  const isHoriz = state.orientation === 'horizontal';
+  const mode = $('widthMode').value;
+
+  state.files.forEach((f, i) => {
+    const layoutPos = state.yOffsets[i];
+    if (isHoriz) {
+      const visibleW = f.w - (f.cropLeft || 0) - (f.cropRight || 0);
+      const k = mode === 'original' ? 1 : (state.mergedH / f.h);
+      const scaledW = visibleW * k;
+      // 縮放到畫面後的「視覺寬度」太小就不顯示 handle
+      const displayW = scaledW * state.viewScale;
+      if (displayW < 40) return;
+
+      const leftPx = offX + layoutPos * state.viewScale;
+      const rightPx = offX + (layoutPos + scaledW) * state.viewScale;
+      // left handle 偏上 1/3，right handle 偏下 2/3
+      const upperThirdY = offY + canvas.height * 0.33;
+      const lowerThirdY = offY + canvas.height * 0.67;
+
+      const leftH = document.createElement('div');
+      leftH.className = 'crop-handle horizontal';
+      leftH.style.left = (leftPx - 9) + 'px';
+      leftH.style.top = upperThirdY + 'px';
+      leftH.dataset.idx = i;
+      leftH.dataset.side = 'left';
+      leftH.title = `圖 ${i + 1} 左側 · 拖動調整可視左邊界`;
+      inner.appendChild(leftH);
+
+      const rightH = document.createElement('div');
+      rightH.className = 'crop-handle horizontal';
+      rightH.style.left = (rightPx - 9) + 'px';
+      rightH.style.top = lowerThirdY + 'px';
+      rightH.dataset.idx = i;
+      rightH.dataset.side = 'right';
+      rightH.title = `圖 ${i + 1} 右側 · 拖動調整可視右邊界`;
+      inner.appendChild(rightH);
+
+      attachCropHandleDrag(leftH);
+      attachCropHandleDrag(rightH);
+    } else {
+      const visibleH = f.h - (f.cropTop || 0) - (f.cropBottom || 0);
+      const k = mode === 'original' ? 1 : (state.mergedW / f.w);
+      const scaledH = visibleH * k;
+      // 縮放到畫面後的「視覺高度」太小就不顯示 handle（避免擠成一坨）
+      const displayH = scaledH * state.viewScale;
+      if (displayH < 40) return;
+
+      const topPx = offY + layoutPos * state.viewScale;
+      const bottomPx = offY + (layoutPos + scaledH) * state.viewScale;
+      // top handle 偏左 1/3，bottom handle 偏右 2/3，避免相鄰圖的兩個 handle 在同一個 Y 位置互相搶占
+      const leftThirdX = offX + canvas.width * 0.33;
+      const rightThirdX = offX + canvas.width * 0.67;
+
+      const topH = document.createElement('div');
+      topH.className = 'crop-handle';
+      topH.style.left = leftThirdX + 'px';
+      topH.style.top = (topPx - 9) + 'px';
+      topH.dataset.idx = i;
+      topH.dataset.side = 'top';
+      topH.title = `圖 ${i + 1} 頂部 · 拖動調整可視上邊界`;
+      inner.appendChild(topH);
+
+      const botH = document.createElement('div');
+      botH.className = 'crop-handle';
+      botH.style.left = rightThirdX + 'px';
+      botH.style.top = (bottomPx - 9) + 'px';
+      botH.dataset.idx = i;
+      botH.dataset.side = 'bottom';
+      botH.title = `圖 ${i + 1} 底部 · 拖動調整可視下邊界`;
+      inner.appendChild(botH);
+
+      attachCropHandleDrag(topH);
+      attachCropHandleDrag(botH);
+    }
+  });
+}
+
+function attachCropHandleDrag(handle) {
+  let startMouse = 0;
+  let startCropA = 0;  // top or left
+  let startCropB = 0;  // bottom or right
+  let i, side;
+  const isHoriz = state.orientation === 'horizontal';
+  function onMove(e) {
+    const f = state.files[i];
+    const mode = $('widthMode').value;
+    if (isHoriz) {
+      const dx = (e.clientX - startMouse) / state.viewScale;
+      const k = mode === 'original' ? 1 : (state.mergedH / f.h);
+      const dxOrig = dx / k;
+      if (side === 'left') {
+        let v = startCropA + dxOrig;
+        v = Math.max(0, Math.min(f.w - (f.cropRight || 0) - 10, v));
+        f.cropLeft = Math.round(v);
+      } else {
+        let v = startCropB - dxOrig;
+        v = Math.max(0, Math.min(f.w - (f.cropLeft || 0) - 10, v));
+        f.cropRight = Math.round(v);
+      }
+    } else {
+      const dy = (e.clientY - startMouse) / state.viewScale;
+      const k = mode === 'original' ? 1 : (state.mergedW / f.w);
+      const dyOrig = dy / k;
+      if (side === 'top') {
+        let v = startCropA + dyOrig;
+        v = Math.max(0, Math.min(f.h - (f.cropBottom || 0) - 10, v));
+        f.cropTop = Math.round(v);
+      } else {
+        let v = startCropB - dyOrig;
+        v = Math.max(0, Math.min(f.h - (f.cropTop || 0) - 10, v));
+        f.cropBottom = Math.round(v);
+      }
+    }
+    rebuildMerged();
+  }
+  function onUp() {
+    handle.classList.remove('dragging');
+    window.removeEventListener('mousemove', onMove);
+    window.removeEventListener('mouseup', onUp);
+  }
+  handle.addEventListener('mousedown', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    i = parseInt(handle.dataset.idx);
+    side = handle.dataset.side;
+    const f = state.files[i];
+    if (isHoriz) {
+      startMouse = e.clientX;
+      startCropA = f.cropLeft || 0;
+      startCropB = f.cropRight || 0;
+    } else {
+      startMouse = e.clientY;
+      startCropA = f.cropTop || 0;
+      startCropB = f.cropBottom || 0;
+    }
+    handle.classList.add('dragging');
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  });
+}
+
+/* ─── Cut lines (manual mode) ─── */
+function renderCutLines() {
+  const inner = $('canvasInner');
+  document.querySelectorAll('.cut-line').forEach(e => e.remove());
+  if (state.cutMode !== 'manual') return;
+  const canvas = $('mergedCanvas');
+  const offX = canvas.offsetLeft;
+  const offY = canvas.offsetTop;
+  const isHoriz = state.orientation === 'horizontal';
+
+  state.manualCuts.forEach((pos, i) => {
+    const line = document.createElement('div');
+    line.className = 'cut-line';
+    if (isHoriz) {
+      line.style.left = (offX + pos * state.viewScale - 2) + 'px';
+      line.style.top = offY + 'px';
+      line.style.right = 'auto';
+      line.style.height = canvas.height + 'px';
+      line.style.width = '4px';
+      line.style.cursor = 'ew-resize';
+      line.style.margin = '0';
+    } else {
+      line.style.top = (offY + pos * state.viewScale) + 'px';
+    }
+    line.dataset.idx = i;
+    line.innerHTML = `
+      <div class="cut-line-label">— 切割線 ${i + 1} —</div>
+      <button class="cut-line-del" title="刪除">×</button>
+    `;
+    line.querySelector('.cut-line-del').addEventListener('click', e => {
+      e.stopPropagation();
+      state.manualCuts.splice(i, 1);
+      renderCutLines();
+      updateOutputPreview();
+    });
+    attachCutLineDrag(line);
+    inner.appendChild(line);
+  });
+}
+
+function attachCutLineDrag(line) {
+  let startMouse, startPos, idx;
+  const isHoriz = state.orientation === 'horizontal';
+  function onMove(e) {
+    const delta = (isHoriz ? e.clientX - startMouse : e.clientY - startMouse) / state.viewScale;
+    let newPos = startPos + delta;
+    const limit = isHoriz ? state.mergedW : state.mergedH;
+    newPos = Math.max(10, Math.min(limit - 10, newPos));
+    state.manualCuts[idx] = newPos;
+    if (isHoriz) {
+      line.style.left = ($('mergedCanvas').offsetLeft + newPos * state.viewScale - 2) + 'px';
+    } else {
+      line.style.top = ($('mergedCanvas').offsetTop + newPos * state.viewScale) + 'px';
+    }
+  }
+  function onUp() {
+    line.classList.remove('dragging');
+    window.removeEventListener('mousemove', onMove);
+    window.removeEventListener('mouseup', onUp);
+    state.manualCuts.sort((a, b) => a - b);
+    renderCutLines();
+    updateOutputPreview();
+  }
+  line.addEventListener('mousedown', e => {
+    if (e.target.classList.contains('cut-line-del')) return;
+    e.preventDefault();
+    e.stopPropagation();
+    idx = parseInt(line.dataset.idx);
+    startMouse = isHoriz ? e.clientX : e.clientY;
+    startPos = state.manualCuts[idx];
+    line.classList.add('dragging');
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  });
+}
+
+/* Click on canvas to add cut line (in manual mode) */
+$('mergedCanvas').addEventListener('click', e => {
+  if (state.cutMode !== 'manual' || !state.mergedCanvas) return;
+  const rect = e.target.getBoundingClientRect();
+  const isHoriz = state.orientation === 'horizontal';
+  const pos = isHoriz
+    ? (e.clientX - rect.left) / state.viewScale
+    : (e.clientY - rect.top) / state.viewScale;
+  const limit = isHoriz ? state.mergedW : state.mergedH;
+  if (pos < 10 || pos > limit - 10) return;
+  state.manualCuts.push(pos);
+  state.manualCuts.sort((a, b) => a - b);
+  renderCutLines();
+  updateOutputPreview();
+});
+
+/* ─── Cut mode tabs ─── */
+document.querySelectorAll('.mode-tab').forEach(t => {
+  if (!t.dataset.cutMode) return;
+  t.addEventListener('click', () => {
+    state.cutMode = t.dataset.cutMode;
+    document.querySelectorAll('.mode-tab[data-cut-mode]').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    $('cutByCount').style.display = state.cutMode === 'count' ? 'block' : 'none';
+    $('cutByHeight').style.display = state.cutMode === 'height' ? 'block' : 'none';
+    $('cutManual').style.display = state.cutMode === 'manual' ? 'block' : 'none';
+    renderCutLines();
+    updateOutputPreview();
+  });
+});
+
+/* ─── Orientation tabs ─── */
+document.querySelectorAll('.mode-tab[data-orient]').forEach(t => {
+  t.addEventListener('click', () => {
+    if (state.orientation === t.dataset.orient) return;
+    state.orientation = t.dataset.orient;
+    document.querySelectorAll('.mode-tab[data-orient]').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    // update labels
+    const isHoriz = state.orientation === 'horizontal';
+    $('dimLabel').textContent = isHoriz ? '合併高度' : '合併寬度';
+    $('customWidthLabel').textContent = isHoriz ? '高度 (px)' : '寬度 (px)';
+    // height-mode label  
+    const cutHeightLabel = $('cutByHeight').querySelector('label');
+    if (cutHeightLabel) cutHeightLabel.textContent = isHoriz ? '每張寬度 (px)' : '每張高度 (px)';
+    // clear manual cuts (coords don't translate between orientations)
+    state.manualCuts = [];
+    rebuildMerged();
+    toast(isHoriz ? '切換到橫式合併' : '切換到直式合併');
+  });
+});
+
+$('cutCount').addEventListener('change', updateOutputPreview);
+$('cutHeight').addEventListener('change', updateOutputPreview);
+$('btnClearCuts').addEventListener('click', () => {
+  state.manualCuts = [];
+  renderCutLines();
+  updateOutputPreview();
+  toast('已清除所有切割線');
+});
+
+/* ─── Compute cut positions (image coords) ─── */
+function computeCutYs() {
+  const isHoriz = state.orientation === 'horizontal';
+  const total = isHoriz ? state.mergedW : state.mergedH;
+  if (!total) return [];
+  if (state.cutMode === 'count') {
+    const n = Math.max(1, Math.min(100, parseInt($('cutCount').value) || 1));
+    if (n === 1) return [];
+    const cuts = [];
+    for (let i = 1; i < n; i++) {
+      cuts.push(Math.round((total * i) / n));
+    }
+    return cuts;
+  }
+  if (state.cutMode === 'height') {
+    const h = Math.max(100, parseInt($('cutHeight').value) || 4000);
+    const cuts = [];
+    let pos = h;
+    while (pos < total - 50) {
+      cuts.push(pos);
+      pos += h;
+    }
+    return cuts;
+  }
+  return state.manualCuts.slice().sort((a, b) => a - b);
+}
+
+/* ─── Output preview ─── */
+function updateOutputPreview() {
+  const grid = $('outputPreview');
+  if (!state.mergedCanvas) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;">需先上傳圖片</div>';
+    $('statSeg').textContent = '—';
+    $('btnDownload').disabled = true;
+    $('btnDownloadPDF').disabled = state.files.length === 0;
+    return;
+  }
+  const isHoriz = state.orientation === 'horizontal';
+  const total = isHoriz ? state.mergedW : state.mergedH;
+  const cuts = computeCutYs();
+  const ranges = [0, ...cuts, total];
+  $('statSeg').textContent = `${ranges.length - 1} 段`;
+  $('btnDownload').disabled = false;
+  $('btnDownloadPDF').disabled = false;
+
+  grid.innerHTML = '';
+  // single?
+  if (ranges.length === 2) {
+    const tw = 160;
+    const ar = state.mergedH / state.mergedW;
+    const th = Math.round(tw * ar);
+    const thumbC = document.createElement('canvas');
+    thumbC.width = tw; thumbC.height = th;
+    thumbC.getContext('2d').drawImage(state.mergedCanvas, 0, 0, tw, th);
+    const dataURL = thumbC.toDataURL('image/png');
+    grid.innerHTML = `
+      <div class="output-card">
+        <div class="thumb" style="aspect-ratio:${state.mergedW}/${state.mergedH};"><img src="${dataURL}"></div>
+        <div class="lbl">01.png<br>${state.mergedW}×${state.mergedH}</div>
+      </div>
+    `;
+    return;
+  }
+
+  for (let i = 0; i < ranges.length - 1; i++) {
+    const p1 = Math.round(ranges[i]);
+    const p2 = Math.round(ranges[i + 1]);
+    const segLen = p2 - p1;
+    if (segLen < 5) continue;
+
+    let segW, segH, sx, sy, sw, sh;
+    if (isHoriz) {
+      segW = segLen;
+      segH = state.mergedH;
+      sx = p1; sy = 0; sw = segLen; sh = state.mergedH;
+    } else {
+      segW = state.mergedW;
+      segH = segLen;
+      sx = 0; sy = p1; sw = state.mergedW; sh = segLen;
+    }
+
+    const thumbC = document.createElement('canvas');
+    const tw = 160;
+    const th = Math.round(segH * (tw / segW));
+    thumbC.width = tw; thumbC.height = Math.max(1, th);
+    const ctx = thumbC.getContext('2d');
+    ctx.imageSmoothingQuality = 'medium';
+    ctx.drawImage(state.mergedCanvas, sx, sy, sw, sh, 0, 0, tw, th);
+    const dataURL = thumbC.toDataURL('image/png');
+    const card = document.createElement('div');
+    card.className = 'output-card';
+    card.innerHTML = `
+      <div class="thumb" style="aspect-ratio:${segW}/${segH};"><img src="${dataURL}"></div>
+      <div class="lbl">${String(i + 1).padStart(2, '0')}.png<br>${segW}×${segH}</div>
+    `;
+    grid.appendChild(card);
+  }
+}
+
+/* ─── Download ZIP ─── */
+$('btnDownload').addEventListener('click', async () => {
+  if (!state.mergedCanvas) return;
+  const isHoriz = state.orientation === 'horizontal';
+  const total = isHoriz ? state.mergedW : state.mergedH;
+  const cuts = computeCutYs();
+  const ranges = [0, ...cuts, total];
+  if (ranges.length === 2) {
+    state.mergedCanvas.toBlob(blob => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `merged-${Date.now()}.png`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast('已下載合併圖');
+    }, 'image/png');
+    return;
+  }
+
+  toast('產生 ZIP 中...');
+  const zip = new JSZip();
+  for (let i = 0; i < ranges.length - 1; i++) {
+    const p1 = Math.round(ranges[i]);
+    const p2 = Math.round(ranges[i + 1]);
+    const segLen = p2 - p1;
+    if (segLen < 5) continue;
+    let segW, segH, sx, sy, sw, sh;
+    if (isHoriz) {
+      segW = segLen; segH = state.mergedH;
+      sx = p1; sy = 0; sw = segLen; sh = state.mergedH;
+    } else {
+      segW = state.mergedW; segH = segLen;
+      sx = 0; sy = p1; sw = state.mergedW; sh = segLen;
+    }
+    const c = document.createElement('canvas');
+    c.width = segW; c.height = segH;
+    c.getContext('2d').drawImage(state.mergedCanvas, sx, sy, sw, sh, 0, 0, segW, segH);
+    const blob = await new Promise(res => c.toBlob(res, 'image/png'));
+    zip.file(`${String(i + 1).padStart(2, '0')}.png`, blob);
+  }
+  const blob = await zip.generateAsync({ type: 'blob' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `merged-${ranges.length - 1}p-${Date.now()}.zip`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast(`已下載 ${ranges.length - 1} 段 ZIP`);
+});
+
+/* ─── Download PDF ─── */
+$('btnDownloadPDF').addEventListener('click', async () => {
+  if (!state.files.length) return;
+  toast('產生 PDF 中...');
+
+  const mode = $('pdfMode').value;
+  const pageSize = $('pdfPageSize').value;
+  const orientChoice = $('pdfOrient').value;
+
+  // 從 jsPDF UMD 取得建構子
+  const { jsPDF } = window.jspdf;
+
+  // 收集要放入 PDF 的圖片資料
+  // separate: 每張原圖獨立一頁（用 files 順序）
+  // merged: 合併後分段（用 cuts）
+  // single: 合併後一張長條（整個 mergedCanvas 一頁）
+  let pages = [];
+
+  if (mode === 'separate') {
+    // 每張原圖一頁，依照 files 列表順序
+    pages = state.files.map((f, i) => {
+      // 把可視範圍取出（套用 crop）
+      const vw = Math.max(1, f.w - (f.cropLeft || 0) - (f.cropRight || 0));
+      const vh = Math.max(1, f.h - (f.cropTop || 0) - (f.cropBottom || 0));
+      const c = document.createElement('canvas');
+      c.width = vw; c.height = vh;
+      c.getContext('2d').drawImage(f.img, f.cropLeft || 0, f.cropTop || 0, vw, vh, 0, 0, vw, vh);
+      return { canvas: c, name: f.name, w: vw, h: vh };
+    });
+  } else if (mode === 'merged' || mode === 'single') {
+    if (!state.mergedCanvas) {
+      toast('請先上傳並合併圖片', true);
+      return;
+    }
+    if (mode === 'single') {
+      pages = [{ canvas: state.mergedCanvas, name: 'merged', w: state.mergedW, h: state.mergedH }];
+    } else {
+      // merged 分段
+      const isHoriz = state.orientation === 'horizontal';
+      const total = isHoriz ? state.mergedW : state.mergedH;
+      const cuts = computeCutYs();
+      const ranges = [0, ...cuts, total];
+      for (let i = 0; i < ranges.length - 1; i++) {
+        const p1 = Math.round(ranges[i]);
+        const p2 = Math.round(ranges[i + 1]);
+        const segLen = p2 - p1;
+        if (segLen < 5) continue;
+        let segW, segH, sx, sy, sw, sh;
+        if (isHoriz) {
+          segW = segLen; segH = state.mergedH;
+          sx = p1; sy = 0; sw = segLen; sh = state.mergedH;
+        } else {
+          segW = state.mergedW; segH = segLen;
+          sx = 0; sy = p1; sw = state.mergedW; sh = segLen;
+        }
+        const c = document.createElement('canvas');
+        c.width = segW; c.height = segH;
+        c.getContext('2d').drawImage(state.mergedCanvas, sx, sy, sw, sh, 0, 0, segW, segH);
+        pages.push({ canvas: c, name: `seg${i + 1}`, w: segW, h: segH });
+      }
+    }
+  }
+
+  if (!pages.length) {
+    toast('沒有可輸出的內容', true);
+    return;
+  }
+
+  // 計算第一頁的方向用於初始化 PDF
+  const firstPage = pages[0];
+  const firstOrient = orientChoice === 'auto'
+    ? (firstPage.w >= firstPage.h ? 'landscape' : 'portrait')
+    : orientChoice;
+
+  // 建立 PDF
+  let pdf;
+  if (pageSize === 'auto') {
+    // 用第一頁的圖片尺寸（按 pixel 對應 mm，72dpi → 1px ≈ 0.353mm）
+    const pxToMm = 0.264583; // 96dpi
+    pdf = new jsPDF({
+      unit: 'mm',
+      orientation: firstOrient,
+      format: [firstPage.w * pxToMm, firstPage.h * pxToMm],
+    });
+  } else {
+    pdf = new jsPDF({
+      unit: 'mm',
+      orientation: firstOrient,
+      format: pageSize === 'a4' ? 'a4' : 'letter',
+    });
+  }
+
+  // 加入每一頁
+  for (let i = 0; i < pages.length; i++) {
+    const p = pages[i];
+    if (i > 0) {
+      const orient = orientChoice === 'auto'
+        ? (p.w >= p.h ? 'landscape' : 'portrait')
+        : orientChoice;
+      if (pageSize === 'auto') {
+        const pxToMm = 0.264583;
+        pdf.addPage([p.w * pxToMm, p.h * pxToMm], orient);
+      } else {
+        pdf.addPage(pageSize === 'a4' ? 'a4' : 'letter', orient);
+      }
+    }
+    // 把圖塞進當前頁面，按比例置中
+    const pageW = pdf.internal.pageSize.getWidth();
+    const pageH = pdf.internal.pageSize.getHeight();
+    const pxToMm = 0.264583;
+    let imgMmW = p.w * pxToMm;
+    let imgMmH = p.h * pxToMm;
+    // 若不是 auto，要按比例 fit
+    if (pageSize !== 'auto') {
+      const k = Math.min(pageW / imgMmW, pageH / imgMmH);
+      imgMmW *= k;
+      imgMmH *= k;
+    }
+    const x = (pageW - imgMmW) / 2;
+    const y = (pageH - imgMmH) / 2;
+    // 把 canvas 轉成 JPEG (PDF 容量小很多)
+    const dataURL = p.canvas.toDataURL('image/jpeg', 0.92);
+    pdf.addImage(dataURL, 'JPEG', x, y, imgMmW, imgMmH, undefined, 'FAST');
+  }
+
+  pdf.save(`merged-${Date.now()}.pdf`);
+  toast(`已下載 PDF · ${pages.length} 頁`);
+});
+
+$('btnViewFit').addEventListener('click', () => {
+  state.viewMode = 'fit';
+  $('btnViewFit').classList.add('primary');
+  $('btnViewWidth').classList.remove('primary');
+  drawMergedToScreen();
+});
+$('btnViewWidth').addEventListener('click', () => {
+  state.viewMode = 'width';
+  $('btnViewWidth').classList.add('primary');
+  $('btnViewFit').classList.remove('primary');
+  drawMergedToScreen();
+});
+
+// 滑桿即時縮放
+$('zoomSlider').addEventListener('input', e => {
+  state.viewMode = 'manual';
+  state.manualZoom = parseInt(e.target.value);
+  $('zoomVal').textContent = state.manualZoom + '%';
+  // 不要再 sync slider，避免迴圈
+  $('btnViewFit').classList.remove('primary');
+  $('btnViewWidth').classList.remove('primary');
+  if (state.mergedCanvas) {
+    // 直接畫，但不要再呼叫 drawMergedToScreen 的 sync 部分
+    const canvas = $('mergedCanvas');
+    const scale = state.manualZoom / 100;
+    state.viewScale = scale;
+    canvas.width = Math.max(1, Math.round(state.mergedW * scale));
+    canvas.height = Math.max(1, Math.round(state.mergedH * scale));
+    const cx = canvas.getContext('2d');
+    cx.imageSmoothingQuality = 'high';
+    cx.drawImage(state.mergedCanvas, 0, 0, canvas.width, canvas.height);
+    renderSegmentMarkers();
+    renderCropHandles();
+    renderCutLines();
+  }
+});
+
+window.addEventListener('resize', () => {
+  if (state.mergedCanvas && state.viewMode !== 'manual') drawMergedToScreen();
+});
+
+</script>
+</body>
+</html>

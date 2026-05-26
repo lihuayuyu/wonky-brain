@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>長圖拆分並排・AI 友善寬圖工具</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Kaisei+Decol:wght@400;500;700&family=Zen+Maru+Gothic:wght@400;500;700;900&family=Noto+Sans+TC:wght@400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FFF5FA;
+    --bg-paper: #FFFFFF;
+    --ink: #4A3A5C;
+    --ink-soft: #8B7BA0;
+    --pink: #FF8FAF;
+    --pink-soft: #FFC8DD;
+    --pink-deep: #E8538A;
+    --blue: #A8C8FF;
+    --blue-soft: #D4E2FF;
+    --blue-deep: #6B9DFF;
+    --yellow: #FFE9A8;
+    --yellow-soft: #FFF5D1;
+    --green: #B8E5C8;
+    --green-deep: #6BC48F;
+    --grid-line: rgba(232, 83, 138, 0.18);
+    --line: rgba(74, 58, 92, 0.15);
+    --warn: #E8538A;
+    --shadow: 3px 3px 0 var(--ink);
+    --shadow-sm: 2px 2px 0 var(--ink);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    color: var(--ink);
+    font-family: 'Noto Sans TC', sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    background: linear-gradient(135deg, #FFE4F0 0%, #FFD6EA 50%, #F5DCFF 100%);
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(255, 150, 195, 0.5) 0%, transparent 35%),
+      radial-gradient(circle at 80% 15%, rgba(220, 200, 255, 0.45) 0%, transparent 40%),
+      radial-gradient(circle at 50% 60%, rgba(255, 195, 220, 0.5) 0%, transparent 45%),
+      radial-gradient(circle at 90% 75%, rgba(230, 200, 255, 0.45) 0%, transparent 35%),
+      radial-gradient(circle at 10% 85%, rgba(255, 180, 210, 0.5) 0%, transparent 40%);
+    pointer-events: none;
+    z-index: 0;
+    filter: blur(2px);
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 35px 35px;
+    pointer-events: none;
+    z-index: 1;
+    mix-blend-mode: multiply;
+  }
+  header, main, .toast { position: relative; z-index: 2; }
+
+  header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(255, 228, 240, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 2px solid var(--ink);
+    padding: 16px 32px 14px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+  }
+  .brand { display: flex; align-items: baseline; gap: 14px; }
+  .brand h1 {
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: 900;
+    font-size: 28px;
+    letter-spacing: 0.04em;
+    line-height: 1;
+    color: var(--ink);
+    transform: rotate(-2deg);
+    position: relative;
+  }
+  .brand h1::after {
+    content: '✦';
+    position: absolute;
+    top: -8px;
+    right: -16px;
+    font-size: 14px;
+    color: var(--pink);
+    transform: rotate(2deg);
+  }
+  .brand .sub {
+    font-family: 'Caveat', cursive;
+    font-size: 18px;
+    color: var(--pink-deep);
+    font-weight: 600;
+    transform: rotate(-1deg);
+  }
+  .donate-btn {
+    display: flex;
+    align-items: center;
+    height: 40px;
+    padding: 6px 14px;
+    border-radius: 12px;
+    color: #F8E0BE;
+    background-color: #AD5138;
+    border: 2px solid var(--ink);
+    text-decoration: none;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s;
+    gap: 8px;
+    white-space: nowrap;
+  }
+  .donate-btn:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: var(--shadow);
+    background-color: #C25E45;
+  }
+  .donate-icon { width: 26px; height: 26px; flex-shrink: 0; display: block; }
+
+  main {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    min-height: calc(100vh - 70px);
+  }
+  @media (max-width: 980px) { main { grid-template-columns: 1fr; } }
+
+  .workspace {
+    padding: 28px;
+    border-right: 2px solid var(--ink);
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    min-width: 0;
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .sidebar {
+    padding: 24px;
+    background: rgba(255, 245, 250, 0.75);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-height: calc(100vh - 70px);
+    overflow-y: auto;
+    font-size: 15px;
+  }
+
+  .dropzone {
+    border: 2px dashed var(--ink);
+    background: rgba(255, 255, 255, 0.6);
+    padding: 60px 32px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 24px;
+  }
+  .dropzone:hover, .dropzone.drag {
+    background: rgba(255, 232, 240, 0.85);
+    transform: translate(-2px, -2px);
+    box-shadow: var(--shadow);
+  }
+  .dropzone-icon { font-family: 'Kaisei Decol', serif; font-size: 56px; font-weight: 700; color: var(--pink-deep); line-height: 1; margin-bottom: 12px; }
+  .dropzone-text { font-family: 'Kaisei Decol', serif; font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+  .dropzone-hint { font-family: 'Caveat', cursive; font-size: 18px; color: var(--ink-soft); font-weight: 600; }
+  .dropzone-hint b { color: var(--pink-deep); font-weight: 700; }
+
+  .info-note {
+    background: var(--yellow-soft);
+    border: 2px solid var(--ink);
+    padding: 14px 16px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--ink);
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+  }
+  .info-note b { color: var(--pink-deep); font-weight: 700; }
+
+  .section { display: flex; flex-direction: column; gap: 10px; }
+  .section-title {
+    font-family: 'Kaisei Decol', serif;
+    font-size: 19px;
+    font-weight: 700;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--ink);
+    color: var(--ink);
+  }
+
+  .control-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 15px;
+  }
+  .control-group label { color: var(--ink-soft); flex: 1; }
+  .control-group input[type=number] {
+    width: 90px;
+    padding: 6px 8px;
+    border: 2px solid var(--ink);
+    background: white;
+    border-radius: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .control-group input[type=color] {
+    width: 44px; height: 32px;
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    cursor: pointer;
+    padding: 2px;
+    background: white;
+  }
+
+  .preset-buttons { display: flex; gap: 6px; flex-wrap: wrap; }
+  .preset-btn {
+    flex: 1;
+    min-width: 80px;
+    padding: 8px 10px;
+    border: 2px solid var(--ink);
+    background: white;
+    border-radius: 999px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    color: var(--ink);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .preset-btn:hover { background: var(--pink-soft); transform: translate(-1px, -1px); box-shadow: var(--shadow-sm); }
+  .preset-btn.active { background: var(--ink); color: white; }
+
+  .btn {
+    font-family: 'Zen Maru Gothic', 'Noto Sans TC', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    padding: 11px 20px;
+    background: white;
+    border: 2px solid var(--ink);
+    color: var(--ink);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    line-height: 1;
+    border-radius: 999px;
+    box-shadow: var(--shadow-sm);
+    white-space: nowrap;
+  }
+  .btn:hover:not(:disabled) { transform: translate(-1px, -1px); box-shadow: var(--shadow); background: var(--pink-soft); }
+  .btn:active:not(:disabled) { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--ink); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn.primary { background: var(--pink-deep); color: white; }
+  .btn.primary:hover:not(:disabled) { background: var(--pink); }
+  .btn.full { width: 100%; justify-content: center; }
+
+  .preview-wrap {
+    background: rgba(255, 255, 255, 0.85);
+    border: 2px solid var(--ink);
+    padding: 16px;
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 400px;
+  }
+  .preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1.5px solid var(--line);
+  }
+  .preview-stats {
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    color: var(--ink-soft);
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .preview-stats b { color: var(--ink); font-weight: 700; }
+  .preview-canvas-wrap {
+    background: repeating-conic-gradient(#FFE4F0 0% 25%, #FFFFFF 0% 50%) 50% / 12px 12px;
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    overflow: auto;
+    max-height: calc(100vh - 320px);
+    min-height: 300px;
+    padding: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
+  #previewCanvas { display: block; max-width: 100%; }
+
+  .original-thumb {
+    background: white;
+    border: 2px solid var(--ink);
+    border-radius: 12px;
+    padding: 10px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    box-shadow: var(--shadow-sm);
+  }
+  .original-thumb img {
+    width: 60px;
+    height: auto;
+    max-height: 200px;
+    border: 1.5px solid var(--ink);
+    border-radius: 6px;
+    object-fit: cover;
+  }
+  .original-thumb .info { flex: 1; font-size: 13px; line-height: 1.6; }
+  .original-thumb .info b { color: var(--pink-deep); font-weight: 700; }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--ink);
+    color: white;
+    padding: 12px 22px;
+    font-size: 14px;
+    border: 2px solid var(--ink);
+    box-shadow: 4px 4px 0 var(--pink-deep);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s;
+    z-index: 1000;
+    max-width: 90vw;
+    border-radius: 999px;
+    font-weight: 500;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.err { box-shadow: 4px 4px 0 var(--pink); }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--ink-soft); border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <h1>長圖拆分</h1>
+    <div class="sub">歪腦袋小工具 · v1.2</div>
+  </div>
+  <a class="donate-btn" href="https://fernfern.bobaboba.me" target="_blank" rel="noopener">
+    <svg class="donate-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M5 7 L7.5 21 Q7.7 22.2 9 22.2 L15 22.2 Q16.3 22.2 16.5 21 L19 7 Z" fill="#F8E0BE" stroke="#3A2618" stroke-width="1.3" stroke-linejoin="round"/>
+      <ellipse cx="12" cy="7" rx="7" ry="1.6" fill="#C48A60" stroke="#3A2618" stroke-width="1.3"/>
+      <path d="M14 2 L13 8" stroke="#E85A5A" stroke-width="1.8" stroke-linecap="round"/>
+      <circle cx="10" cy="17" r="1.3" fill="#3A2618"/>
+      <circle cx="13" cy="18.5" r="1.3" fill="#3A2618"/>
+      <circle cx="11" cy="14" r="1.2" fill="#3A2618"/>
+      <circle cx="14" cy="15.5" r="1.2" fill="#3A2618"/>
+    </svg>
+    <div>歡迎餵食我 🤤</div>
+  </a>
+</header>
+
+<main>
+  <section class="workspace">
+
+    <div class="dropzone" id="dropzone">
+      <div class="dropzone-icon">↓</div>
+      <div class="dropzone-text">拖曳、點擊或貼上一張長圖</div>
+      <div class="dropzone-hint">支援拖曳檔案、點擊選檔、<b>Ctrl+V / Cmd+V 貼上</b></div>
+      <input type="file" id="fileInput" accept="image/*" style="display:none">
+    </div>
+
+    <div id="originalSection" style="display:none;">
+      <div class="original-thumb">
+        <img id="origPreview">
+        <div class="info">
+          <div><b id="origName">—</b></div>
+          <div id="origDim" style="font-family:'DM Mono',monospace;color:var(--ink-soft);">—</div>
+          <div id="origRatio" style="font-family:'DM Mono',monospace;color:var(--ink-soft);">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview-wrap" id="previewWrap" style="display:none;">
+      <div class="preview-header">
+        <div class="preview-stats">
+          <span>輸出 <b id="outDim">—</b></span>
+          <span>切成 <b id="segCount">—</b> 段</span>
+          <span>每段 <b id="segSize">—</b></span>
+        </div>
+        <button class="btn primary" id="btnDownload" disabled>⬇ 下載並排寬圖</button>
+      </div>
+      <div class="preview-canvas-wrap">
+        <canvas id="previewCanvas"></canvas>
+      </div>
+    </div>
+
+  </section>
+
+  <aside class="sidebar">
+
+    <div class="info-note">
+      <b>什麼是這個工具？</b><br>
+      AI 看「超長截圖」會看不清細節 → 這個工具會把長圖<b>切成多段並排</b>變成寬版圖，AI 就能清楚讀取每一段內容。<br><br>
+      📌 適合：長截圖、長對話記錄、Threads/PTT 長文、長條漫畫貼給 AI 看
+    </div>
+
+    <div class="section">
+      <div class="section-title">輸出尺寸預設</div>
+      <div class="preset-buttons">
+        <button class="preset-btn active" data-preset="claude">Claude 1568</button>
+        <button class="preset-btn" data-preset="gpt">GPT-4V 2048</button>
+        <button class="preset-btn" data-preset="custom">自訂</button>
+      </div>
+      <div class="control-group">
+        <label>輸出最長邊 (px)</label>
+        <input type="number" id="maxEdge" value="1568" min="200" max="8000" step="32">
+      </div>
+      <div style="font-size:11px;color:var(--ink-soft);font-family:'DM Mono',monospace;">
+        💡 Claude 最佳 1568 · GPT-4V 最佳 2048
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">切割方式</div>
+      <div class="preset-buttons">
+        <button class="preset-btn active" data-mode="auto">自動最佳</button>
+        <button class="preset-btn" data-mode="cols">指定欄數</button>
+        <button class="preset-btn" data-mode="height">每段高度</button>
+      </div>
+      <div class="control-group" id="colsRow" style="display:none;">
+        <label>欄數</label>
+        <input type="number" id="cols" value="3" min="2" max="12" step="1">
+      </div>
+      <div class="control-group" id="heightRow" style="display:none;">
+        <label>每段高度 (px)</label>
+        <input type="number" id="segHeight" value="2000" min="200" max="20000" step="100">
+      </div>
+      <div class="control-group">
+        <label>段重疊 (px)</label>
+        <input type="number" id="overlap" value="60" min="0" max="300" step="10">
+      </div>
+      <div style="font-size:11px;color:var(--ink-soft);font-family:'DM Mono',monospace;line-height:1.5;">
+        💡 自動模式：依輸出尺寸算最佳欄數<br>
+        💡 段重疊：每段頭尾多包含前後段的內容，避免文字被切斷（建議 40~80）
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">外觀</div>
+      <div class="control-group">
+        <label>段間距 (px)</label>
+        <input type="number" id="gap" value="20" min="0" max="100" step="2">
+      </div>
+      <div class="control-group">
+        <label>背景顏色</label>
+        <input type="color" id="bgColor" value="#FFFFFF">
+      </div>
+      <div class="control-group">
+        <label>段邊框</label>
+        <input type="color" id="borderColor" value="#CCCCCC">
+      </div>
+      <div>
+        <div style="font-size:14px;color:var(--ink-soft);margin-bottom:6px;">段編號位置</div>
+        <div class="preset-buttons">
+          <button class="preset-btn active" data-numpos="top">段上方</button>
+          <button class="preset-btn" data-numpos="overlay">蓋在圖上</button>
+          <button class="preset-btn" data-numpos="none">不顯示</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn full primary" id="btnDownload2" disabled style="margin-top:auto;">⬇ 下載並排寬圖</button>
+
+  </aside>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+const state = {
+  img: null,
+  imgW: 0,
+  imgH: 0,
+  fileName: '',
+  outCanvas: null,
+  preset: 'claude',
+  mode: 'auto',
+  numPos: 'top',  // 'top' | 'overlay' | 'none'
+};
+
+function toast(msg, err = false) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (err ? ' err' : '');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.className = 'toast', 2600);
+}
+
+$('dropzone').addEventListener('click', () => $('fileInput').click());
+$('fileInput').addEventListener('change', e => {
+  if (e.target.files[0]) handleFile(e.target.files[0]);
+});
+['dragenter','dragover'].forEach(ev => $('dropzone').addEventListener(ev, e => {
+  e.preventDefault(); $('dropzone').classList.add('drag');
+}));
+['dragleave','drop'].forEach(ev => $('dropzone').addEventListener(ev, e => {
+  e.preventDefault(); $('dropzone').classList.remove('drag');
+}));
+$('dropzone').addEventListener('drop', e => {
+  if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+});
+
+// 全域貼上事件（從剪貼簿讀圖）
+window.addEventListener('paste', async (e) => {
+  // 如果焦點在輸入框，不要攔截
+  const tag = (e.target && e.target.tagName) || '';
+  if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+
+  const items = (e.clipboardData || window.clipboardData)?.items;
+  if (!items) return;
+  for (const item of items) {
+    if (item.type && item.type.startsWith('image/')) {
+      const file = item.getAsFile();
+      if (file) {
+        // 給檔案一個有意義的名字（貼上的圖片通常檔名是 "image.png"）
+        const ext = item.type.split('/')[1] || 'png';
+        const renamed = new File([file], `pasted-${Date.now()}.${ext}`, { type: item.type });
+        await handleFile(renamed);
+        e.preventDefault();
+        toast('✓ 已貼上剪貼簿圖片');
+        return;
+      }
+    }
+  }
+});
+
+async function handleFile(file) {
+  if (!file.type.startsWith('image/')) { toast('不是有效的圖片檔', true); return; }
+  state.fileName = file.name;
+  try {
+    state.img = await loadImage(file);
+    state.imgW = state.img.naturalWidth;
+    state.imgH = state.img.naturalHeight;
+    $('originalSection').style.display = 'block';
+    $('previewWrap').style.display = 'flex';
+    $('origPreview').src = state.img.src;
+    $('origName').textContent = file.name;
+    $('origDim').textContent = `原始：${state.imgW} × ${state.imgH} px`;
+    const ratio = (state.imgH / state.imgW).toFixed(1);
+    $('origRatio').textContent = `比例：高度是寬度的 ${ratio} 倍`;
+    rebuild();
+    toast('已載入長圖');
+  } catch (e) {
+    console.error(e);
+    toast('圖片載入失敗', true);
+  }
+}
+
+function loadImage(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => {
+      const img = new Image();
+      img.onload = () => res(img);
+      img.onerror = rej;
+      img.src = r.result;
+    };
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+function calculateOptimalCols(imgW, imgH, maxEdge) {
+  // 目標：選一個欄數，讓「每欄縮放後的寬度」越大越好（AI 看得越清楚）
+  // 限制：輸出寬高都不超過 maxEdge
+  let best = { cols: 2, perColW: 0 };
+  for (let cols = 2; cols <= 12; cols++) {
+    const segH = Math.ceil(imgH / cols);
+    const fullW = cols * imgW;
+    const fullH = segH;
+    const k = maxEdge / Math.max(fullW, fullH);
+    const outW = fullW * k;
+    const outH = fullH * k;
+    const perColW = outW / cols;
+    const aspect = outW / outH;
+    // 過寬或過窄的方案打折
+    let score = perColW;
+    if (aspect < 0.5 || aspect > 4) score *= 0.7;
+    if (score > best.perColW) {
+      best = { cols, perColW: score };
+    }
+  }
+  return best.cols;
+}
+
+function rebuild() {
+  if (!state.img) return;
+  const maxEdge = Math.max(200, parseInt($('maxEdge').value) || 1568);
+  const gap = Math.max(0, parseInt($('gap').value) || 0);
+  const overlap = Math.max(0, parseInt($('overlap').value) || 0);
+  const bg = $('bgColor').value;
+  const borderColor = $('borderColor').value;
+  const numPos = state.numPos; // 'top' | 'overlay' | 'none'
+
+  let cols;
+  if (state.mode === 'cols') {
+    cols = Math.max(2, Math.min(12, parseInt($('cols').value) || 3));
+  } else if (state.mode === 'height') {
+    const h = Math.max(200, parseInt($('segHeight').value) || 2000);
+    cols = Math.ceil(state.imgH / h);
+    cols = Math.max(1, Math.min(20, cols));
+  } else {
+    cols = calculateOptimalCols(state.imgW, state.imgH, maxEdge);
+  }
+
+  // 基本段高（每段佔原圖多少）
+  const baseSegH = Math.ceil(state.imgH / cols);
+
+  // 每段實際取樣高度 = baseSegH + overlap（往下多包含 overlap 像素）
+  // 但若已是最後一段且原圖不夠，就用實際剩餘
+  // 計算每段的 sy（原圖座標）和 sh（取樣高度）
+  const segments = [];
+  for (let i = 0; i < cols; i++) {
+    const sy = i * baseSegH;
+    let sh = baseSegH + overlap;
+    if (sy + sh > state.imgH) sh = state.imgH - sy;
+    if (sh <= 0) break;
+    segments.push({ sy, sh });
+  }
+  const realCols = segments.length;
+
+  // 取樣後的最大段高（決定每欄縮放後的高度）
+  const maxSh = Math.max(...segments.map(s => s.sh));
+
+  const fullW_orig = realCols * state.imgW;
+  const fullH_orig = maxSh;
+
+  const k = maxEdge / Math.max(fullW_orig, fullH_orig);
+  const segWScaled = Math.max(1, Math.round(state.imgW * k));
+  const segMaxHScaled = Math.max(1, Math.round(maxSh * k));
+
+  // 編號區高度（只在 top 模式預留）
+  const numberHeight = numPos === 'top' ? Math.max(28, Math.round(segWScaled * 0.07)) + 14 : 0;
+
+  const outW = segWScaled * realCols + gap * (realCols - 1);
+  const outH = segMaxHScaled + numberHeight;
+
+  if (outW * outH > 100000000) {
+    toast('輸出尺寸過大', true);
+    return;
+  }
+
+  const out = document.createElement('canvas');
+  out.width = outW;
+  out.height = outH;
+  const cx = out.getContext('2d');
+  cx.fillStyle = bg;
+  cx.fillRect(0, 0, outW, outH);
+  cx.imageSmoothingQuality = 'high';
+
+  segments.forEach((s, i) => {
+    const dx = i * (segWScaled + gap);
+    const dy = numberHeight;
+    const dh = Math.round(s.sh * k);
+
+    cx.drawImage(
+      state.img,
+      0, s.sy, state.imgW, s.sh,
+      dx, dy, segWScaled, dh
+    );
+
+    // 邊框
+    if (borderColor && borderColor.toLowerCase() !== bg.toLowerCase()) {
+      cx.strokeStyle = borderColor;
+      cx.lineWidth = 2;
+      cx.strokeRect(dx + 1, dy + 1, segWScaled - 2, dh - 2);
+    }
+
+    // 編號（位置依 numPos 決定）
+    if (numPos !== 'none') {
+      const num = String(i + 1).padStart(2, '0');
+      const fontSize = numPos === 'top'
+        ? Math.max(20, Math.round(segWScaled * 0.06))
+        : Math.max(20, Math.round(segWScaled * 0.07));
+      cx.font = `bold ${fontSize}px sans-serif`;
+      const padX = Math.round(fontSize * 0.7);
+      const padY = Math.round(fontSize * 0.25);
+      const textW = cx.measureText(num).width;
+      const badgeH = fontSize + padY * 2;
+      const badgeW = textW + padX * 2;
+
+      let badgeX, badgeY;
+      if (numPos === 'top') {
+        // 段上方間距區，左對齊
+        badgeX = dx;
+        badgeY = (numberHeight - badgeH) / 2;
+      } else {
+        // 蓋在圖上，左上角
+        badgeX = dx + 8;
+        badgeY = dy + 8;
+      }
+
+      // 圓角膠囊深紫底
+      cx.fillStyle = '#4A3A5C';
+      const r = badgeH / 2;
+      cx.beginPath();
+      cx.moveTo(badgeX + r, badgeY);
+      cx.lineTo(badgeX + badgeW - r, badgeY);
+      cx.quadraticCurveTo(badgeX + badgeW, badgeY, badgeX + badgeW, badgeY + r);
+      cx.lineTo(badgeX + badgeW, badgeY + badgeH - r);
+      cx.quadraticCurveTo(badgeX + badgeW, badgeY + badgeH, badgeX + badgeW - r, badgeY + badgeH);
+      cx.lineTo(badgeX + r, badgeY + badgeH);
+      cx.quadraticCurveTo(badgeX, badgeY + badgeH, badgeX, badgeY + badgeH - r);
+      cx.lineTo(badgeX, badgeY + r);
+      cx.quadraticCurveTo(badgeX, badgeY, badgeX + r, badgeY);
+      cx.closePath();
+      cx.fill();
+      // 編號文字
+      cx.fillStyle = 'white';
+      cx.textBaseline = 'middle';
+      cx.fillText(num, badgeX + padX, badgeY + badgeH / 2);
+    }
+  });
+
+  state.outCanvas = out;
+  drawPreview();
+  $('outDim').textContent = `${outW} × ${outH}`;
+  $('segCount').textContent = realCols;
+  $('segSize').textContent = `${segWScaled} × ${segMaxHScaled}`;
+  $('btnDownload').disabled = false;
+  $('btnDownload2').disabled = false;
+}
+
+function drawPreview() {
+  if (!state.outCanvas) return;
+  const wrap = document.querySelector('.preview-canvas-wrap');
+  const canvas = $('previewCanvas');
+  const wrapW = wrap.clientWidth - 24;
+  const wrapH = wrap.clientHeight - 24;
+  const scale = Math.min(1, wrapW / state.outCanvas.width, wrapH / state.outCanvas.height);
+  canvas.width = Math.max(1, Math.round(state.outCanvas.width * scale));
+  canvas.height = Math.max(1, Math.round(state.outCanvas.height * scale));
+  const cx = canvas.getContext('2d');
+  cx.imageSmoothingQuality = 'high';
+  cx.drawImage(state.outCanvas, 0, 0, canvas.width, canvas.height);
+}
+
+window.addEventListener('resize', () => {
+  if (state.outCanvas) drawPreview();
+});
+
+document.querySelectorAll('.preset-btn[data-preset]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.preset-btn[data-preset]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.preset = btn.dataset.preset;
+    if (btn.dataset.preset === 'claude') $('maxEdge').value = 1568;
+    else if (btn.dataset.preset === 'gpt') $('maxEdge').value = 2048;
+    rebuild();
+  });
+});
+
+document.querySelectorAll('.preset-btn[data-mode]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.preset-btn[data-mode]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.mode = btn.dataset.mode;
+    $('colsRow').style.display = state.mode === 'cols' ? 'flex' : 'none';
+    $('heightRow').style.display = state.mode === 'height' ? 'flex' : 'none';
+    rebuild();
+  });
+});
+
+// 編號位置按鈕
+document.querySelectorAll('.preset-btn[data-numpos]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.preset-btn[data-numpos]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.numPos = btn.dataset.numpos;
+    rebuild();
+  });
+});
+
+['maxEdge', 'cols', 'segHeight', 'gap', 'overlap', 'bgColor', 'borderColor'].forEach(id => {
+  $(id).addEventListener('input', () => rebuild());
+});
+
+function doDownload() {
+  if (!state.outCanvas) return;
+  state.outCanvas.toBlob(blob => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const baseName = state.fileName.replace(/\.[^.]+$/, '');
+    a.download = `${baseName}-split.png`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('已下載並排寬圖');
+  }, 'image/png');
+}
+$('btnDownload').addEventListener('click', doDownload);
+$('btnDownload2').addEventListener('click', doDownload);
+
+</script>
+</body>
+</html>
