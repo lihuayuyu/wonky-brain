@@ -355,6 +355,7 @@ main.container {
 .tool-card.c9 .tool-cover { background: linear-gradient(135deg, var(--blue), var(--purple)); }
 .tool-card.c10 .tool-cover { background: linear-gradient(135deg, #FFB833, var(--pink)); }
 .tool-card.c11 .tool-cover { background: linear-gradient(135deg, var(--purple-deep), var(--blue)); }
+.tool-card.c12 .tool-cover { background: linear-gradient(135deg, #6BC48F, var(--pink-deep)); }
 
 .tool-cover::before {
   content: '';
@@ -596,10 +597,10 @@ main.container {
 <main class="container">
 
   <div class="category-bar">
-    <a href="#" class="cat-btn active">全部 <span class="count">11</span></a>
+    <a href="#" class="cat-btn active">全部 <span class="count">12</span></a>
     <a href="#" class="cat-btn">隨機決策 <span class="count">3</span></a>
     <a href="#" class="cat-btn">計算工具 <span class="count">2</span></a>
-    <a href="#" class="cat-btn">文字處理 <span class="count">2</span></a>
+    <a href="#" class="cat-btn">文字處理 <span class="count">3</span></a>
     <a href="#" class="cat-btn">休閒娛樂 <span class="count">1</span></a>
     <a href="#" class="cat-btn">創作工具 <span class="count">3</span></a>
   </div>
@@ -658,6 +659,19 @@ main.container {
       </div>
     </a>
 
+    <a href="tool-text-to-srt.html" class="tool-card c12">
+      <div class="tool-cover"><span class="tool-icon">SRT</span></div>
+      <div class="tool-content">
+        <span class="tool-cat-tag text">文字處理</span>
+        <h3 class="tool-name">文字轉字幕</h3>
+        <p class="tool-desc">把講稿文字自動加上時間軸，產生影片可用的 SRT 字幕檔。</p>
+        <div class="tool-footer">
+          <span class="tool-meta">FREE · NO LOGIN</span>
+          <span class="tool-arrow">使用 →</span>
+        </div>
+      </div>
+    </a>
+
     <a href="tool-date.html" class="tool-card c9">
       <div class="tool-cover"><span class="tool-icon">Date</span></div>
       <div class="tool-content">
@@ -671,30 +685,28 @@ main.container {
       </div>
     </a>
 
-    <a href="#" class="tool-card c2 coming-soon">
-      <span class="coming-badge">Soon</span>
-      <div class="tool-cover"><span class="tool-icon">Draw</span></div>
-      <div class="tool-content">
-        <span class="tool-cat-tag random">隨機決策</span>
-        <h3 class="tool-name">線上抽籤</h3>
-        <p class="tool-desc">公平公正的線上抽籤工具。</p>
-        <div class="tool-footer">
-          <span class="tool-meta">準備中...</span>
-          <span class="tool-arrow">→</span>
-        </div>
-      </div>
-    </a>
-
-    <a href="#" class="tool-card c3 coming-soon">
-      <span class="coming-badge">Soon</span>
+    <a href="tool-dice.html" class="tool-card c3">
       <div class="tool-cover"><span class="tool-icon">Dice</span></div>
       <div class="tool-content">
         <span class="tool-cat-tag random">隨機決策</span>
         <h3 class="tool-name">線上骰子</h3>
-        <p class="tool-desc">不用真的拿骰子，線上滾就好。</p>
+        <p class="tool-desc">3D 多面骰（D4 ~ D20），桌遊跑團神器，附歷史記錄與出點統計。</p>
         <div class="tool-footer">
-          <span class="tool-meta">準備中...</span>
-          <span class="tool-arrow">→</span>
+          <span class="tool-meta">FREE · NO LOGIN</span>
+          <span class="tool-arrow">使用 →</span>
+        </div>
+      </div>
+    </a>
+
+    <a href="tool-draw.html" class="tool-card c2">
+      <div class="tool-cover"><span class="tool-icon">Draw</span></div>
+      <div class="tool-content">
+        <span class="tool-cat-tag random">隨機決策</span>
+        <h3 class="tool-name">線上抽籤</h3>
+        <p class="tool-desc">單抽、多抽、分組、抽高低、兩階段抽獎，名單可貼可上傳可進階篩。</p>
+        <div class="tool-footer">
+          <span class="tool-meta">FREE · NO LOGIN</span>
+          <span class="tool-arrow">使用 →</span>
         </div>
       </div>
     </a>
