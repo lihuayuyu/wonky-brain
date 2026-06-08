@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>今天吃什麼・解決選擇困難症</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Kaisei+Decol:wght@400;500;700&family=Zen+Maru+Gothic:wght@400;500;700;900&family=Noto+Sans+TC:wght@400;500;700;900&family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FFF5FA;
+    --ink: #4A3A5C;
+    --ink-soft: #8B7BA0;
+    --pink: #FF8FAF;
+    --pink-soft: #FFC8DD;
+    --pink-deep: #E8538A;
+    --blue: #A8C8FF;
+    --blue-soft: #D4E2FF;
+    --blue-deep: #6B9DFF;
+    --yellow: #FFE9A8;
+    --yellow-soft: #FFF5D1;
+    --green: #B8E5C8;
+    --green-deep: #6BC48F;
+    --purple: #D4C0FF;
+    --purple-deep: #B294E0;
+    --grid-line: rgba(232, 83, 138, 0.18);
+    --line: rgba(74, 58, 92, 0.15);
+    --shadow: 3px 3px 0 var(--ink);
+    --shadow-sm: 2px 2px 0 var(--ink);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    color: var(--ink);
+    font-family: 'Noto Sans TC', sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    background: linear-gradient(135deg, #FFE4F0 0%, #FFD6EA 50%, #F5DCFF 100%);
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(255, 150, 195, 0.5) 0%, transparent 35%),
+      radial-gradient(circle at 80% 15%, rgba(220, 200, 255, 0.45) 0%, transparent 40%),
+      radial-gradient(circle at 50% 60%, rgba(255, 195, 220, 0.5) 0%, transparent 45%),
+      radial-gradient(circle at 90% 75%, rgba(230, 200, 255, 0.45) 0%, transparent 35%),
+      radial-gradient(circle at 10% 85%, rgba(255, 180, 210, 0.5) 0%, transparent 40%);
+    pointer-events: none;
+    z-index: 0;
+    filter: blur(2px);
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 35px 35px;
+    pointer-events: none;
+    z-index: 1;
+    mix-blend-mode: multiply;
+  }
+  header, main, .toast { position: relative; z-index: 2; }
+
+  header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(255, 228, 240, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 2px solid var(--ink);
+    padding: 16px 32px 14px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+  }
+  .brand { display: flex; align-items: baseline; gap: 14px; }
+  .brand h1 {
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: 900;
+    font-size: 28px;
+    letter-spacing: 0.04em;
+    line-height: 1;
+    color: var(--ink);
+    transform: rotate(-2deg);
+    position: relative;
+  }
+  .brand h1::after {
+    content: '🍜';
+    position: absolute;
+    top: -10px;
+    right: -28px;
+    font-size: 16px;
+    transform: rotate(15deg);
+  }
+  .brand .sub {
+    font-family: 'Caveat', cursive;
+    font-size: 18px;
+    color: var(--pink-deep);
+    font-weight: 600;
+    transform: rotate(-1deg);
+  }
+  .donate-btn {
+    display: flex;
+    align-items: center;
+    height: 40px;
+    padding: 6px 14px;
+    border-radius: 12px;
+    color: #F8E0BE;
+    background-color: #AD5138;
+    border: 2px solid var(--ink);
+    text-decoration: none;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s;
+    gap: 8px;
+    white-space: nowrap;
+  }
+  .donate-btn:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: var(--shadow);
+    background-color: #C25E45;
+  }
+  .donate-icon { width: 26px; height: 26px; flex-shrink: 0; display: block; }
+
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 32px 24px 60px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  /* 結果舞台 */
+  .result-stage {
+    background: linear-gradient(180deg, #FFFAFC 0%, #FFF0F8 100%);
+    border: 2px solid var(--ink);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    padding: 48px 28px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    min-height: 240px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+  }
+  .result-stage::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 30% 30%, rgba(255, 200, 220, 0.4) 0%, transparent 50%),
+      radial-gradient(circle at 70% 70%, rgba(220, 200, 255, 0.4) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .result-food {
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-size: clamp(40px, 9vw, 72px);
+    font-weight: 900;
+    color: var(--ink);
+    text-shadow: 4px 4px 0 var(--pink);
+    position: relative;
+    z-index: 1;
+    transition: transform 0.1s;
+    min-height: 1.2em;
+    word-break: break-all;
+    padding: 0 10px;
+  }
+  .result-food.running {
+    color: var(--pink-deep);
+    animation: wobble 0.15s ease-in-out infinite alternate;
+  }
+  @keyframes wobble {
+    from { transform: translateY(-3px) rotate(-1.5deg); }
+    to { transform: translateY(3px) rotate(1.5deg); }
+  }
+  .result-food.winner {
+    color: var(--pink-deep);
+    text-shadow: 4px 4px 0 var(--yellow), 8px 8px 0 var(--ink);
+    animation: pop 0.6s ease-out;
+  }
+  @keyframes pop {
+    0% { transform: scale(0.5); opacity: 0; }
+    60% { transform: scale(1.2); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .result-emoji {
+    font-size: 56px;
+    position: relative;
+    z-index: 1;
+    min-height: 1em;
+  }
+
+  .decide-btn {
+    font-family: 'Zen Maru Gothic', 'Noto Sans TC', sans-serif;
+    font-weight: 900;
+    font-size: 24px;
+    padding: 18px 48px;
+    background: var(--pink-deep);
+    color: white;
+    border: 3px solid var(--ink);
+    cursor: pointer;
+    border-radius: 999px;
+    box-shadow: 4px 4px 0 var(--ink);
+    transition: all 0.15s;
+    letter-spacing: 0.06em;
+    align-self: center;
+  }
+  .decide-btn:hover:not(:disabled) {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 var(--ink);
+    background: var(--pink);
+  }
+  .decide-btn:active:not(:disabled) {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+  .decide-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  /* 類別選擇 */
+  .cat-section {
+    background: white;
+    border: 2px solid var(--ink);
+    border-radius: 18px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .cat-title {
+    font-family: 'Kaisei Decol', serif;
+    font-size: 16px;
+    font-weight: 700;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .cat-chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .cat-chip {
+    padding: 8px 16px;
+    background: white;
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    transition: all 0.15s;
+    box-shadow: var(--shadow-sm);
+  }
+  .cat-chip:hover:not(.active) { background: var(--pink-soft); transform: translate(-1px,-1px); }
+  .cat-chip.active { background: var(--ink); color: white; }
+
+  /* 自訂清單 */
+  .custom-section {
+    background: white;
+    border: 2px solid var(--ink);
+    border-radius: 18px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .text-area {
+    width: 100%;
+    min-height: 120px;
+    padding: 14px;
+    border: 2px solid var(--ink);
+    border-radius: 14px;
+    background: var(--yellow-soft);
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    resize: vertical;
+    color: var(--ink);
+  }
+  .text-area:focus { outline: none; background: white; box-shadow: var(--shadow-sm); }
+  .text-area::placeholder { color: var(--ink-soft); opacity: 0.6; }
+
+  .current-pool {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+  }
+  .current-pool b { color: var(--pink-deep); }
+
+  .btn {
+    font-family: 'Zen Maru Gothic', 'Noto Sans TC', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 8px 14px;
+    background: white;
+    border: 2px solid var(--ink);
+    color: var(--ink);
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 999px;
+    box-shadow: var(--shadow-sm);
+    white-space: nowrap;
+  }
+  .btn:hover { transform: translate(-1px, -1px); box-shadow: var(--shadow); background: var(--pink-soft); }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--ink);
+    color: white;
+    padding: 12px 22px;
+    font-size: 14px;
+    border: 2px solid var(--ink);
+    box-shadow: 4px 4px 0 var(--pink-deep);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s;
+    z-index: 1000;
+    border-radius: 999px;
+    font-weight: 500;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <h1>今天吃什麼</h1>
+    <div class="sub">歪腦袋小工具 · v1.0</div>
+  </div>
+  <a class="donate-btn" href="https://fernfern.bobaboba.me" target="_blank" rel="noopener">
+    <svg class="donate-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M5 7 L7.5 21 Q7.7 22.2 9 22.2 L15 22.2 Q16.3 22.2 16.5 21 L19 7 Z" fill="#F8E0BE" stroke="#3A2618" stroke-width="1.3" stroke-linejoin="round"/>
+      <ellipse cx="12" cy="7" rx="7" ry="1.6" fill="#C48A60" stroke="#3A2618" stroke-width="1.3"/>
+      <path d="M14 2 L13 8" stroke="#E85A5A" stroke-width="1.8" stroke-linecap="round"/>
+      <circle cx="10" cy="17" r="1.3" fill="#3A2618"/>
+      <circle cx="13" cy="18.5" r="1.3" fill="#3A2618"/>
+      <circle cx="11" cy="14" r="1.2" fill="#3A2618"/>
+      <circle cx="14" cy="15.5" r="1.2" fill="#3A2618"/>
+    </svg>
+    <div>歡迎餵食我 🤤</div>
+  </a>
+</header>
+
+<main>
+  <div class="result-stage">
+    <div class="result-emoji" id="resultEmoji">🍽️</div>
+    <div class="result-food" id="resultFood">肚子餓了嗎？</div>
+    <button class="decide-btn" id="btnDecide">🎯 幫我決定</button>
+  </div>
+
+  <div class="cat-section">
+    <div class="cat-title">
+      選擇範圍
+      <span style="font-size:12px;color:var(--ink-soft);font-family:'DM Mono',monospace;font-weight:400;">可複選</span>
+    </div>
+    <div class="cat-chips" id="catChips"></div>
+    <div class="current-pool" id="currentPool"></div>
+  </div>
+
+  <div class="custom-section">
+    <div class="cat-title" style="margin-bottom:4px;">
+      自己加菜單
+      <button class="btn" id="btnUseCustom">只抽我加的</button>
+    </div>
+    <textarea class="text-area" id="customInput" placeholder="一行一個，加進抽選池&#10;&#10;💡 例如：&#10;巷口那家滷肉飯&#10;公司樓下便當&#10;媽媽煮的菜"></textarea>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+function toast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.className = 'toast show';
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.className = 'toast', 2000);
+}
+
+// ─── 食物資料庫 ───
+const foodCategories = {
+  '台式': { emoji: '🍱', foods: ['滷肉飯', '雞肉飯', '排骨便當', '牛肉麵', '陽春麵', '乾麵', '肉羹', '滷味', '鹽酥雞', '蚵仔煎', '臭豆腐', '碗粿', '肉圓', '割包', '筒仔米糕', '擔仔麵'] },
+  '中式': { emoji: '🥢', foods: ['炒飯', '炒麵', '水餃', '小籠包', '鍋貼', '蔥油餅', '麻婆豆腐', '宮保雞丁', '糖醋排骨', '三杯雞', '酸辣湯', '蛋花湯', '燒臘', '港式飲茶'] },
+  '日式': { emoji: '🍣', foods: ['壽司', '生魚片', '拉麵', '丼飯', '咖哩飯', '豬排飯', '親子丼', '烏龍麵', '蕎麥麵', '天婦羅', '章魚燒', '大阪燒', '日式定食'] },
+  '韓式': { emoji: '🍲', foods: ['韓式炸雞', '部隊鍋', '石鍋拌飯', '泡菜鍋', '辣炒年糕', '韓式烤肉', '海鮮煎餅', '人參雞湯', '紫菜飯捲', '冷麵'] },
+  '西式': { emoji: '🍝', foods: ['義大利麵', '披薩', '漢堡', '牛排', '燉飯', '帕尼尼', '三明治', '沙拉', '濃湯', '炸雞', '薯條', '熱狗堡'] },
+  '東南亞': { emoji: '🍛', foods: ['打拋豬', '綠咖哩', '泰式炒河粉', '月亮蝦餅', '越南河粉', '越式法國麵包', '叻沙', '海南雞飯', '沙嗲', '冬陰功湯'] },
+  '速食': { emoji: '🍔', foods: ['麥當勞', '肯德基', '摩斯漢堡', '漢堡王', 'Subway', '丹丹漢堡', '頂呱呱'] },
+  '小吃': { emoji: '🥟', foods: ['關東煮', '車輪餅', '雞蛋糕', '蔥抓餅', '地瓜球', '鹹酥雞', '大腸包小腸', '胡椒餅', '潤餅', '刈包'] },
+  '健康': { emoji: '🥗', foods: ['沙拉', '舒肥雞胸', '水煮餐', '健康餐盒', '優格', '蔬果汁', '地瓜', '雞胸肉便當', '生菜捲'] },
+  '火鍋': { emoji: '🍲', foods: ['麻辣鍋', '酸菜白肉鍋', '壽喜燒', '涮涮鍋', '石頭火鍋', '薑母鴨', '羊肉爐', '鴨血豆腐鍋'] },
+};
+
+const state = {
+  activeCats: ['台式', '中式', '日式'],  // 預設選的
+  spinning: false,
+  customMode: false,
+};
+
+// ─── 建立類別 chips ───
+function renderChips() {
+  const container = $('catChips');
+  container.innerHTML = '';
+  Object.keys(foodCategories).forEach(cat => {
+    const chip = document.createElement('div');
+    chip.className = 'cat-chip' + (state.activeCats.includes(cat) ? ' active' : '');
+    chip.textContent = `${foodCategories[cat].emoji} ${cat}`;
+    chip.addEventListener('click', () => {
+      if (state.spinning) return;
+      state.customMode = false;
+      const i = state.activeCats.indexOf(cat);
+      if (i >= 0) {
+        if (state.activeCats.length > 1) state.activeCats.splice(i, 1);
+        else { toast('至少要選一個類別'); return; }
+      } else {
+        state.activeCats.push(cat);
+      }
+      renderChips();
+      updatePool();
+    });
+    container.appendChild(chip);
+  });
+}
+
+// ─── 取得目前抽選池 ───
+function getPool() {
+  if (state.customMode) {
+    const custom = $('customInput').value.split(/\r?\n/).map(s => s.trim()).filter(s => s);
+    return custom;
+  }
+  let pool = [];
+  state.activeCats.forEach(cat => {
+    pool = pool.concat(foodCategories[cat].foods);
+  });
+  // 加上自訂的（如果有）
+  const custom = $('customInput').value.split(/\r?\n/).map(s => s.trim()).filter(s => s);
+  pool = pool.concat(custom);
+  return pool;
+}
+
+function getEmoji(food) {
+  // 找這個食物屬於哪類，回傳對應 emoji
+  for (const cat of Object.keys(foodCategories)) {
+    if (foodCategories[cat].foods.includes(food)) {
+      return foodCategories[cat].emoji;
+    }
+  }
+  return '🍽️';
+}
+
+function updatePool() {
+  const pool = getPool();
+  const el = $('currentPool');
+  if (state.customMode) {
+    el.innerHTML = `🎯 只從你加的菜單抽 · 共 <b>${pool.length}</b> 樣`;
+  } else {
+    el.innerHTML = `目前範圍：<b>${state.activeCats.join('、')}</b> · 共 <b>${pool.length}</b> 樣選擇`;
+  }
+}
+
+// ─── 抽選動畫 ───
+async function decide() {
+  if (state.spinning) return;
+  const pool = getPool();
+  if (!pool.length) {
+    toast('抽選池是空的，先選類別或加菜單');
+    return;
+  }
+
+  state.spinning = true;
+  $('btnDecide').disabled = true;
+
+  const foodEl = $('resultFood');
+  const emojiEl = $('resultEmoji');
+  foodEl.className = 'result-food running';
+
+  const winner = pool[Math.floor(Math.random() * pool.length)];
+
+  // 跳動動畫，漸慢
+  const startInterval = 50;
+  const endInterval = 280;
+  const duration = 2000;
+  const start = Date.now();
+
+  await new Promise(resolve => {
+    function tick() {
+      const elapsed = Date.now() - start;
+      const t = Math.min(1, elapsed / duration);
+      const interval = startInterval + (endInterval - startInterval) * (t * t);
+      const food = pool[Math.floor(Math.random() * pool.length)];
+      foodEl.textContent = food;
+      emojiEl.textContent = getEmoji(food);
+      if (elapsed < duration) {
+        setTimeout(tick, interval);
+      } else {
+        foodEl.textContent = winner;
+        emojiEl.textContent = getEmoji(winner);
+        foodEl.className = 'result-food winner';
+        resolve();
+      }
+    }
+    tick();
+  });
+
+  state.spinning = false;
+  $('btnDecide').disabled = false;
+  $('btnDecide').textContent = '🎯 再抽一次';
+}
+
+$('btnDecide').addEventListener('click', decide);
+
+// ─── 自訂菜單 ───
+$('customInput').addEventListener('input', () => {
+  if (state.customMode) updatePool();
+  else updatePool();
+});
+
+$('btnUseCustom').addEventListener('click', () => {
+  const custom = $('customInput').value.split(/\r?\n/).map(s => s.trim()).filter(s => s);
+  if (!custom.length) {
+    toast('先在下方加幾樣菜單');
+    return;
+  }
+  state.customMode = !state.customMode;
+  $('btnUseCustom').textContent = state.customMode ? '✓ 只抽我加的' : '只抽我加的';
+  $('btnUseCustom').style.background = state.customMode ? 'var(--pink-deep)' : '';
+  $('btnUseCustom').style.color = state.customMode ? 'white' : '';
+  // 取消類別高亮
+  if (state.customMode) {
+    document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
+  } else {
+    renderChips();
+  }
+  updatePool();
+  toast(state.customMode ? '只從你加的菜單抽' : '回到類別抽選');
+});
+
+// 空白鍵
+window.addEventListener('keydown', e => {
+  if (e.code === 'Space' && !state.spinning) {
+    const tag = (e.target?.tagName || '').toUpperCase();
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+    e.preventDefault();
+    decide();
+  }
+});
+
+// ─── 初始 ───
+renderChips();
+updatePool();
+</script>
+</body>
+</html>

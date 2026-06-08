@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>簡繁轉換・簡體繁體一鍵互轉</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Kaisei+Decol:wght@400;500;700&family=Zen+Maru+Gothic:wght@400;500;700;900&family=Noto+Sans+TC:wght@400;500;700;900&family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.js"></script>
+<style>
+  :root {
+    --bg: #FFF5FA; --ink: #4A3A5C; --ink-soft: #8B7BA0;
+    --pink: #FF8FAF; --pink-soft: #FFC8DD; --pink-deep: #E8538A;
+    --blue: #A8C8FF; --blue-soft: #D4E2FF; --blue-deep: #6B9DFF;
+    --yellow: #FFE9A8; --yellow-soft: #FFF5D1;
+    --green: #B8E5C8; --green-deep: #6BC48F;
+    --purple: #D4C0FF; --purple-deep: #B294E0;
+    --grid-line: rgba(232, 83, 138, 0.18); --line: rgba(74, 58, 92, 0.15);
+    --shadow: 3px 3px 0 var(--ink); --shadow-sm: 2px 2px 0 var(--ink);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { color: var(--ink); font-family: 'Noto Sans TC', sans-serif; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  body { background: linear-gradient(135deg, #FFE4F0 0%, #FFD6EA 50%, #F5DCFF 100%); min-height: 100vh; position: relative; overflow-x: hidden; }
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(255, 150, 195, 0.5) 0%, transparent 35%),
+      radial-gradient(circle at 80% 15%, rgba(220, 200, 255, 0.45) 0%, transparent 40%),
+      radial-gradient(circle at 50% 60%, rgba(255, 195, 220, 0.5) 0%, transparent 45%),
+      radial-gradient(circle at 90% 75%, rgba(230, 200, 255, 0.45) 0%, transparent 35%),
+      radial-gradient(circle at 10% 85%, rgba(255, 180, 210, 0.5) 0%, transparent 40%);
+    pointer-events: none; z-index: 0; filter: blur(2px);
+  }
+  body::after {
+    content: ''; position: fixed; inset: 0;
+    background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 35px 35px; pointer-events: none; z-index: 1; mix-blend-mode: multiply;
+  }
+  header, main, .toast { position: relative; z-index: 2; }
+  header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(255, 228, 240, 0.92); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border-bottom: 2px solid var(--ink); padding: 16px 32px 14px;
+    display: flex; align-items: flex-end; justify-content: space-between; gap: 24px;
+  }
+  .brand { display: flex; align-items: baseline; gap: 14px; }
+  .brand h1 { font-family: 'Zen Maru Gothic', sans-serif; font-weight: 900; font-size: 28px; letter-spacing: 0.04em; line-height: 1; color: var(--ink); transform: rotate(-2deg); position: relative; }
+  .brand h1::after { content: '字'; position: absolute; top: -10px; right: -22px; font-size: 13px; color: var(--pink); transform: rotate(8deg); font-family: 'Kaisei Decol', serif; }
+  .brand .sub { font-family: 'Caveat', cursive; font-size: 18px; color: var(--pink-deep); font-weight: 600; transform: rotate(-1deg); }
+  .donate-btn { display: flex; align-items: center; height: 40px; padding: 6px 14px; border-radius: 12px; color: #F8E0BE; background-color: #AD5138; border: 2px solid var(--ink); text-decoration: none; font-family: 'Noto Sans TC', sans-serif; font-size: 14px; font-weight: 600; box-shadow: var(--shadow-sm); transition: all 0.2s; gap: 8px; white-space: nowrap; }
+  .donate-btn:hover { transform: translate(-1px, -1px); box-shadow: var(--shadow); background-color: #C25E45; }
+  .donate-icon { width: 26px; height: 26px; flex-shrink: 0; display: block; }
+
+  main { max-width: 960px; margin: 0 auto; padding: 28px 24px 60px; display: flex; flex-direction: column; gap: 18px; }
+
+  /* 模式列 */
+  .mode-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .mode-tabs { display: flex; border: 2px solid var(--ink); border-radius: 999px; overflow: hidden; background: white; box-shadow: var(--shadow-sm); }
+  .mode-tab { padding: 10px 20px; background: white; cursor: pointer; font-family: 'Zen Maru Gothic', sans-serif; font-size: 14px; font-weight: 700; border-right: 2px solid var(--ink); transition: all 0.2s; color: var(--ink); }
+  .mode-tab:last-child { border-right: none; }
+  .mode-tab.active { background: var(--ink); color: white; }
+  .mode-tab:hover:not(.active) { background: var(--pink-soft); }
+
+  .convert-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 14px; align-items: stretch; }
+  @media (max-width: 760px) { .convert-grid { grid-template-columns: 1fr; } }
+
+  .text-panel { background: white; border: 2px solid var(--ink); border-radius: 16px; box-shadow: var(--shadow); display: flex; flex-direction: column; overflow: hidden; }
+  .panel-header { padding: 10px 16px; border-bottom: 2px solid var(--ink); display: flex; justify-content: space-between; align-items: center; background: var(--yellow-soft); }
+  .panel-title { font-family: 'Kaisei Decol', serif; font-weight: 700; font-size: 15px; }
+  .panel-count { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--ink-soft); }
+  .text-area { width: 100%; min-height: 320px; padding: 16px; border: none; background: white; font-family: 'Noto Sans TC', sans-serif; font-size: 16px; line-height: 1.8; resize: vertical; color: var(--ink); flex: 1; }
+  .text-area:focus { outline: none; }
+  .text-area::placeholder { color: var(--ink-soft); opacity: 0.6; }
+  .text-area[readonly] { background: #FDFAFD; }
+
+  .center-controls { display: flex; flex-direction: column; gap: 10px; justify-content: center; align-items: center; }
+  @media (max-width: 760px) { .center-controls { flex-direction: row; } }
+
+  .swap-btn { width: 48px; height: 48px; border: 2px solid var(--ink); background: var(--pink-deep); color: white; border-radius: 50%; cursor: pointer; font-size: 20px; line-height: 1; transition: all 0.2s; box-shadow: var(--shadow-sm); }
+  .swap-btn:hover { transform: rotate(180deg); box-shadow: var(--shadow); background: var(--pink); }
+
+  .panel-actions { padding: 10px 16px; border-top: 2px solid var(--line); display: flex; gap: 8px; }
+
+  .btn { font-family: 'Zen Maru Gothic', 'Noto Sans TC', sans-serif; font-weight: 700; font-size: 13px; padding: 8px 14px; background: white; border: 2px solid var(--ink); color: var(--ink); cursor: pointer; transition: all 0.2s; border-radius: 999px; box-shadow: var(--shadow-sm); white-space: nowrap; }
+  .btn:hover:not(:disabled) { transform: translate(-1px, -1px); box-shadow: var(--shadow); background: var(--pink-soft); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn.primary { background: var(--pink-deep); color: white; }
+  .btn.primary:hover:not(:disabled) { background: var(--pink); }
+  .btn.danger { background: var(--pink); color: white; }
+  .btn.danger:hover { background: var(--pink-deep); }
+
+  .loading-note { background: var(--blue-soft); border: 2px solid var(--ink); padding: 12px 16px; font-size: 13px; border-radius: 12px; box-shadow: var(--shadow-sm); text-align: center; }
+
+  .info-note { background: var(--yellow-soft); border: 2px solid var(--ink); padding: 14px 16px; font-size: 13px; line-height: 1.7; color: var(--ink); border-radius: 12px; box-shadow: var(--shadow-sm); }
+  .info-note b { color: var(--pink-deep); font-weight: 700; }
+
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--ink); color: white; padding: 12px 22px; font-size: 14px; border: 2px solid var(--ink); box-shadow: 4px 4px 0 var(--pink-deep); opacity: 0; pointer-events: none; transition: all 0.3s; z-index: 1000; border-radius: 999px; font-weight: 500; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.err { box-shadow: 4px 4px 0 var(--pink); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <h1>簡繁轉換</h1>
+    <div class="sub">歪腦袋小工具 · v1.0</div>
+  </div>
+  <a class="donate-btn" href="https://fernfern.bobaboba.me" target="_blank" rel="noopener">
+    <svg class="donate-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M5 7 L7.5 21 Q7.7 22.2 9 22.2 L15 22.2 Q16.3 22.2 16.5 21 L19 7 Z" fill="#F8E0BE" stroke="#3A2618" stroke-width="1.3" stroke-linejoin="round"/>
+      <ellipse cx="12" cy="7" rx="7" ry="1.6" fill="#C48A60" stroke="#3A2618" stroke-width="1.3"/>
+      <path d="M14 2 L13 8" stroke="#E85A5A" stroke-width="1.8" stroke-linecap="round"/>
+      <circle cx="10" cy="17" r="1.3" fill="#3A2618"/>
+      <circle cx="13" cy="18.5" r="1.3" fill="#3A2618"/>
+      <circle cx="11" cy="14" r="1.2" fill="#3A2618"/>
+      <circle cx="14" cy="15.5" r="1.2" fill="#3A2618"/>
+    </svg>
+    <div>歡迎餵食我 🤤</div>
+  </a>
+</header>
+
+<main>
+  <div class="mode-row">
+    <div class="mode-tabs" id="modeTabs">
+      <div class="mode-tab active" data-mode="s2twp">簡 → 繁（台灣用語）</div>
+      <div class="mode-tab" data-mode="s2t">簡 → 繁</div>
+      <div class="mode-tab" data-mode="tw2sp">繁 → 簡（大陸用語）</div>
+      <div class="mode-tab" data-mode="t2s">繁 → 簡</div>
+    </div>
+  </div>
+
+  <div id="loadingNote" class="loading-note">⏳ 載入轉換字庫中...</div>
+
+  <div class="convert-grid">
+    <div class="text-panel">
+      <div class="panel-header">
+        <span class="panel-title" id="srcTitle">輸入（簡體）</span>
+        <span class="panel-count" id="srcCount">0 字</span>
+      </div>
+      <textarea class="text-area" id="srcText" placeholder="在這裡輸入或貼上文字...&#10;&#10;💡 適合：&#10;• 把陸版遊戲攻略簡體轉成繁體&#10;• 大陸網站複製的內容轉繁體&#10;• 繁體稿子轉簡體給對岸看"></textarea>
+      <div class="panel-actions">
+        <button class="btn" id="btnPaste">📋 貼上</button>
+        <button class="btn danger" id="btnClear">✕ 清空</button>
+      </div>
+    </div>
+
+    <div class="center-controls">
+      <button class="swap-btn" id="btnSwap" title="交換方向">⇄</button>
+    </div>
+
+    <div class="text-panel">
+      <div class="panel-header">
+        <span class="panel-title" id="dstTitle">輸出（繁體）</span>
+        <span class="panel-count" id="dstCount">0 字</span>
+      </div>
+      <textarea class="text-area" id="dstText" readonly placeholder="轉換結果會出現在這裡..."></textarea>
+      <div class="panel-actions">
+        <button class="btn primary" id="btnCopy">📋 複製結果</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-note">
+    💡 <b>用語轉換：</b>選「台灣用語」會把大陸詞彙轉成台灣說法（例如「軟件→軟體」「鼠標→滑鼠」「視頻→影片」），不只是字體轉換。<br>
+    🔒 全部在你的瀏覽器轉換，文字不會上傳到任何伺服器。
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+function toast(msg, err = false) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (err ? ' err' : '');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.className = 'toast', 2000);
+}
+
+const state = {
+  mode: 's2twp',
+  converter: null,
+  ready: false,
+};
+
+// 模式定義：from / to 給 OpenCC，title 給 UI
+const modeConfig = {
+  s2twp: { from: 'cn', to: 'twp', src: '簡體', dst: '繁體（台灣用語）' },
+  s2t:   { from: 'cn', to: 'tw',  src: '簡體', dst: '繁體' },
+  tw2sp: { from: 'twp', to: 'cn', src: '繁體', dst: '簡體（大陸用語）' },
+  t2s:   { from: 'tw', to: 'cn',  src: '繁體', dst: '簡體' },
+};
+
+function buildConverter() {
+  const cfg = modeConfig[state.mode];
+  try {
+    state.converter = OpenCC.Converter({ from: cfg.from, to: cfg.to });
+    return true;
+  } catch (e) {
+    console.error(e);
+    return false;
+  }
+}
+
+function convert() {
+  if (!state.ready || !state.converter) return;
+  const src = $('srcText').value;
+  if (!src) { $('dstText').value = ''; updateCounts(); return; }
+  try {
+    $('dstText').value = state.converter(src);
+  } catch (e) {
+    console.error(e);
+    toast('轉換失敗', true);
+  }
+  updateCounts();
+}
+
+function updateCounts() {
+  $('srcCount').textContent = Array.from($('srcText').value).length + ' 字';
+  $('dstCount').textContent = Array.from($('dstText').value).length + ' 字';
+}
+
+function updateTitles() {
+  const cfg = modeConfig[state.mode];
+  $('srcTitle').textContent = '輸入（' + cfg.src + '）';
+  $('dstTitle').textContent = '輸出（' + cfg.dst + '）';
+}
+
+// ─── 等 OpenCC 載入 ───
+function waitForOpenCC() {
+  if (typeof OpenCC !== 'undefined') {
+    state.ready = true;
+    buildConverter();
+    $('loadingNote').style.display = 'none';
+    convert();
+  } else {
+    let tries = 0;
+    const timer = setInterval(() => {
+      tries++;
+      if (typeof OpenCC !== 'undefined') {
+        clearInterval(timer);
+        state.ready = true;
+        buildConverter();
+        $('loadingNote').style.display = 'none';
+        convert();
+      } else if (tries > 50) {
+        clearInterval(timer);
+        $('loadingNote').textContent = '⚠️ 字庫載入失敗，請檢查網路後重新整理';
+        $('loadingNote').style.background = 'var(--pink-soft)';
+      }
+    }, 100);
+  }
+}
+
+// ─── 事件 ───
+$('srcText').addEventListener('input', convert);
+
+document.querySelectorAll('.mode-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    state.mode = tab.dataset.mode;
+    updateTitles();
+    if (state.ready) { buildConverter(); convert(); }
+  });
+});
+
+$('btnSwap').addEventListener('click', () => {
+  // 把輸出貼回輸入，並切換對應的反向模式
+  const swapMap = { s2twp: 'tw2sp', s2t: 't2s', tw2sp: 's2twp', t2s: 's2t' };
+  const dstVal = $('dstText').value;
+  state.mode = swapMap[state.mode];
+  // 更新 tab highlight
+  document.querySelectorAll('.mode-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.mode === state.mode);
+  });
+  updateTitles();
+  if (dstVal) $('srcText').value = dstVal;
+  if (state.ready) { buildConverter(); convert(); }
+  toast('已交換轉換方向');
+});
+
+$('btnPaste').addEventListener('click', async () => {
+  try {
+    const text = await navigator.clipboard.readText();
+    if (text) { $('srcText').value = text; convert(); toast('✓ 已貼上'); }
+  } catch (e) {
+    toast('讀取剪貼簿失敗，請改用 Ctrl+V', true);
+  }
+});
+
+$('btnClear').addEventListener('click', () => {
+  $('srcText').value = '';
+  $('dstText').value = '';
+  updateCounts();
+});
+
+$('btnCopy').addEventListener('click', async () => {
+  const v = $('dstText').value;
+  if (!v) return;
+  try {
+    await navigator.clipboard.writeText(v);
+    toast('✓ 已複製結果');
+  } catch (e) {
+    const ta = document.createElement('textarea');
+    ta.value = v; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    toast('✓ 已複製結果');
+  }
+});
+
+// ─── 初始 ───
+updateTitles();
+waitForOpenCC();
+</script>
+</body>
+</html>

@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>圖片壓縮轉檔・PNG JPG WebP 互轉減肥</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Kaisei+Decol:wght@400;500;700&family=Zen+Maru+Gothic:wght@400;500;700;900&family=Noto+Sans+TC:wght@400;500;700;900&family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FFF5FA; --ink: #4A3A5C; --ink-soft: #8B7BA0;
+    --pink: #FF8FAF; --pink-soft: #FFC8DD; --pink-deep: #E8538A;
+    --blue: #A8C8FF; --blue-soft: #D4E2FF; --blue-deep: #6B9DFF;
+    --yellow: #FFE9A8; --yellow-soft: #FFF5D1;
+    --green: #B8E5C8; --green-deep: #6BC48F;
+    --purple: #D4C0FF; --purple-deep: #B294E0;
+    --grid-line: rgba(232, 83, 138, 0.18); --line: rgba(74, 58, 92, 0.15);
+    --shadow: 3px 3px 0 var(--ink); --shadow-sm: 2px 2px 0 var(--ink);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { color: var(--ink); font-family: 'Noto Sans TC', sans-serif; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  body { background: linear-gradient(135deg, #FFE4F0 0%, #FFD6EA 50%, #F5DCFF 100%); min-height: 100vh; position: relative; overflow-x: hidden; }
+  body::before { content: ''; position: fixed; inset: 0; background: radial-gradient(circle at 15% 20%, rgba(255, 150, 195, 0.5) 0%, transparent 35%), radial-gradient(circle at 80% 15%, rgba(220, 200, 255, 0.45) 0%, transparent 40%), radial-gradient(circle at 50% 60%, rgba(255, 195, 220, 0.5) 0%, transparent 45%), radial-gradient(circle at 90% 75%, rgba(230, 200, 255, 0.45) 0%, transparent 35%), radial-gradient(circle at 10% 85%, rgba(255, 180, 210, 0.5) 0%, transparent 40%); pointer-events: none; z-index: 0; filter: blur(2px); }
+  body::after { content: ''; position: fixed; inset: 0; background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px); background-size: 35px 35px; pointer-events: none; z-index: 1; mix-blend-mode: multiply; }
+  header, main, .toast { position: relative; z-index: 2; }
+  header { position: sticky; top: 0; z-index: 100; background: rgba(255, 228, 240, 0.92); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 2px solid var(--ink); padding: 16px 32px 14px; display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; }
+  .brand { display: flex; align-items: baseline; gap: 14px; }
+  .brand h1 { font-family: 'Zen Maru Gothic', sans-serif; font-weight: 900; font-size: 28px; letter-spacing: 0.04em; line-height: 1; color: var(--ink); transform: rotate(-2deg); position: relative; }
+  .brand h1::after { content: '🖼️'; position: absolute; top: -10px; right: -26px; font-size: 15px; transform: rotate(15deg); }
+  .brand .sub { font-family: 'Caveat', cursive; font-size: 18px; color: var(--pink-deep); font-weight: 600; transform: rotate(-1deg); }
+  .donate-btn { display: flex; align-items: center; height: 40px; padding: 6px 14px; border-radius: 12px; color: #F8E0BE; background-color: #AD5138; border: 2px solid var(--ink); text-decoration: none; font-family: 'Noto Sans TC', sans-serif; font-size: 14px; font-weight: 600; box-shadow: var(--shadow-sm); transition: all 0.2s; gap: 8px; white-space: nowrap; }
+  .donate-btn:hover { transform: translate(-1px, -1px); box-shadow: var(--shadow); background-color: #C25E45; }
+  .donate-icon { width: 26px; height: 26px; flex-shrink: 0; display: block; }
+
+  main { max-width: 920px; margin: 0 auto; padding: 32px 24px 60px; display: flex; flex-direction: column; gap: 22px; }
+
+  .dropzone { border: 2px dashed var(--ink); background: rgba(255,255,255,0.6); padding: 48px 24px; text-align: center; cursor: pointer; transition: all 0.2s; border-radius: 20px; }
+  .dropzone:hover, .dropzone.drag { background: rgba(255,232,240,0.85); transform: translate(-2px,-2px); box-shadow: var(--shadow); }
+  .dropzone-icon { font-family: 'Kaisei Decol', serif; font-size: 48px; font-weight: 700; color: var(--pink-deep); line-height: 1; margin-bottom: 10px; }
+  .dropzone-text { font-family: 'Kaisei Decol', serif; font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+  .dropzone-hint { font-family: 'Caveat', cursive; font-size: 16px; color: var(--ink-soft); font-weight: 600; }
+  .dropzone-hint b { color: var(--pink-deep); }
+
+  .settings-card { background: white; border: 2px solid var(--ink); border-radius: 18px; padding: 22px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 18px; }
+  .setting-block { display: flex; flex-direction: column; gap: 8px; }
+  .setting-label { font-family: 'Kaisei Decol', serif; font-size: 15px; font-weight: 700; color: var(--ink); }
+  .format-tabs { display: flex; gap: 6px; }
+  .format-tab { flex: 1; padding: 10px 4px; text-align: center; background: white; border: 2px solid var(--ink); border-radius: 12px; cursor: pointer; font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 700; color: var(--ink); transition: all 0.15s; }
+  .format-tab.active { background: var(--ink); color: white; }
+  .format-tab:hover:not(.active) { background: var(--pink-soft); }
+
+  .opt-header { display: flex; justify-content: space-between; align-items: center; }
+  .opt-val { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 700; color: var(--pink-deep); }
+  input[type=range] { width: 100%; height: 8px; -webkit-appearance: none; appearance: none; background: var(--yellow-soft); border: 2px solid var(--ink); border-radius: 999px; outline: none; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; background: var(--pink-deep); border: 2px solid var(--ink); border-radius: 50%; cursor: pointer; }
+  input[type=range]::-moz-range-thumb { width: 22px; height: 22px; background: var(--pink-deep); border: 2px solid var(--ink); border-radius: 50%; cursor: pointer; }
+  input[type=range]:disabled { opacity: 0.4; }
+
+  .resize-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .resize-row label { font-size: 14px; color: var(--ink-soft); }
+  .resize-row input[type=number] { width: 100px; padding: 8px 10px; border: 2px solid var(--ink); border-radius: 8px; font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 700; color: var(--ink); background: white; }
+  .resize-row select { padding: 8px 10px; border: 2px solid var(--ink); border-radius: 8px; font-family: 'Noto Sans TC',sans-serif; font-size: 13px; font-weight: 700; color: var(--ink); background: white; cursor: pointer; }
+
+  /* 結果列表 */
+  .results { display: flex; flex-direction: column; gap: 12px; }
+  .result-item { background: white; border: 2px solid var(--ink); border-radius: 14px; padding: 14px; display: flex; gap: 14px; align-items: center; box-shadow: var(--shadow-sm); flex-wrap: wrap; }
+  .result-thumb { width: 60px; height: 60px; border: 2px solid var(--ink); border-radius: 8px; object-fit: cover; background: var(--yellow-soft); flex-shrink: 0; }
+  .result-info { flex: 1; min-width: 140px; font-size: 13px; }
+  .result-info .name { font-weight: 700; color: var(--ink); word-break: break-all; margin-bottom: 4px; }
+  .result-info .stats { font-family: 'DM Mono', monospace; color: var(--ink-soft); font-size: 12px; }
+  .result-info .stats .saved { color: var(--green-deep); font-weight: 700; }
+  .result-info .stats .up { color: var(--pink-deep); font-weight: 700; }
+  .result-actions { display: flex; gap: 8px; }
+
+  .btn { font-family: 'Zen Maru Gothic', 'Noto Sans TC', sans-serif; font-weight: 700; font-size: 13px; padding: 9px 16px; background: white; border: 2px solid var(--ink); color: var(--ink); cursor: pointer; transition: all 0.2s; border-radius: 999px; box-shadow: var(--shadow-sm); white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+  .btn:hover:not(:disabled) { transform: translate(-1px, -1px); box-shadow: var(--shadow); background: var(--pink-soft); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn.primary { background: var(--pink-deep); color: white; }
+  .btn.primary:hover:not(:disabled) { background: var(--pink); }
+  .btn.full { width: 100%; }
+
+  .info-note { background: var(--yellow-soft); border: 2px solid var(--ink); padding: 12px 16px; font-size: 13px; line-height: 1.6; color: var(--ink); border-radius: 12px; box-shadow: var(--shadow-sm); }
+  .info-note b { color: var(--pink-deep); font-weight: 700; }
+
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--ink); color: white; padding: 12px 22px; font-size: 14px; border: 2px solid var(--ink); box-shadow: 4px 4px 0 var(--pink-deep); opacity: 0; pointer-events: none; transition: all 0.3s; z-index: 1000; border-radius: 999px; font-weight: 500; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.err { box-shadow: 4px 4px 0 var(--pink); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <h1>圖片壓縮轉檔</h1>
+    <div class="sub">歪腦袋小工具 · v1.7</div>
+  </div>
+  <a class="donate-btn" href="https://fernfern.bobaboba.me" target="_blank" rel="noopener">
+    <svg class="donate-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M5 7 L7.5 21 Q7.7 22.2 9 22.2 L15 22.2 Q16.3 22.2 16.5 21 L19 7 Z" fill="#F8E0BE" stroke="#3A2618" stroke-width="1.3" stroke-linejoin="round"/>
+      <ellipse cx="12" cy="7" rx="7" ry="1.6" fill="#C48A60" stroke="#3A2618" stroke-width="1.3"/>
+      <path d="M14 2 L13 8" stroke="#E85A5A" stroke-width="1.8" stroke-linecap="round"/>
+      <circle cx="10" cy="17" r="1.3" fill="#3A2618"/><circle cx="13" cy="18.5" r="1.3" fill="#3A2618"/><circle cx="11" cy="14" r="1.2" fill="#3A2618"/><circle cx="14" cy="15.5" r="1.2" fill="#3A2618"/>
+    </svg>
+    <div>歡迎餵食我 🤤</div>
+  </a>
+</header>
+
+<main>
+  <div class="dropzone" id="dropzone">
+    <div class="dropzone-icon">↓</div>
+    <div class="dropzone-text">拖曳、點擊或貼上圖片</div>
+    <div class="dropzone-hint">支援多張，<b>JPG / PNG / WebP</b>，全部在瀏覽器處理不上傳</div>
+    <input type="file" id="fileInput" accept="image/*" multiple style="display:none">
+  </div>
+
+  <div class="settings-card">
+    <div class="setting-block">
+      <div class="setting-label">輸出格式</div>
+      <div class="format-tabs" id="formatTabs">
+        <div class="format-tab active" data-fmt="image/jpeg">JPG</div>
+        <div class="format-tab" data-fmt="image/png">PNG</div>
+        <div class="format-tab" data-fmt="image/webp">WebP</div>
+      </div>
+    </div>
+
+    <div class="setting-block">
+      <div class="opt-header">
+        <span class="setting-label">壓縮品質</span>
+        <span class="opt-val" id="qualityVal">80%</span>
+      </div>
+      <input type="range" id="qualitySlider" min="10" max="100" value="80" step="5">
+      <span style="font-size:11px;color:var(--ink-soft);font-family:'DM Mono',monospace;" id="qualityNote">JPG / WebP 適用，PNG 為無損不受此影響</span>
+    </div>
+
+    <div class="setting-block">
+      <div class="setting-label">尺寸調整（選填）</div>
+      <div class="resize-row">
+        <select id="resizeMode">
+          <option value="none">維持原始尺寸</option>
+          <option value="dimensions">指定寬高（鎖定比例）</option>
+          <option value="maxWidth">限制最大寬度</option>
+          <option value="maxHeight">限制最大高度</option>
+          <option value="scale">按比例縮放 %</option>
+        </select>
+        <input type="number" id="resizeValue" value="1920" min="1" style="display:none;">
+        <span id="resizeUnit" style="font-size:13px;color:var(--ink-soft);display:none;">px</span>
+      </div>
+      <div class="dimension-row" id="dimensionRow" style="display:none; align-items:center; gap:8px; margin-top:10px;">
+        <div style="display:flex; flex-direction:column; gap:3px;">
+          <label style="font-size:11px;color:var(--ink-soft);">寬 W</label>
+          <input type="number" id="dimWidth" min="1" style="width:100px; padding:8px 10px; border:2px solid var(--ink); border-radius:8px; font-family:'DM Mono',monospace; font-size:14px; font-weight:700; color:var(--ink); background:white;">
+        </div>
+        <span style="font-size:18px; color:var(--ink-soft); margin-top:16px;">×</span>
+        <div style="display:flex; flex-direction:column; gap:3px;">
+          <label style="font-size:11px;color:var(--ink-soft);">高 H</label>
+          <input type="number" id="dimHeight" min="1" style="width:100px; padding:8px 10px; border:2px solid var(--ink); border-radius:8px; font-family:'DM Mono',monospace; font-size:14px; font-weight:700; color:var(--ink); background:white;">
+        </div>
+        <label style="display:flex; align-items:center; gap:5px; margin-top:16px; cursor:pointer; font-size:12px;">
+          <input type="checkbox" id="lockRatio" checked style="width:16px;height:16px;accent-color:var(--pink-deep);">
+          🔒 鎖比例
+        </label>
+        <button type="button" id="btnRedetect" style="margin-top:16px; padding:6px 12px; border:2px solid var(--ink); border-radius:999px; background:white; font-family:'Zen Maru Gothic',sans-serif; font-weight:700; font-size:12px; cursor:pointer; color:var(--ink);" title="重新讀取原圖尺寸">↻ 重新偵測</button>
+      </div>
+      <div id="dimHint" style="display:none; font-size:11px; color:var(--ink-soft); font-family:'DM Mono',monospace; margin-top:6px;"></div>
+    </div>
+
+    <button class="btn primary full" id="btnProcess" disabled>⚙️ 開始處理</button>
+  </div>
+
+  <div class="results" id="results"></div>
+
+  <div class="info-note">
+    🔒 所有圖片<b>完全在你的瀏覽器處理</b>，不會上傳到任何伺服器。<br>
+    💡 <b>JPG</b> 適合照片、<b>PNG</b> 適合需要透明背景的圖、<b>WebP</b> 檔案最小但舊裝置可能不支援。
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+function toast(msg, err) { const t = $('toast'); t.textContent = msg; t.className = 'toast show' + (err ? ' err' : ''); clearTimeout(t._t); t._t = setTimeout(() => t.className = 'toast', 2200); }
+
+const state = { files: [], format: 'image/jpeg', quality: 0.8, resizeMode: 'none', resizeValue: 1920, results: [], firstDim: null, dimW: 0, dimH: 0, ratio: 1 };
+
+function fmtSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / 1024 / 1024).toFixed(2) + ' MB';
+}
+
+// ─── 上傳 ───
+$('dropzone').addEventListener('click', () => $('fileInput').click());
+$('fileInput').addEventListener('change', e => addFiles(e.target.files));
+['dragenter','dragover'].forEach(ev => $('dropzone').addEventListener(ev, e => { e.preventDefault(); $('dropzone').classList.add('drag'); }));
+['dragleave','drop'].forEach(ev => $('dropzone').addEventListener(ev, e => { e.preventDefault(); $('dropzone').classList.remove('drag'); }));
+$('dropzone').addEventListener('drop', e => addFiles(e.dataTransfer.files));
+window.addEventListener('paste', e => {
+  const items = (e.clipboardData || window.clipboardData)?.items;
+  if (!items) return;
+  const imgs = [];
+  for (const it of items) if (it.type.startsWith('image/')) { const f = it.getAsFile(); if (f) imgs.push(f); }
+  if (imgs.length) { addFiles(imgs); toast('✓ 已貼上圖片'); }
+});
+
+async function addFiles(fileList) {
+  const arr = Array.from(fileList).filter(f => f.type.startsWith('image/'));
+  if (!arr.length) { toast('沒有有效的圖片', true); return; }
+  arr.forEach(f => state.files.push(f));
+  $('btnProcess').disabled = false;
+  toast(`已加入 ${arr.length} 張圖片`);
+  // 讀第一張圖尺寸
+  const dim = await readDim(state.files[0]);
+  if (dim) {
+    state.firstDim = dim;
+    state.ratio = dim.w / dim.h;
+    // 不管在哪個模式都更新提示，讓使用者知道尺寸讀到了
+    if (state.resizeMode === 'dimensions') {
+      fillDimensions();
+    }
+  } else {
+    state.firstDim = null;
+    if (state.resizeMode === 'dimensions') {
+      $('dimHint').textContent = '⚠️ 這張圖讀不到尺寸（檔案可能損壞），換一張試試';
+    }
+    toast('⚠️ 讀不到圖片尺寸', true);
+  }
+}
+
+// 讀單一檔案的尺寸，回傳 {w, h} 或 null
+// 主方法用 createImageBitmap（最可靠），失敗才退回 Image
+async function readDim(file) {
+  if (!file) return null;
+  // 方法 1：createImageBitmap（現代瀏覽器最穩，直接吃 File）
+  if (typeof createImageBitmap === 'function') {
+    try {
+      const bmp = await createImageBitmap(file);
+      const w = bmp.width, h = bmp.height;
+      bmp.close && bmp.close();
+      if (w > 0 && h > 0) return { w, h };
+    } catch (e) {
+      console.warn('createImageBitmap 失敗，改用 Image', e);
+    }
+  }
+  // 方法 2：Image + object URL（後備）
+  return new Promise(resolve => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const w = img.naturalWidth, h = img.naturalHeight;
+      URL.revokeObjectURL(url);
+      resolve(w > 0 && h > 0 ? { w, h } : null);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(null); };
+    img.src = url;
+  });
+}
+
+// 把原圖尺寸填進 dimensions 輸入框
+function fillDimensions() {
+  if (!state.firstDim) {
+    $('dimWidth').value = '';
+    $('dimHeight').value = '';
+    $('dimHint').textContent = state.files.length ? '⏳ 正在讀取尺寸，請點「↻ 重新偵測」' : '⚠️ 請先上傳圖片';
+    return;
+  }
+  state.dimW = state.firstDim.w;
+  state.dimH = state.firstDim.h;
+  state.ratio = state.firstDim.w / state.firstDim.h;
+  $('dimWidth').value = state.dimW;
+  $('dimHeight').value = state.dimH;
+  const n = state.files.length;
+  const batchNote = n > 1 ? `　🔄 設定會套用到全部 ${n} 張圖（依各圖比例）` : '';
+  $('dimHint').textContent = `原圖 ${state.firstDim.w}×${state.firstDim.h}（比例 ${state.ratio.toFixed(3)}）改任一邊另一邊自動算${batchNote}`;
+}
+
+// ─── 設定 ───
+document.querySelectorAll('.format-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.format-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    state.format = tab.dataset.fmt;
+    const isPng = state.format === 'image/png';
+    $('qualitySlider').disabled = isPng;
+    $('qualityNote').style.opacity = isPng ? '1' : '0.6';
+  });
+});
+$('qualitySlider').addEventListener('input', e => { state.quality = parseInt(e.target.value) / 100; $('qualityVal').textContent = e.target.value + '%'; });
+$('resizeMode').addEventListener('change', e => {
+  state.resizeMode = e.target.value;
+  const isDimensions = state.resizeMode === 'dimensions';
+  const showSimple = state.resizeMode !== 'none' && !isDimensions;
+  $('resizeValue').style.display = showSimple ? 'inline-block' : 'none';
+  $('resizeUnit').style.display = showSimple ? 'inline' : 'none';
+  $('dimensionRow').style.display = isDimensions ? 'flex' : 'none';
+  $('dimHint').style.display = isDimensions ? 'block' : 'none';
+  if (state.resizeMode === 'scale') { $('resizeValue').value = 50; $('resizeUnit').textContent = '%'; state.resizeValue = 50; }
+  else if (showSimple) { $('resizeValue').value = 1920; $('resizeUnit').textContent = 'px'; state.resizeValue = 1920; }
+  if (isDimensions) {
+    if (state.firstDim) {
+      fillDimensions();
+    } else if (state.files.length) {
+      $('dimHint').textContent = '⏳ 讀取尺寸中...';
+      readDim(state.files[0]).then(dim => {
+        if (dim) { state.firstDim = dim; state.ratio = dim.w / dim.h; fillDimensions(); }
+        else { $('dimHint').textContent = '⚠️ 無法讀取此圖尺寸，請換張圖試試'; }
+      });
+    } else {
+      $('dimHint').textContent = '⚠️ 請先上傳圖片';
+    }
+  }
+});
+$('resizeValue').addEventListener('input', e => state.resizeValue = parseFloat(e.target.value) || 0);
+
+// 重新偵測尺寸按鈕
+$('btnRedetect').addEventListener('click', async () => {
+  if (!state.files.length) {
+    $('dimHint').textContent = '⚠️ 還沒有圖片，請先上傳';
+    toast('請先上傳圖片', true);
+    return;
+  }
+  $('dimHint').textContent = '⏳ 重新讀取尺寸中...';
+  const dim = await readDim(state.files[0]);
+  if (dim) {
+    state.firstDim = dim;
+    state.ratio = dim.w / dim.h;
+    fillDimensions();
+    toast('✓ 已偵測：' + dim.w + '×' + dim.h);
+  } else {
+    $('dimHint').textContent = '⚠️ 無法讀取此圖尺寸，請換張圖或重新上傳';
+    toast('讀取失敗', true);
+  }
+});
+
+// 取得目前有效比例：多重來源，盡可能算出
+function getRatio() {
+  // 1. 已讀到的原圖尺寸
+  if (state.firstDim && state.firstDim.w > 0 && state.firstDim.h > 0) {
+    return state.firstDim.w / state.firstDim.h;
+  }
+  // 2. 上次算過的比例（非 1）
+  if (state.ratio && state.ratio > 0 && state.ratio !== 1) {
+    return state.ratio;
+  }
+  // 3. 兩個輸入框都有值，就用它們的比例
+  const w = parseFloat($('dimWidth').value) || 0;
+  const h = parseFloat($('dimHeight').value) || 0;
+  if (w > 0 && h > 0) return w / h;
+  return null;
+}
+
+// 確保有比例：沒有就當場同步讀第一張圖
+async function ensureRatio() {
+  let ratio = getRatio();
+  if (ratio) return ratio;
+  if (state.files.length) {
+    const dim = await readDim(state.files[0]);
+    if (dim) {
+      state.firstDim = dim;
+      state.ratio = dim.w / dim.h;
+      return dim.w / dim.h;
+    }
+  }
+  return null;
+}
+
+// 寬高連動（鎖比例時改一邊另一邊自動依原圖比例算）
+$('dimWidth').addEventListener('input', async e => {
+  const w = parseFloat(e.target.value) || 0;
+  state.dimW = w;
+  if (!$('lockRatio').checked || w <= 0) return;
+  const ratio = await ensureRatio();
+  if (!ratio) {
+    $('dimHint').textContent = '⚠️ 偵測不到圖片尺寸，請先上傳圖片或點「↻ 重新偵測」';
+    return;
+  }
+  state.dimH = Math.round(w / ratio);
+  $('dimHeight').value = state.dimH;
+});
+$('dimHeight').addEventListener('input', async e => {
+  const h = parseFloat(e.target.value) || 0;
+  state.dimH = h;
+  if (!$('lockRatio').checked || h <= 0) return;
+  const ratio = await ensureRatio();
+  if (!ratio) {
+    $('dimHint').textContent = '⚠️ 偵測不到圖片尺寸，請先上傳圖片或點「↻ 重新偵測」';
+    return;
+  }
+  state.dimW = Math.round(h * ratio);
+  $('dimWidth').value = state.dimW;
+});
+
+// ─── 處理 ───
+$('btnProcess').addEventListener('click', async () => {
+  if (!state.files.length) return;
+  $('btnProcess').disabled = true;
+  $('btnProcess').textContent = '⏳ 處理中...';
+  $('results').innerHTML = '';
+  state.results = [];
+
+  for (const file of state.files) {
+    try {
+      const result = await processImage(file);
+      state.results.push(result);
+      renderResult(result);
+    } catch (e) {
+      console.error(e);
+      toast(`${file.name} 處理失敗`, true);
+    }
+  }
+
+  // 加「全部下載」按鈕
+  if (state.results.length > 1) {
+    const allBtn = document.createElement('button');
+    allBtn.className = 'btn primary full';
+    allBtn.textContent = `⬇ 全部下載 (${state.results.length} 張)`;
+    allBtn.addEventListener('click', () => state.results.forEach(r => downloadResult(r)));
+    $('results').appendChild(allBtn);
+  }
+
+  $('btnProcess').disabled = false;
+  $('btnProcess').textContent = '⚙️ 重新處理';
+  state.files = [];
+  // 不清空 firstDim / ratio，讓使用者還能繼續依比例調整
+  toast('處理完成！');
+});
+
+function processImage(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let w = img.naturalWidth, h = img.naturalHeight;
+      // 尺寸調整
+      if (state.resizeMode === 'maxWidth' && w > state.resizeValue) {
+        h = h * state.resizeValue / w; w = state.resizeValue;
+      } else if (state.resizeMode === 'maxHeight' && h > state.resizeValue) {
+        w = w * state.resizeValue / h; h = state.resizeValue;
+      } else if (state.resizeMode === 'scale') {
+        w = w * state.resizeValue / 100; h = h * state.resizeValue / 100;
+      } else if (state.resizeMode === 'dimensions' && state.dimW > 0) {
+        // 指定寬高：直接套用設定的目標寬高
+        // （同尺寸的批量圖會全部變一致；若某張比例不同，仍以該張比例為準避免變形）
+        const targetRatio = state.dimW / state.dimH;
+        const thisRatio = img.naturalWidth / img.naturalHeight;
+        // 比例幾乎相同（同方向同尺寸）→ 直接用目標寬高
+        if (Math.abs(targetRatio - thisRatio) < 0.02) {
+          w = state.dimW;
+          h = state.dimH;
+        } else {
+          // 比例不同的圖：以目標寬為準，依自己比例算高（不變形）
+          w = state.dimW;
+          h = Math.round(state.dimW / thisRatio);
+        }
+      }
+      w = Math.round(w); h = Math.round(h);
+
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.imageSmoothingQuality = 'high';
+      // JPG 不支援透明，填白底
+      if (state.format === 'image/jpeg') {
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, w, h);
+      }
+      ctx.drawImage(img, 0, 0, w, h);
+
+      canvas.toBlob(blob => {
+        if (!blob) { reject(new Error('轉換失敗')); return; }
+        const ext = state.format === 'image/jpeg' ? 'jpg' : (state.format === 'image/png' ? 'png' : 'webp');
+        const baseName = file.name.replace(/\.[^.]+$/, '');
+        resolve({
+          originalName: file.name,
+          originalSize: file.size,
+          newSize: blob.size,
+          blob,
+          downloadName: `${baseName}.${ext}`,
+          thumbUrl: canvas.toDataURL(state.format, 0.5),
+          width: w, height: h,
+        });
+      }, state.format, state.format === 'image/png' ? undefined : state.quality);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('圖片載入失敗')); };
+    img.src = url;
+  });
+}
+
+function renderResult(r) {
+  const diff = r.originalSize - r.newSize;
+  const pct = ((diff / r.originalSize) * 100).toFixed(0);
+  const item = document.createElement('div');
+  item.className = 'result-item';
+  let statsHtml;
+  if (diff > 0) {
+    statsHtml = `${fmtSize(r.originalSize)} → ${fmtSize(r.newSize)} <span class="saved">↓ 省 ${pct}%</span>`;
+  } else {
+    statsHtml = `${fmtSize(r.originalSize)} → ${fmtSize(r.newSize)} <span class="up">↑ 增 ${Math.abs(pct)}%</span>`;
+  }
+  item.innerHTML = `
+    <img class="result-thumb" src="${r.thumbUrl}">
+    <div class="result-info">
+      <div class="name">${r.downloadName}</div>
+      <div class="stats">${r.width}×${r.height} · ${statsHtml}</div>
+    </div>
+    <div class="result-actions"></div>
+  `;
+  const dlBtn = document.createElement('button');
+  dlBtn.className = 'btn primary';
+  dlBtn.textContent = '⬇ 下載';
+  dlBtn.addEventListener('click', () => downloadResult(r));
+  item.querySelector('.result-actions').appendChild(dlBtn);
+  $('results').appendChild(item);
+}
+
+function downloadResult(r) {
+  const url = URL.createObjectURL(r.blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = r.downloadName;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>

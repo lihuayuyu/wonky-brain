@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>單位換算・長度重量溫度面積一次搞定</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Kaisei+Decol:wght@400;500;700&family=Zen+Maru+Gothic:wght@400;500;700;900&family=Noto+Sans+TC:wght@400;500;700;900&family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FFF5FA;
+    --ink: #4A3A5C;
+    --ink-soft: #8B7BA0;
+    --pink: #FF8FAF;
+    --pink-soft: #FFC8DD;
+    --pink-deep: #E8538A;
+    --blue: #A8C8FF;
+    --blue-soft: #D4E2FF;
+    --blue-deep: #6B9DFF;
+    --yellow: #FFE9A8;
+    --yellow-soft: #FFF5D1;
+    --green: #B8E5C8;
+    --green-deep: #6BC48F;
+    --purple: #D4C0FF;
+    --purple-deep: #B294E0;
+    --grid-line: rgba(232, 83, 138, 0.18);
+    --line: rgba(74, 58, 92, 0.15);
+    --shadow: 3px 3px 0 var(--ink);
+    --shadow-sm: 2px 2px 0 var(--ink);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    color: var(--ink);
+    font-family: 'Noto Sans TC', sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    background: linear-gradient(135deg, #FFE4F0 0%, #FFD6EA 50%, #F5DCFF 100%);
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(255, 150, 195, 0.5) 0%, transparent 35%),
+      radial-gradient(circle at 80% 15%, rgba(220, 200, 255, 0.45) 0%, transparent 40%),
+      radial-gradient(circle at 50% 60%, rgba(255, 195, 220, 0.5) 0%, transparent 45%),
+      radial-gradient(circle at 90% 75%, rgba(230, 200, 255, 0.45) 0%, transparent 35%),
+      radial-gradient(circle at 10% 85%, rgba(255, 180, 210, 0.5) 0%, transparent 40%);
+    pointer-events: none;
+    z-index: 0;
+    filter: blur(2px);
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 35px 35px;
+    pointer-events: none;
+    z-index: 1;
+    mix-blend-mode: multiply;
+  }
+  header, main, .toast { position: relative; z-index: 2; }
+
+  header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(255, 228, 240, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 2px solid var(--ink);
+    padding: 16px 32px 14px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+  }
+  .brand { display: flex; align-items: baseline; gap: 14px; }
+  .brand h1 {
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: 900;
+    font-size: 28px;
+    letter-spacing: 0.04em;
+    line-height: 1;
+    color: var(--ink);
+    transform: rotate(-2deg);
+    position: relative;
+  }
+  .brand h1::after {
+    content: '📐';
+    position: absolute;
+    top: -8px;
+    right: -24px;
+    font-size: 16px;
+    transform: rotate(15deg);
+  }
+  .brand .sub {
+    font-family: 'Caveat', cursive;
+    font-size: 18px;
+    color: var(--pink-deep);
+    font-weight: 600;
+    transform: rotate(-1deg);
+  }
+  .donate-btn {
+    display: flex;
+    align-items: center;
+    height: 40px;
+    padding: 6px 14px;
+    border-radius: 12px;
+    color: #F8E0BE;
+    background-color: #AD5138;
+    border: 2px solid var(--ink);
+    text-decoration: none;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s;
+    gap: 8px;
+    white-space: nowrap;
+  }
+  .donate-btn:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: var(--shadow);
+    background-color: #C25E45;
+  }
+  .donate-icon { width: 26px; height: 26px; flex-shrink: 0; display: block; }
+
+  main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 32px 24px 60px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  /* 類別分頁 */
+  .cat-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .cat-tab {
+    padding: 10px 18px;
+    background: white;
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    transition: all 0.15s;
+    box-shadow: var(--shadow-sm);
+  }
+  .cat-tab:hover:not(.active) {
+    background: var(--pink-soft);
+    transform: translate(-1px, -1px);
+    box-shadow: var(--shadow);
+  }
+  .cat-tab.active { background: var(--ink); color: white; }
+
+  /* 換算卡 */
+  .convert-card {
+    background: white;
+    border: 2px solid var(--ink);
+    border-radius: 20px;
+    padding: 28px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .convert-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .convert-row label {
+    font-family: 'Kaisei Decol', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ink-soft);
+  }
+  .convert-input-group {
+    display: flex;
+    gap: 10px;
+  }
+  .convert-input {
+    flex: 1;
+    padding: 14px 16px;
+    border: 2px solid var(--ink);
+    border-radius: 14px;
+    background: var(--yellow-soft);
+    font-family: 'DM Mono', monospace;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--ink);
+    min-width: 0;
+  }
+  .convert-input:focus { outline: none; box-shadow: var(--shadow-sm); background: white; }
+  .convert-input[readonly] {
+    background: var(--pink-soft);
+    cursor: default;
+  }
+  .unit-select {
+    width: 160px;
+    padding: 14px 12px;
+    border: 2px solid var(--ink);
+    border-radius: 14px;
+    background: white;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ink);
+    cursor: pointer;
+  }
+
+  .swap-btn {
+    align-self: center;
+    width: 48px; height: 48px;
+    border: 2px solid var(--ink);
+    background: var(--pink-deep);
+    color: white;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 22px;
+    line-height: 1;
+    transition: all 0.2s;
+    box-shadow: var(--shadow-sm);
+  }
+  .swap-btn:hover {
+    transform: rotate(180deg) translate(1px, 1px);
+    box-shadow: var(--shadow);
+    background: var(--pink);
+  }
+
+  /* 常用對照 */
+  .quick-ref {
+    background: var(--yellow-soft);
+    border: 2px solid var(--ink);
+    border-radius: 14px;
+    padding: 14px 18px;
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--ink);
+    box-shadow: var(--shadow-sm);
+  }
+  .quick-ref .title {
+    font-family: 'Kaisei Decol', serif;
+    font-weight: 700;
+    color: var(--pink-deep);
+    margin-bottom: 6px;
+  }
+  .quick-ref .ref-item {
+    font-family: 'DM Mono', monospace;
+    display: inline-block;
+    margin-right: 16px;
+  }
+  .quick-ref .ref-item b { color: var(--pink-deep); }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--ink);
+    color: white;
+    padding: 12px 22px;
+    font-size: 14px;
+    border: 2px solid var(--ink);
+    box-shadow: 4px 4px 0 var(--pink-deep);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s;
+    z-index: 1000;
+    border-radius: 999px;
+    font-weight: 500;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <h1>單位換算</h1>
+    <div class="sub">歪腦袋小工具 · v1.0</div>
+  </div>
+  <a class="donate-btn" href="https://fernfern.bobaboba.me" target="_blank" rel="noopener">
+    <svg class="donate-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M5 7 L7.5 21 Q7.7 22.2 9 22.2 L15 22.2 Q16.3 22.2 16.5 21 L19 7 Z" fill="#F8E0BE" stroke="#3A2618" stroke-width="1.3" stroke-linejoin="round"/>
+      <ellipse cx="12" cy="7" rx="7" ry="1.6" fill="#C48A60" stroke="#3A2618" stroke-width="1.3"/>
+      <path d="M14 2 L13 8" stroke="#E85A5A" stroke-width="1.8" stroke-linecap="round"/>
+      <circle cx="10" cy="17" r="1.3" fill="#3A2618"/>
+      <circle cx="13" cy="18.5" r="1.3" fill="#3A2618"/>
+      <circle cx="11" cy="14" r="1.2" fill="#3A2618"/>
+      <circle cx="14" cy="15.5" r="1.2" fill="#3A2618"/>
+    </svg>
+    <div>歡迎餵食我 🤤</div>
+  </a>
+</header>
+
+<main>
+  <div class="cat-tabs" id="catTabs"></div>
+
+  <div class="convert-card">
+    <div class="convert-row">
+      <label>從</label>
+      <div class="convert-input-group">
+        <input type="number" class="convert-input" id="fromValue" value="1" inputmode="decimal">
+        <select class="unit-select" id="fromUnit"></select>
+      </div>
+    </div>
+
+    <button class="swap-btn" id="btnSwap" title="交換單位">⇅</button>
+
+    <div class="convert-row">
+      <label>等於</label>
+      <div class="convert-input-group">
+        <input type="number" class="convert-input" id="toValue" readonly>
+        <select class="unit-select" id="toUnit"></select>
+      </div>
+    </div>
+  </div>
+
+  <div class="quick-ref" id="quickRef"></div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+function toast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.className = 'toast show';
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.className = 'toast', 2000);
+}
+
+// ─── 換算定義 ───
+// 大部分用「對基準單位的倍率」線性換算，溫度特殊處理
+const categories = {
+  length: {
+    name: '長度',
+    base: '公尺',
+    units: {
+      '公釐 mm': 0.001,
+      '公分 cm': 0.01,
+      '公尺 m': 1,
+      '公里 km': 1000,
+      '英寸 in': 0.0254,
+      '英尺 ft': 0.3048,
+      '碼 yd': 0.9144,
+      '英里 mi': 1609.344,
+      '台尺': 0.30303,
+      '台寸': 0.030303,
+    },
+    quickRef: [
+      '1 英寸 = <b>2.54</b> 公分',
+      '1 英尺 = <b>30.48</b> 公分',
+      '1 英里 ≈ <b>1.609</b> 公里',
+      '1 台尺 ≈ <b>30.3</b> 公分',
+    ],
+  },
+  weight: {
+    name: '重量',
+    base: '公斤',
+    units: {
+      '公克 g': 0.001,
+      '公斤 kg': 1,
+      '公噸 t': 1000,
+      '毫克 mg': 0.000001,
+      '英磅 lb': 0.453592,
+      '盎司 oz': 0.0283495,
+      '台斤': 0.6,
+      '台兩': 0.0375,
+      '市斤': 0.5,
+    },
+    quickRef: [
+      '1 英磅 ≈ <b>0.454</b> 公斤',
+      '1 盎司 ≈ <b>28.35</b> 公克',
+      '1 台斤 = <b>0.6</b> 公斤',
+      '1 台斤 = <b>16</b> 台兩',
+    ],
+  },
+  area: {
+    name: '面積',
+    base: '平方公尺',
+    units: {
+      '平方公分 cm²': 0.0001,
+      '平方公尺 m²': 1,
+      '公頃 ha': 10000,
+      '平方公里 km²': 1000000,
+      '坪': 3.305785,
+      '台甲': 9699.173,
+      '平方英尺 ft²': 0.092903,
+      '英畝 acre': 4046.856,
+    },
+    quickRef: [
+      '1 坪 ≈ <b>3.306</b> 平方公尺',
+      '1 坪 ≈ <b>35.58</b> 平方英尺',
+      '1 台甲 ≈ <b>2934</b> 坪',
+      '1 公頃 ≈ <b>3025</b> 坪',
+    ],
+  },
+  volume: {
+    name: '容量',
+    base: '公升',
+    units: {
+      '毫升 ml': 0.001,
+      '公升 L': 1,
+      '立方公尺 m³': 1000,
+      '加侖(美) gal': 3.785412,
+      '品脫(美) pt': 0.473176,
+      '盎司(液) fl oz': 0.0295735,
+      '杯 cup': 0.236588,
+    },
+    quickRef: [
+      '1 加侖(美) ≈ <b>3.785</b> 公升',
+      '1 杯 ≈ <b>236.6</b> 毫升',
+      '1 液盎司 ≈ <b>29.57</b> 毫升',
+    ],
+  },
+  temperature: {
+    name: '溫度',
+    base: '攝氏',
+    isTemp: true,
+    units: {
+      '攝氏 °C': 'C',
+      '華氏 °F': 'F',
+      '克氏 K': 'K',
+    },
+    quickRef: [
+      '0°C = <b>32</b>°F = <b>273.15</b>K',
+      '37°C = <b>98.6</b>°F（體溫）',
+      '100°C = <b>212</b>°F（水沸騰）',
+    ],
+  },
+  time: {
+    name: '時間',
+    base: '秒',
+    units: {
+      '毫秒 ms': 0.001,
+      '秒 s': 1,
+      '分鐘 min': 60,
+      '小時 hr': 3600,
+      '天 day': 86400,
+      '週 week': 604800,
+      '年 yr': 31536000,
+    },
+    quickRef: [
+      '1 小時 = <b>3600</b> 秒',
+      '1 天 = <b>1440</b> 分鐘',
+      '1 年 = <b>365</b> 天',
+    ],
+  },
+  data: {
+    name: '資料量',
+    base: 'MB',
+    units: {
+      'Bit': 0.00000011920929,
+      'Byte B': 0.00000095367432,
+      'KB': 0.0009765625,
+      'MB': 1,
+      'GB': 1024,
+      'TB': 1048576,
+    },
+    quickRef: [
+      '1 GB = <b>1024</b> MB',
+      '1 MB = <b>1024</b> KB',
+      '1 Byte = <b>8</b> Bit',
+    ],
+  },
+};
+
+const state = {
+  category: 'length',
+  fromUnit: null,
+  toUnit: null,
+};
+
+// ─── 溫度換算 ───
+function tempToBase(value, unit) {
+  // 統一轉成攝氏
+  if (unit === 'C') return value;
+  if (unit === 'F') return (value - 32) * 5 / 9;
+  if (unit === 'K') return value - 273.15;
+}
+function tempFromBase(celsius, unit) {
+  if (unit === 'C') return celsius;
+  if (unit === 'F') return celsius * 9 / 5 + 32;
+  if (unit === 'K') return celsius + 273.15;
+}
+
+// ─── 換算主邏輯 ───
+function convert() {
+  const cat = categories[state.category];
+  const fromVal = parseFloat($('fromValue').value);
+  if (isNaN(fromVal)) { $('toValue').value = ''; return; }
+
+  const fromKey = $('fromUnit').value;
+  const toKey = $('toUnit').value;
+
+  let result;
+  if (cat.isTemp) {
+    const base = tempToBase(fromVal, cat.units[fromKey]);
+    result = tempFromBase(base, cat.units[toKey]);
+  } else {
+    const base = fromVal * cat.units[fromKey];
+    result = base / cat.units[toKey];
+  }
+
+  // 格式化：避免太多小數，但保留精度
+  $('toValue').value = formatNumber(result);
+}
+
+function formatNumber(n) {
+  if (n === 0) return '0';
+  const abs = Math.abs(n);
+  if (abs >= 1e9 || abs < 1e-6) return n.toExponential(4);
+  // 取有意義的小數位
+  let str = n.toPrecision(8);
+  // 去除尾端 0
+  str = parseFloat(str).toString();
+  return str;
+}
+
+// ─── 建立類別分頁 ───
+function renderCatTabs() {
+  const container = $('catTabs');
+  container.innerHTML = '';
+  Object.keys(categories).forEach(key => {
+    const tab = document.createElement('div');
+    tab.className = 'cat-tab' + (key === state.category ? ' active' : '');
+    tab.textContent = categories[key].name;
+    tab.addEventListener('click', () => {
+      state.category = key;
+      renderCatTabs();
+      renderUnits();
+      convert();
+      renderQuickRef();
+    });
+    container.appendChild(tab);
+  });
+}
+
+// ─── 建立單位下拉 ───
+function renderUnits() {
+  const cat = categories[state.category];
+  const unitKeys = Object.keys(cat.units);
+  const fromSel = $('fromUnit');
+  const toSel = $('toUnit');
+  fromSel.innerHTML = '';
+  toSel.innerHTML = '';
+  unitKeys.forEach(k => {
+    const o1 = document.createElement('option');
+    o1.value = k; o1.textContent = k;
+    fromSel.appendChild(o1);
+    const o2 = document.createElement('option');
+    o2.value = k; o2.textContent = k;
+    toSel.appendChild(o2);
+  });
+  // 預設：第一個 → 第二個
+  fromSel.value = unitKeys[0];
+  toSel.value = unitKeys[1] || unitKeys[0];
+}
+
+function renderQuickRef() {
+  const cat = categories[state.category];
+  const ref = $('quickRef');
+  ref.innerHTML = `
+    <div class="title">💡 ${cat.name}常用對照</div>
+    ${cat.quickRef.map(r => `<span class="ref-item">${r}</span>`).join('')}
+  `;
+}
+
+// ─── 事件 ───
+$('fromValue').addEventListener('input', convert);
+$('fromUnit').addEventListener('change', convert);
+$('toUnit').addEventListener('change', convert);
+$('btnSwap').addEventListener('click', () => {
+  const f = $('fromUnit').value;
+  const t = $('toUnit').value;
+  $('fromUnit').value = t;
+  $('toUnit').value = f;
+  // 把結果帶到輸入框
+  const toVal = $('toValue').value;
+  if (toVal) $('fromValue').value = toVal;
+  convert();
+});
+
+// 點結果可複製
+$('toValue').addEventListener('click', async () => {
+  const v = $('toValue').value;
+  if (!v) return;
+  try {
+    await navigator.clipboard.writeText(v);
+    toast('✓ 已複製結果：' + v);
+  } catch (e) {}
+});
+
+// ─── 初始 ───
+renderCatTabs();
+renderUnits();
+convert();
+renderQuickRef();
+</script>
+</body>
+</html>

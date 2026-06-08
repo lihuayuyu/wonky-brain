@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>符號倉庫・特殊符號顏文字一鍵複製</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Kaisei+Decol:wght@400;500;700&family=Zen+Maru+Gothic:wght@400;500;700;900&family=Noto+Sans+TC:wght@400;500;700;900&family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FFF5FA; --ink: #4A3A5C; --ink-soft: #8B7BA0;
+    --pink: #FF8FAF; --pink-soft: #FFC8DD; --pink-deep: #E8538A;
+    --blue: #A8C8FF; --blue-soft: #D4E2FF; --blue-deep: #6B9DFF;
+    --yellow: #FFE9A8; --yellow-soft: #FFF5D1;
+    --green: #B8E5C8; --green-deep: #6BC48F;
+    --purple: #D4C0FF; --purple-deep: #B294E0;
+    --grid-line: rgba(232, 83, 138, 0.18); --line: rgba(74, 58, 92, 0.15);
+    --shadow: 3px 3px 0 var(--ink); --shadow-sm: 2px 2px 0 var(--ink);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { color: var(--ink); font-family: 'Noto Sans TC', sans-serif; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  body { background: linear-gradient(135deg, #FFE4F0 0%, #FFD6EA 50%, #F5DCFF 100%); min-height: 100vh; position: relative; overflow-x: hidden; }
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(255, 150, 195, 0.5) 0%, transparent 35%),
+      radial-gradient(circle at 80% 15%, rgba(220, 200, 255, 0.45) 0%, transparent 40%),
+      radial-gradient(circle at 50% 60%, rgba(255, 195, 220, 0.5) 0%, transparent 45%),
+      radial-gradient(circle at 90% 75%, rgba(230, 200, 255, 0.45) 0%, transparent 35%),
+      radial-gradient(circle at 10% 85%, rgba(255, 180, 210, 0.5) 0%, transparent 40%);
+    pointer-events: none; z-index: 0; filter: blur(2px);
+  }
+  body::after {
+    content: ''; position: fixed; inset: 0;
+    background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 35px 35px; pointer-events: none; z-index: 1; mix-blend-mode: multiply;
+  }
+  header, main, .toast { position: relative; z-index: 2; }
+  header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(255, 228, 240, 0.92); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border-bottom: 2px solid var(--ink); padding: 16px 32px 14px;
+    display: flex; align-items: flex-end; justify-content: space-between; gap: 24px;
+  }
+  .brand { display: flex; align-items: baseline; gap: 14px; }
+  .brand h1 { font-family: 'Zen Maru Gothic', sans-serif; font-weight: 900; font-size: 28px; letter-spacing: 0.04em; line-height: 1; color: var(--ink); transform: rotate(-2deg); position: relative; }
+  .brand h1::after { content: '✦'; position: absolute; top: -8px; right: -16px; font-size: 14px; color: var(--pink); transform: rotate(2deg); }
+  .brand .sub { font-family: 'Caveat', cursive; font-size: 18px; color: var(--pink-deep); font-weight: 600; transform: rotate(-1deg); }
+  .donate-btn { display: flex; align-items: center; height: 40px; padding: 6px 14px; border-radius: 12px; color: #F8E0BE; background-color: #AD5138; border: 2px solid var(--ink); text-decoration: none; font-family: 'Noto Sans TC', sans-serif; font-size: 14px; font-weight: 600; box-shadow: var(--shadow-sm); transition: all 0.2s; gap: 8px; white-space: nowrap; }
+  .donate-btn:hover { transform: translate(-1px, -1px); box-shadow: var(--shadow); background-color: #C25E45; }
+  .donate-icon { width: 26px; height: 26px; flex-shrink: 0; display: block; }
+
+  main { max-width: 920px; margin: 0 auto; padding: 28px 24px 60px; display: flex; flex-direction: column; gap: 18px; }
+
+  /* 搜尋列 */
+  .search-bar { display: flex; gap: 10px; align-items: center; }
+  .search-input {
+    flex: 1; padding: 12px 18px; border: 2px solid var(--ink); border-radius: 999px;
+    background: white; font-family: 'Noto Sans TC', sans-serif; font-size: 15px; color: var(--ink);
+    box-shadow: var(--shadow-sm);
+  }
+  .search-input:focus { outline: none; box-shadow: var(--shadow); }
+
+  /* 分類分頁 */
+  .cat-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+  .cat-tab {
+    padding: 7px 14px; background: white; border: 2px solid var(--ink); border-radius: 999px; cursor: pointer;
+    font-family: 'Zen Maru Gothic', sans-serif; font-size: 13px; font-weight: 700; color: var(--ink); transition: all 0.15s; box-shadow: var(--shadow-sm);
+  }
+  .cat-tab:hover:not(.active) { background: var(--pink-soft); transform: translate(-1px,-1px); }
+  .cat-tab.active { background: var(--ink); color: white; }
+
+  /* 符號區塊 */
+  .symbol-group { display: flex; flex-direction: column; gap: 10px; }
+  .group-title { font-family: 'Kaisei Decol', serif; font-size: 16px; font-weight: 700; color: var(--ink); padding-bottom: 4px; border-bottom: 2px solid var(--ink); }
+  .symbol-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(58px, 1fr)); gap: 8px; }
+  .symbol-cell {
+    aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+    background: white; border: 2px solid var(--ink); border-radius: 12px; cursor: pointer;
+    font-size: 26px; transition: all 0.12s; box-shadow: var(--shadow-sm); user-select: none;
+  }
+  .symbol-cell:hover { background: var(--yellow); transform: translate(-2px, -2px); box-shadow: var(--shadow); }
+  .symbol-cell:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--ink); }
+  .symbol-cell.text-sym { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 700; }
+  .symbol-cell.kaomoji { font-size: 13px; font-family: 'DM Mono', monospace; padding: 4px; text-align: center; line-height: 1.2; word-break: break-all; }
+
+  .empty { text-align: center; color: var(--ink-soft); font-style: italic; padding: 40px; }
+
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--ink); color: white; padding: 12px 22px; font-size: 14px; border: 2px solid var(--ink); box-shadow: 4px 4px 0 var(--pink-deep); opacity: 0; pointer-events: none; transition: all 0.3s; z-index: 1000; border-radius: 999px; font-weight: 500; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <h1>符號倉庫</h1>
+    <div class="sub">歪腦袋小工具 · v1.1</div>
+  </div>
+  <a class="donate-btn" href="https://fernfern.bobaboba.me" target="_blank" rel="noopener">
+    <svg class="donate-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M5 7 L7.5 21 Q7.7 22.2 9 22.2 L15 22.2 Q16.3 22.2 16.5 21 L19 7 Z" fill="#F8E0BE" stroke="#3A2618" stroke-width="1.3" stroke-linejoin="round"/>
+      <ellipse cx="12" cy="7" rx="7" ry="1.6" fill="#C48A60" stroke="#3A2618" stroke-width="1.3"/>
+      <path d="M14 2 L13 8" stroke="#E85A5A" stroke-width="1.8" stroke-linecap="round"/>
+      <circle cx="10" cy="17" r="1.3" fill="#3A2618"/>
+      <circle cx="13" cy="18.5" r="1.3" fill="#3A2618"/>
+      <circle cx="11" cy="14" r="1.2" fill="#3A2618"/>
+      <circle cx="14" cy="15.5" r="1.2" fill="#3A2618"/>
+    </svg>
+    <div>歡迎餵食我 🤤</div>
+  </a>
+</header>
+
+<main>
+  <div class="search-bar">
+    <input class="search-input" id="searchInput" placeholder="🔍 搜尋符號關鍵字（例如：箭頭、星星、愛心、笑）">
+  </div>
+
+  <div class="cat-tabs" id="catTabs"></div>
+
+  <div id="symbolContainer"></div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+function toast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.className = 'toast show';
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.className = 'toast', 1600);
+}
+
+// ─── 符號資料庫 ───
+// 每個項目：[符號, 關鍵字]
+const symbolData = {
+  '箭頭': {
+    type: 'text',
+    items: [['→','右'],['←','左'],['↑','上'],['↓','下'],['↗','右上'],['↘','右下'],['↙','左下'],['↖','左上'],['↔','左右'],['↕','上下'],['⇒','雙右'],['⇐','雙左'],['⇑','雙上'],['⇓','雙下'],['⇔','雙左右'],['⇕','雙上下'],['⇄','左右交換'],['⇅','上下交換'],['⇆','左右'],['↺','逆時針'],['↻','順時針'],['➜','粗右'],['➤','實右三角'],['➥','彎右'],['➦','彎右'],['➧','右'],['➨','右'],['➩','右'],['➪','右'],['➫','右'],['➬','右'],['➭','右'],['➮','右'],['➯','右'],['➱','右'],['➲','圈右'],['➳','右'],['➵','右'],['➸','右'],['➺','右'],['➻','右'],['➼','右'],['➽','右'],['»','雙書右'],['«','雙書左'],['‹','單左'],['›','單右'],['▶','播放'],['◀','倒退'],['▲','上三角'],['▼','下三角'],['◢','右下角'],['◣','左下角'],['◤','左上角'],['◥','右上角'],['⤴','上彎'],['⤵','下彎'],['↩','左彎回'],['↪','右彎'],['⟶','長右'],['⟵','長左'],['⟷','長左右'],['↯','閃電下'],['⇗','右上雙'],['⇘','右下雙'],['⇙','左下雙'],['⇖','左上雙']],
+  },
+  '星星': {
+    type: 'text',
+    items: [['★','實星'],['☆','空星'],['✦','四角星'],['✧','空四角'],['✩','星'],['✪','圈星'],['✫','星'],['✬','星'],['✭','星'],['✮','星'],['✯','星'],['✰','星'],['⭐','emoji星'],['🌟','閃星'],['✨','閃亮'],['💫','暈眩'],['⚡','閃電'],['❇','火花'],['❈','花'],['❉','花'],['❊','花'],['❋','花'],['✱','星號'],['✲','星號'],['✳','八角星'],['✴','八芒'],['✵','八芒'],['✶','六芒'],['✷','八芒'],['✸','重芒'],['✹','十二芒'],['✺','十六芒'],['⁂','三星'],['⋆','小星'],['🌠','流星'],['☄','彗星'],['🔯','六芒星'],['✴️','八芒emoji']],
+  },
+  '愛心': {
+    type: 'text',
+    items: [['♡','空心'],['♥','實心'],['❤','紅心'],['🧡','橘'],['💛','黃'],['💚','綠'],['💙','藍'],['💜','紫'],['🖤','黑'],['🤍','白'],['🤎','棕'],['💕','兩心'],['💞','旋轉心'],['💓','心動'],['💗','成長心'],['💖','閃亮心'],['💘','邱比特'],['💝','緞帶心'],['💟','裝飾心'],['❣','感嘆心'],['❤️‍🔥','燃燒心'],['❤️‍🩹','修補心'],['💔','心碎'],['♥️','紅心emoji'],['❥','彎心'],['❦','花心'],['❧','花心'],['💌','情書'],['💑','情侶'],['💏','親吻']],
+  },
+  '標點符號': {
+    type: 'text',
+    items: [['•','項目點'],['◦','空心點'],['‣','三角點'],['·','間隔點'],['∙','點'],['※','參考'],['＊','全星'],['＃','井號'],['＆','和'],['＠','小老鼠'],['…','刪節'],['‥','二點'],['、','頓號'],['。','句號'],['，','逗號'],['；','分號'],['：','冒號'],['！','驚嘆'],['？','問號'],['‼','雙驚嘆'],['⁇','雙問'],['⁈','問驚'],['⁉','驚問'],['¿','倒問'],['¡','倒驚'],['–','短破折'],['—','破折'],['―','橫線'],['§','章節'],['¶','段落'],['†','劍號'],['‡','雙劍'],['№','編號'],['℃','攝氏'],['℉','華氏'],['°','度'],['′','分'],['″','秒'],['‰','千分'],['％','全形%']],
+  },
+  '括號': {
+    type: 'text',
+    items: [['「','上引'],['」','下引'],['『','雙上引'],['』','雙下引'],['【','實括左'],['】','實括右'],['〔','括左'],['〕','括右'],['〖','括左'],['〗','括右'],['（','全左括'],['）','全右括'],['［','全左方括'],['］','全右方括'],['｛','全左花括'],['｝','全右花括'],['〈','角左'],['〉','角右'],['《','書名左'],['》','書名右'],['⟨','數左角'],['⟩','數右角'],['⌈','上左'],['⌉','上右'],['⌊','下左'],['⌋','下右'],['「','鉤左'],['﹁','直引上'],['﹂','直引下'],['︵','直上括'],['︶','直下括']],
+  },
+  '線條方框': {
+    type: 'text',
+    items: [['│','直'],['─','橫'],['┌','左上'],['┐','右上'],['└','左下'],['┘','右下'],['├','左T'],['┤','右T'],['┬','上T'],['┴','下T'],['┼','十字'],['═','雙橫'],['║','雙直'],['╔','雙左上'],['╗','雙右上'],['╚','雙左下'],['╝','雙右下'],['■','實方'],['□','空方'],['▪','小實方'],['▫','小空方'],['▣','框方'],['▢','圓角方'],['▤','橫線方'],['▥','直線方'],['▦','格方'],['▧','斜方'],['▨','斜方'],['▩','滿方'],['●','實圓'],['○','空圓'],['◎','雙圓'],['◉','靶心'],['⊙','圈點'],['◌','虛圓'],['◍','實虛圓'],['◐','左黑'],['◑','右黑'],['◒','下黑'],['◓','上黑'],['◆','實菱'],['◇','空菱'],['◈','框菱'],['▷','右三角'],['◁','左三角'],['△','上空三角'],['▽','下空三角'],['◬','三角點']],
+  },
+  '勾叉記號': {
+    type: 'text',
+    items: [['✓','勾'],['✔','粗勾'],['☑','框勾'],['☓','叉叉'],['✗','叉'],['✘','粗叉'],['☒','框叉'],['❌','紅叉'],['⭕','紅圈'],['✅','綠勾'],['❎','綠叉框'],['☓','叉'],['√','根號勾'],['╳','大叉'],['☐','空框'],['❓','問號'],['❔','白問'],['❗','驚嘆'],['❕','白驚嘆'],['⚠','警告'],['🚫','禁止'],['⛔','禁入'],['♻','回收'],['⚡','閃電'],['☢','輻射'],['☣','生物危害'],['⚐','空旗'],['⚑','實旗'],['✁','剪'],['✂','剪刀'],['✃','剪'],['✄','剪刀']],
+  },
+  '數字符號': {
+    type: 'text',
+    items: [['①','圈1'],['②','圈2'],['③','圈3'],['④','圈4'],['⑤','圈5'],['⑥','圈6'],['⑦','圈7'],['⑧','圈8'],['⑨','圈9'],['⑩','圈10'],['❶','黑圈1'],['❷','黑圈2'],['❸','黑圈3'],['❹','黑圈4'],['❺','黑圈5'],['⒈','點1'],['⒉','點2'],['⒊','點3'],['Ⅰ','羅馬1'],['Ⅱ','羅馬2'],['Ⅲ','羅馬3'],['Ⅳ','羅馬4'],['Ⅴ','羅馬5'],['Ⅵ','羅馬6'],['Ⅶ','羅馬7'],['Ⅷ','羅馬8'],['Ⅸ','羅馬9'],['Ⅹ','羅馬10'],['½','二分一'],['⅓','三分一'],['¼','四分一'],['¾','四分三'],['⅛','八分一'],['㊀','圈一'],['㊁','圈二'],['㊂','圈三']],
+  },
+  '數學符號': {
+    type: 'text',
+    items: [['＋','加'],['－','減'],['×','乘'],['÷','除'],['＝','等'],['≠','不等'],['≈','約等'],['≡','恆等'],['＜','小於'],['＞','大於'],['≤','小於等'],['≥','大於等'],['±','正負'],['∓','負正'],['√','根號'],['∛','立方根'],['∞','無限'],['∑','總和'],['∏','連乘'],['∫','積分'],['∂','偏微'],['∇','梯度'],['∆','差分'],['π','圓周率'],['∝','正比'],['∈','屬於'],['∉','不屬'],['⊂','子集'],['⊃','超集'],['∪','聯集'],['∩','交集'],['∅','空集'],['∀','任意'],['∃','存在'],['∴','所以'],['∵','因為'],['⊥','垂直'],['∥','平行'],['∠','角'],['°','度'],['‰','千分'],['µ','微'],['Ω','歐姆'],['℮','估計']],
+  },
+  '貨幣符號': {
+    type: 'text',
+    items: [['＄','美元'],['¢','分'],['£','英鎊'],['€','歐元'],['¥','日圓'],['₩','韓元'],['₹','印度盧比'],['₽','盧布'],['฿','泰銖'],['₫','越南盾'],['₱','披索'],['₴','格里夫納'],['₪','謝克爾'],['₦','奈拉'],['₡','科朗'],['﷼','里亞爾'],['元','元'],['圓','圓'],['¤','通用貨幣']],
+  },
+  '表情emoji': {
+    type: 'emoji',
+    items: [['😀','笑'],['😃','開口笑'],['😄','大笑'],['😁','露齒'],['😆','瞇眼'],['😅','苦笑'],['🤣','笑翻'],['😂','笑哭'],['🙂','微笑'],['🙃','倒臉'],['😊','靦腆'],['😇','天使'],['🥰','三心'],['😍','愛心眼'],['🤩','星星眼'],['😘','飛吻'],['😗','親'],['😚','閉眼親'],['😙','微親'],['😋','美味'],['😛','吐舌'],['😜','眨眼吐舌'],['🤪','瘋'],['😝','瞇吐舌'],['🤑','錢'],['🤗','抱抱'],['🤭','摀嘴'],['🤫','噓'],['🤔','思考'],['🤐','拉鍊嘴'],['🤨','挑眉'],['😐','面無表情'],['😑','無語'],['😶','無嘴'],['😏','得意'],['😒','不屑'],['🙄','翻白眼'],['😬','尷尬'],['😮‍💨','嘆氣'],['🤥','說謊'],['😌','放鬆'],['😔','失落'],['😪','睏'],['🤤','流口水'],['😴','睡'],['😷','口罩'],['🤒','發燒'],['🤕','受傷'],['🤢','噁心'],['🤮','嘔吐'],['🥵','熱'],['🥶','冷'],['😵','暈'],['🤯','爆炸頭'],['🤠','牛仔'],['🥳','派對'],['😎','墨鏡'],['🤓','書呆'],['🧐','單眼鏡'],['😕','困惑'],['😟','擔心'],['🙁','微皺眉'],['😮','驚訝'],['😯','驚'],['😲','震驚'],['😳','臉紅'],['🥺','可憐'],['😦','皺眉張嘴'],['😧','痛苦'],['😨','害怕'],['😰','冷汗'],['😥','失望'],['😢','哭'],['😭','大哭'],['😱','嚇'],['😖','糾結'],['😣','堅持'],['😞','失望'],['😓','流汗'],['😩','累'],['😫','疲憊'],['🥱','打哈欠'],['😤','哼'],['😡','生氣'],['😠','怒'],['🤬','罵'],['😈','小惡魔'],['👿','怒惡魔'],['💀','骷髏'],['💩','便便'],['🤡','小丑'],['👻','鬼'],['👽','外星人'],['🤖','機器人']],
+  },
+  '手勢emoji': {
+    type: 'emoji',
+    items: [['👍','讚'],['👎','倒讚'],['👌','OK'],['🤌','捏'],['🤏','一點點'],['✌','耶'],['🤞','祈禱'],['🤟','愛你'],['🤘','搖滾'],['🤙','打電話'],['👈','左指'],['👉','右指'],['👆','上指'],['👇','下指'],['☝','上指'],['✋','手掌'],['🤚','手背'],['🖐','張開手'],['🖖','瓦肯'],['👋','揮手'],['🤝','握手'],['👏','鼓掌'],['🙌','舉雙手'],['👐','張開雙手'],['🤲','捧手'],['🙏','拜託'],['✊','拳頭'],['👊','出拳'],['🤛','左拳'],['🤜','右拳'],['✍','寫字'],['💅','美甲'],['🤳','自拍'],['💪','肌肉'],['🦾','機械臂'],['🖕','中指']],
+  },
+  '常用物件': {
+    type: 'emoji',
+    items: [['🔥','火'],['💯','一百'],['✅','綠勾'],['❌','叉'],['⭕','圈'],['❗','驚嘆'],['❓','問號'],['💢','怒'],['💥','爆'],['💫','暈'],['💦','汗'],['💨','風'],['🕳','洞'],['💬','對話'],['💭','想'],['🗯','怒吼框'],['🎉','彩帶'],['🎊','彩球'],['🎈','氣球'],['🎁','禮物'],['🎀','蝴蝶結'],['🏆','獎盃'],['🥇','金牌'],['🥈','銀牌'],['🥉','銅牌'],['🏅','獎牌'],['👑','皇冠'],['💎','鑽石'],['💰','錢袋'],['💴','日鈔'],['💵','美鈔'],['💳','信用卡'],['⏰','鬧鐘'],['⏳','沙漏'],['⌛','沙漏滿'],['📌','圖釘'],['📍','定位'],['🔔','鈴鐺'],['🔕','靜音'],['💡','燈泡'],['🔦','手電筒'],['📢','喇叭'],['📣','大聲公'],['🚀','火箭'],['⭐','星'],['🌈','彩虹'],['☀','太陽'],['⛅','多雲'],['☁','雲'],['🌙','月亮'],['💧','水滴'],['🌊','海浪'],['❄','雪花'],['⚡','閃電'],['🎯','標靶'],['🔑','鑰匙'],['🔒','鎖'],['🔓','開鎖'],['📷','相機'],['📹','攝影機'],['🎬','場記板'],['🎤','麥克風'],['🎧','耳機'],['🎵','音符'],['🎶','音符'],['📱','手機'],['💻','筆電'],['🖥','螢幕'],['⌨','鍵盤'],['🖱','滑鼠'],['💾','磁片'],['📀','光碟']],
+  },
+  '食物emoji': {
+    type: 'emoji',
+    items: [['🍎','蘋果'],['🍊','橘子'],['🍋','檸檬'],['🍌','香蕉'],['🍉','西瓜'],['🍇','葡萄'],['🍓','草莓'],['🫐','藍莓'],['🍒','櫻桃'],['🍑','桃'],['🥭','芒果'],['🍍','鳳梨'],['🥥','椰子'],['🥝','奇異果'],['🍅','番茄'],['🍆','茄子'],['🥑','酪梨'],['🥦','花椰菜'],['🌽','玉米'],['🥕','紅蘿蔔'],['🍞','麵包'],['🥐','可頌'],['🥖','法棍'],['🧀','起司'],['🥚','蛋'],['🍳','煎蛋'],['🥞','鬆餅'],['🧇','格子鬆餅'],['🥓','培根'],['🍔','漢堡'],['🍟','薯條'],['🍕','披薩'],['🌭','熱狗'],['🥪','三明治'],['🌮','塔可'],['🌯','捲餅'],['🍜','拉麵'],['🍝','義大利麵'],['🍛','咖哩'],['🍣','壽司'],['🍱','便當'],['🍚','飯'],['🍙','飯糰'],['🍘','米餅'],['🍥','魚板'],['🥟','餃子'],['🍢','關東煮'],['🍡','糰子'],['🍧','刨冰'],['🍨','冰淇淋'],['🍦','霜淇淋'],['🍰','蛋糕'],['🎂','生日蛋糕'],['🧁','杯子蛋糕'],['🍮','布丁'],['🍭','棒棒糖'],['🍬','糖果'],['🍫','巧克力'],['🍿','爆米花'],['🍩','甜甜圈'],['🍪','餅乾'],['☕','咖啡'],['🍵','茶'],['🧋','珍奶'],['🥤','飲料'],['🍺','啤酒'],['🍷','紅酒'],['🥂','香檳']],
+  },
+  '動物emoji': {
+    type: 'emoji',
+    items: [['🐶','狗'],['🐱','貓'],['🐭','鼠'],['🐹','倉鼠'],['🐰','兔'],['🦊','狐狸'],['🐻','熊'],['🐼','熊貓'],['🐨','無尾熊'],['🐯','虎'],['🦁','獅'],['🐮','牛'],['🐷','豬'],['🐸','青蛙'],['🐵','猴'],['🐔','雞'],['🐧','企鵝'],['🐦','鳥'],['🐤','小雞'],['🦆','鴨'],['🦅','鷹'],['🦉','貓頭鷹'],['🦇','蝙蝠'],['🐺','狼'],['🐗','野豬'],['🐴','馬'],['🦄','獨角獸'],['🐝','蜜蜂'],['🐛','蟲'],['🦋','蝴蝶'],['🐌','蝸牛'],['🐞','瓢蟲'],['🐜','螞蟻'],['🕷','蜘蛛'],['🐢','烏龜'],['🐍','蛇'],['🦎','蜥蜴'],['🐙','章魚'],['🦑','魷魚'],['🦐','蝦'],['🦀','螃蟹'],['🐠','熱帶魚'],['🐟','魚'],['🐬','海豚'],['🐳','鯨'],['🦈','鯊魚'],['🐊','鱷魚'],['🐅','老虎'],['🦓','斑馬'],['🦍','猩猩'],['🐘','大象'],['🦏','犀牛'],['🐪','駱駝'],['🦒','長頸鹿']],
+  },
+  '顏文字': {
+    type: 'kaomoji',
+    items: [['(๑•̀ㅂ•́)و✧','元氣'],['(｡･ω･｡)','可愛'],['(╯°□°）╯︵ ┻━┻','掀桌'],['┬─┬ノ( º _ ºノ)','放回'],['ᕦ(ò_óˇ)ᕤ','肌肉'],['(っ´ω`c)','撒嬌'],['(´；ω；`)','哭'],['ヽ(´▽`)/','開心'],['(*´▽`*)','陶醉'],['(￣▽￣)','無奈'],['(¬‿¬)','奸笑'],['(°ロ°)','驚訝'],['(￣^￣)ゞ','敬禮'],['_(:з」∠)_','癱'],['(｀・ω・´)','認真'],['(˘•ω•˘)','害羞'],['╮(╯▽╰)╭','聳肩'],['(づ｡◕‿‿◕｡)づ','抱抱'],['＼(^o^)／','萬歲'],['(￣﹃￣)','流口水'],['(◕‿◕)','微笑'],['(¯﹃¯)','饞'],['(；¬_¬)','懷疑'],['(ノ°▽°)ノ','興奮'],['(✿◡‿◡)','花痴'],['(>﹏<)','糾結'],['(╥﹏╥)','淚奔'],['(◍•ᴗ•◍)','幸福'],['ヽ(•̀ω•́ )ゝ','加油'],['(￣ε￣)','親'],['(´•ω•`)','期待'],['(◔_◔)','無言'],['ʕ•ᴥ•ʔ','熊'],['(=^･ω･^=)','貓'],['(っ˘ω˘ς)','睏'],['щ(ﾟД ﾟщ)','崩潰'],['(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧','撒花'],['(♥ω♥)','戀愛'],['(งò_óง)','戰鬥'],['(ᵔᴥᵔ)','滿足']],
+  },
+};
+
+const state = { category: 'all', search: '' };
+
+function renderCatTabs() {
+  const container = $('catTabs');
+  container.innerHTML = '';
+  const allTab = document.createElement('div');
+  allTab.className = 'cat-tab' + (state.category === 'all' ? ' active' : '');
+  allTab.textContent = '全部';
+  allTab.addEventListener('click', () => { state.category = 'all'; renderCatTabs(); render(); });
+  container.appendChild(allTab);
+  Object.keys(symbolData).forEach(cat => {
+    const tab = document.createElement('div');
+    tab.className = 'cat-tab' + (state.category === cat ? ' active' : '');
+    tab.textContent = cat;
+    tab.addEventListener('click', () => { state.category = cat; renderCatTabs(); render(); });
+    container.appendChild(tab);
+  });
+}
+
+function copySymbol(sym) {
+  navigator.clipboard.writeText(sym).then(() => toast('✓ 已複製 ' + sym)).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = sym; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    toast('✓ 已複製 ' + sym);
+  });
+}
+
+function makeCell(sym, type) {
+  const cell = document.createElement('div');
+  cell.className = 'symbol-cell' + (type === 'text' ? ' text-sym' : type === 'kaomoji' ? ' kaomoji' : '');
+  cell.textContent = sym;
+  cell.title = '點擊複製';
+  cell.addEventListener('click', () => copySymbol(sym));
+  return cell;
+}
+
+function render() {
+  const container = $('symbolContainer');
+  container.innerHTML = '';
+  const search = state.search.trim().toLowerCase();
+
+  const catsToShow = state.category === 'all' ? Object.keys(symbolData) : [state.category];
+  let totalShown = 0;
+
+  catsToShow.forEach(cat => {
+    const data = symbolData[cat];
+    let items = data.items;
+    if (search) {
+      items = items.filter(([sym, kw]) => kw.toLowerCase().includes(search) || sym.includes(search) || cat.includes(search));
+    }
+    if (items.length === 0) return;
+    totalShown += items.length;
+
+    const group = document.createElement('div');
+    group.className = 'symbol-group';
+    const title = document.createElement('div');
+    title.className = 'group-title';
+    title.textContent = cat;
+    group.appendChild(title);
+    const grid = document.createElement('div');
+    grid.className = 'symbol-grid';
+    if (data.type === 'kaomoji') grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(110px, 1fr))';
+    items.forEach(([sym]) => grid.appendChild(makeCell(sym, data.type)));
+    group.appendChild(grid);
+    container.appendChild(group);
+  });
+
+  if (totalShown === 0) {
+    container.innerHTML = '<div class="empty">找不到符合的符號，換個關鍵字試試</div>';
+  }
+}
+
+$('searchInput').addEventListener('input', e => { state.search = e.target.value; render(); });
+
+renderCatTabs();
+render();
+</script>
+</body>
+</html>
