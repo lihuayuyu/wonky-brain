@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>文字花樣產生器・加框・大字・特殊字體</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Kaisei+Decol:wght@400;500;700&family=Zen+Maru+Gothic:wght@400;500;700;900&family=Noto+Sans+TC:wght@400;500;700;900&family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FFF5FA; --ink: #4A3A5C; --ink-soft: #8B7BA0;
+    --pink: #FF8FAF; --pink-soft: #FFC8DD; --pink-deep: #E8538A;
+    --blue: #A8C8FF; --blue-soft: #D4E2FF; --blue-deep: #6B9DFF;
+    --yellow: #FFE9A8; --yellow-soft: #FFF5D1;
+    --green: #B8E5C8; --green-deep: #6BC48F;
+    --purple: #D4C0FF; --purple-deep: #B294E0;
+    --grid-line: rgba(232, 83, 138, 0.18); --line: rgba(74, 58, 92, 0.15);
+    --shadow: 3px 3px 0 var(--ink); --shadow-sm: 2px 2px 0 var(--ink);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { color: var(--ink); font-family: 'Noto Sans TC', sans-serif; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  body { background: linear-gradient(135deg, #FFE4F0 0%, #FFD6EA 50%, #F5DCFF 100%); min-height: 100vh; position: relative; overflow-x: hidden; }
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(255, 150, 195, 0.5) 0%, transparent 35%),
+      radial-gradient(circle at 80% 15%, rgba(220, 200, 255, 0.45) 0%, transparent 40%),
+      radial-gradient(circle at 50% 60%, rgba(255, 195, 220, 0.5) 0%, transparent 45%),
+      radial-gradient(circle at 90% 75%, rgba(230, 200, 255, 0.45) 0%, transparent 35%),
+      radial-gradient(circle at 10% 85%, rgba(255, 180, 210, 0.5) 0%, transparent 40%);
+    pointer-events: none; z-index: 0; filter: blur(2px);
+  }
+  body::after {
+    content: ''; position: fixed; inset: 0;
+    background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 35px 35px; pointer-events: none; z-index: 1; mix-blend-mode: multiply;
+  }
+  header, main, .toast { position: relative; z-index: 2; }
+  header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(255, 228, 240, 0.92); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border-bottom: 2px solid var(--ink); padding: 16px 32px 14px;
+    display: flex; align-items: flex-end; justify-content: space-between; gap: 24px;
+  }
+  .brand { display: flex; align-items: baseline; gap: 14px; }
+  .brand h1 { font-family: 'Zen Maru Gothic', sans-serif; font-weight: 900; font-size: 28px; letter-spacing: 0.04em; line-height: 1; color: var(--ink); transform: rotate(-2deg); position: relative; }
+  .brand h1::after { content: '✦'; position: absolute; top: -8px; right: -16px; font-size: 14px; color: var(--pink); transform: rotate(2deg); }
+  .brand .sub { font-family: 'Caveat', cursive; font-size: 18px; color: var(--pink-deep); font-weight: 600; transform: rotate(-1deg); }
+  .donate-btn { display: flex; align-items: center; height: 40px; padding: 6px 14px; border-radius: 12px; color: #F8E0BE; background-color: #AD5138; border: 2px solid var(--ink); text-decoration: none; font-family: 'Noto Sans TC', sans-serif; font-size: 14px; font-weight: 600; box-shadow: var(--shadow-sm); transition: all 0.2s; gap: 8px; white-space: nowrap; }
+  .donate-btn:hover { transform: translate(-1px, -1px); box-shadow: var(--shadow); background-color: #C25E45; }
+  .donate-icon { width: 26px; height: 26px; flex-shrink: 0; display: block; }
+
+  main { max-width: 880px; margin: 0 auto; padding: 28px 24px 60px; display: flex; flex-direction: column; gap: 18px; }
+
+  /* 大分頁 */
+  .main-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+  .main-tab { padding: 12px 22px; background: white; border: 2px solid var(--ink); border-radius: 999px; cursor: pointer; font-family: 'Zen Maru Gothic', sans-serif; font-size: 15px; font-weight: 700; color: var(--ink); transition: all 0.15s; box-shadow: var(--shadow-sm); }
+  .main-tab:hover:not(.active) { background: var(--pink-soft); transform: translate(-1px,-1px); box-shadow: var(--shadow); }
+  .main-tab.active { background: var(--ink); color: white; }
+
+  /* 輸入 */
+  .input-card { background: white; border: 2px solid var(--ink); border-radius: 16px; padding: 18px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 12px; }
+  .input-label { font-family: 'Kaisei Decol', serif; font-size: 15px; font-weight: 700; }
+  .text-input { width: 100%; padding: 12px 16px; border: 2px solid var(--ink); border-radius: 12px; background: var(--yellow-soft); font-family: 'Noto Sans TC', sans-serif; font-size: 16px; color: var(--ink); }
+  .text-input:focus { outline: none; background: white; box-shadow: var(--shadow-sm); }
+  .text-input::placeholder { color: var(--ink-soft); opacity: 0.6; }
+
+  /* 選項 */
+  .options-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .opt-chip { padding: 7px 14px; background: white; border: 2px solid var(--ink); border-radius: 999px; cursor: pointer; font-size: 13px; font-weight: 700; color: var(--ink); transition: all 0.15s; box-shadow: var(--shadow-sm); }
+  .opt-chip:hover:not(.active) { background: var(--pink-soft); transform: translate(-1px,-1px); }
+  .opt-chip.active { background: var(--ink); color: white; }
+  .opt-label { font-size: 13px; color: var(--ink-soft); font-weight: 500; }
+
+  .spacing-toggle { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; padding: 7px 14px; border: 2px solid var(--ink); border-radius: 999px; background: white; box-shadow: var(--shadow-sm); transition: all 0.15s; }
+  .spacing-toggle.active { background: var(--pink-soft); }
+  .spacing-toggle input { width: 16px; height: 16px; accent-color: var(--pink-deep); }
+
+  /* 結果（加框 / ASCII 用等寬） */
+  .result-card { background: white; border: 2px solid var(--ink); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow); }
+  .result-header { padding: 10px 16px; border-bottom: 2px solid var(--ink); display: flex; justify-content: space-between; align-items: center; background: var(--yellow-soft); flex-wrap: wrap; gap: 8px; }
+  .result-title { font-family: 'Kaisei Decol', serif; font-weight: 700; font-size: 14px; }
+  .result-pre { padding: 18px; background: #2D2438; color: #F0E8FF; font-family: 'DM Mono', monospace; font-size: 14px; line-height: 1.35; overflow-x: auto; white-space: pre; margin: 0; min-height: 60px; }
+  .result-actions { padding: 10px 16px; display: flex; gap: 8px; border-top: 1.5px solid var(--line); }
+
+  /* 特殊字體：多種結果列表 */
+  .font-list { display: flex; flex-direction: column; gap: 10px; }
+  .font-item { background: white; border: 2px solid var(--ink); border-radius: 14px; padding: 12px 16px; box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 12px; transition: all 0.15s; }
+  .font-item:hover { transform: translate(-1px,-1px); box-shadow: var(--shadow); background: var(--yellow-soft); }
+  .font-name { font-size: 11px; color: var(--ink-soft); font-family: 'DM Mono', monospace; width: 72px; flex-shrink: 0; font-weight: 700; }
+  .font-sample { flex: 1; font-size: 20px; color: var(--ink); word-break: break-all; line-height: 1.4; }
+  .font-copy { width: 38px; height: 38px; border: 2px solid var(--ink); background: white; border-radius: 10px; cursor: pointer; font-size: 15px; flex-shrink: 0; transition: all 0.15s; }
+  .font-copy:hover { background: var(--pink-soft); transform: translate(-1px,-1px); }
+
+  .btn { font-family: 'Zen Maru Gothic', 'Noto Sans TC', sans-serif; font-weight: 700; font-size: 13px; padding: 8px 16px; background: white; border: 2px solid var(--ink); color: var(--ink); cursor: pointer; transition: all 0.2s; border-radius: 999px; box-shadow: var(--shadow-sm); white-space: nowrap; }
+  .btn:hover { transform: translate(-1px, -1px); box-shadow: var(--shadow); background: var(--pink-soft); }
+  .btn.primary { background: var(--pink-deep); color: white; }
+  .btn.primary:hover { background: var(--pink); }
+
+  .hint { font-size: 12px; color: var(--ink-soft); font-family: 'DM Mono', monospace; line-height: 1.6; }
+
+  .info-note { background: var(--yellow-soft); border: 2px solid var(--ink); padding: 12px 16px; font-size: 13px; line-height: 1.7; color: var(--ink); border-radius: 12px; box-shadow: var(--shadow-sm); }
+  .info-note b { color: var(--pink-deep); font-weight: 700; }
+
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--ink); color: white; padding: 12px 22px; font-size: 14px; border: 2px solid var(--ink); box-shadow: 4px 4px 0 var(--pink-deep); opacity: 0; pointer-events: none; transition: all 0.3s; z-index: 1000; border-radius: 999px; font-weight: 500; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--ink-soft); border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <h1>文字花樣</h1>
+    <div class="sub">歪腦袋小工具 · v1.2</div>
+  </div>
+  <a class="donate-btn" href="https://fernfern.bobaboba.me" target="_blank" rel="noopener">
+    <svg class="donate-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M5 7 L7.5 21 Q7.7 22.2 9 22.2 L15 22.2 Q16.3 22.2 16.5 21 L19 7 Z" fill="#F8E0BE" stroke="#3A2618" stroke-width="1.3" stroke-linejoin="round"/>
+      <ellipse cx="12" cy="7" rx="7" ry="1.6" fill="#C48A60" stroke="#3A2618" stroke-width="1.3"/>
+      <path d="M14 2 L13 8" stroke="#E85A5A" stroke-width="1.8" stroke-linecap="round"/>
+      <circle cx="10" cy="17" r="1.3" fill="#3A2618"/>
+      <circle cx="13" cy="18.5" r="1.3" fill="#3A2618"/>
+      <circle cx="11" cy="14" r="1.2" fill="#3A2618"/>
+      <circle cx="14" cy="15.5" r="1.2" fill="#3A2618"/>
+    </svg>
+    <div>歡迎餵食我 🤤</div>
+  </a>
+</header>
+
+<main>
+  <div class="main-tabs">
+    <div class="main-tab active" data-tab="box">🔲 文字加框</div>
+    <div class="main-tab" data-tab="ascii">🅰 ASCII 大字</div>
+    <div class="main-tab" data-tab="fancy">✨ 特殊字體</div>
+  </div>
+
+  <div class="input-card">
+    <div class="input-label" id="inputLabel">輸入文字</div>
+    <input class="text-input" id="textInput" placeholder="在這裡輸入文字..." value="歪腦袋">
+    <div class="options-row" id="optionsRow"></div>
+    <div class="hint" id="inputHint"></div>
+  </div>
+
+  <div id="outputArea"></div>
+
+  <div class="info-note" id="infoNote"></div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+function toast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.className = 'toast show';
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.className = 'toast', 1800);
+}
+
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(() => toast('✓ 已複製')).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    toast('✓ 已複製');
+  });
+}
+
+const state = {
+  tab: 'box',
+  boxStyle: 'single',
+  asciiSpacing: true,
+};
+
+// ══════════════════════════════════════
+//  1. 文字加框
+// ══════════════════════════════════════
+// 對齊框：用標準 box-drawing 等寬字元，保證整齊（適合 Discord、論壇、純文字編輯器）
+const boxStyles = {
+  single: { name: '細線', type: 'align', tl:'┌', tr:'┐', bl:'└', br:'┘', h:'─', v:'│' },
+  double: { name: '雙線', type: 'align', tl:'╔', tr:'╗', bl:'╚', br:'╝', h:'═', v:'║' },
+  round:  { name: '圓角', type: 'align', tl:'╭', tr:'╮', bl:'╰', br:'╯', h:'─', v:'│' },
+  bold:   { name: '粗線', type: 'align', tl:'┏', tr:'┓', bl:'┗', br:'┛', h:'━', v:'┃' },
+  // 裝飾框：上下用裝飾符號圍繞，不靠精準對齊（聊天室也堪用）
+  star:   { name: '✦星星', type: 'wrap', deco: '✦', sideL: '✦ ', sideR: ' ✦' },
+  flower: { name: '❀花邊', type: 'wrap', deco: '✿❀', sideL: '❀ ', sideR: ' ❀' },
+  heart:  { name: '♡愛心', type: 'wrap', deco: '♡', sideL: '♡ ', sideR: ' ♡' },
+  sparkle:{ name: '✨閃亮', type: 'wrap', deco: '✦✧', sideL: '✦ ', sideR: ' ✦' },
+  arrow:  { name: '➤箭頭', type: 'wrap', deco: '➤', sideL: '➤ ', sideR: ' ◀' },
+  wave:   { name: '波浪', type: 'wrap', deco: '～', sideL: '～ ', sideR: ' ～' },
+};
+
+// 計算字串顯示寬度（中文算 2，英文算 1）
+function displayWidth(str) {
+  let w = 0;
+  for (const ch of str) {
+    w += /[\u4e00-\u9fff\u3000-\u303f\uff00-\uffef\u3040-\u30ff]/.test(ch) ? 2 : 1;
+  }
+  return w;
+}
+
+function makeBox(text, styleKey) {
+  const s = boxStyles[styleKey];
+  const lines = text.split('\n');
+
+  if (s.type === 'align') {
+    // 對齊框：精準 box-drawing
+    const maxW = Math.max(...lines.map(displayWidth), 1);
+    const pad = 2;
+    const innerW = maxW + pad * 2;
+    const out = [];
+    out.push(s.tl + s.h.repeat(innerW) + s.tr);
+    lines.forEach(line => {
+      const lineW = displayWidth(line);
+      const totalSpace = innerW - lineW;
+      const leftSpace = Math.floor(totalSpace / 2);
+      const rightSpace = totalSpace - leftSpace;
+      out.push(s.v + ' '.repeat(leftSpace) + line + ' '.repeat(rightSpace) + s.v);
+    });
+    out.push(s.bl + s.h.repeat(innerW) + s.br);
+    return out.join('\n');
+  } else {
+    // 裝飾框：上下圍繞，左右補空白對齊（讓兩側裝飾符號成一直線）
+    const maxW = Math.max(...lines.map(displayWidth), 4);
+    const sideLW = displayWidth(s.sideL);
+    const sideRW = displayWidth(s.sideR);
+    // 內容區寬度 = 最寬那行
+    const out = [];
+    // 上下裝飾線：長度對齊「左裝飾 + 內容 + 右裝飾」的總寬
+    const totalW = sideLW + maxW + sideRW;
+    const decoUnitW = displayWidth(s.deco);
+    const decoCount = Math.max(3, Math.ceil(totalW / decoUnitW));
+    const decoLine = s.deco.repeat(decoCount);
+    out.push(decoLine);
+    lines.forEach(line => {
+      const lineW = displayWidth(line);
+      const padRight = maxW - lineW; // 補到跟最寬行一樣
+      out.push(s.sideL + line + ' '.repeat(padRight) + s.sideR);
+    });
+    out.push(decoLine);
+    return out.join('\n');
+  }
+}
+
+// ══════════════════════════════════════
+//  2. ASCII 大字（內建 figlet standard 字型，含 A-Z 0-9 與常用符號）
+// ══════════════════════════════════════
+// 每個字元 6 行高。資料格式：字元 -> [6行]
+const asciiFont = {
+  'A': [' █████ ','██   ██','███████','██   ██','██   ██','       '],
+  'B': ['██████ ','██   ██','██████ ','██   ██','██████ ','       '],
+  'C': [' ██████','██     ','██     ','██     ',' ██████','       '],
+  'D': ['██████ ','██   ██','██   ██','██   ██','██████ ','       '],
+  'E': ['███████','██     ','█████  ','██     ','███████','       '],
+  'F': ['███████','██     ','█████  ','██     ','██     ','       '],
+  'G': [' ██████','██     ','██  ███','██   ██',' ██████','       '],
+  'H': ['██   ██','██   ██','███████','██   ██','██   ██','       '],
+  'I': ['██','██','██','██','██','  '],
+  'J': ['     ██','     ██','     ██','██   ██',' █████ ','       '],
+  'K': ['██   ██','██  ██ ','█████  ','██  ██ ','██   ██','       '],
+  'L': ['██     ','██     ','██     ','██     ','███████','       '],
+  'M': ['███    ███','████  ████','██ ████ ██','██  ██  ██','██      ██','          '],
+  'N': ['██    ██','███   ██','██ ██ ██','██  ████','██    ██','        '],
+  'O': [' ██████ ','██    ██','██    ██','██    ██',' ██████ ','        '],
+  'P': ['██████ ','██   ██','██████ ','██     ','██     ','       '],
+  'Q': [' ██████ ','██    ██','██  █ ██','██   ███',' ███████','        '],
+  'R': ['██████ ','██   ██','██████ ','██   ██','██   ██','       '],
+  'S': [' ██████','██     ',' █████ ','     ██','██████ ','       '],
+  'T': ['████████','   ██   ','   ██   ','   ██   ','   ██   ','        '],
+  'U': ['██    ██','██    ██','██    ██','██    ██',' ██████ ','        '],
+  'V': ['██    ██','██    ██','██    ██',' ██  ██ ','  ████  ','        '],
+  'W': ['██     ██','██     ██','██  █  ██','██ ███ ██',' ███ ███ ','         '],
+  'X': ['██   ██',' ██ ██ ','  ███  ',' ██ ██ ','██   ██','       '],
+  'Y': ['██    ██',' ██  ██ ','  ████  ','   ██   ','   ██   ','        '],
+  'Z': ['███████','    ██ ','  ██   ',' ██    ','███████','       '],
+  '0': [' ██████ ','██   ███','██ ██ ██','███   ██',' ██████ ','        '],
+  '1': [' ███','  ██','  ██','  ██','██████','      '],
+  '2': ['██████ ','     ██',' █████ ','██     ','███████','       '],
+  '3': ['██████ ','     ██',' █████ ','     ██','██████ ','       '],
+  '4': ['██   ██','██   ██','███████','     ██','     ██','       '],
+  '5': ['███████','██     ','██████ ','     ██','██████ ','       '],
+  '6': [' ██████','██     ','██████ ','██   ██',' █████ ','       '],
+  '7': ['███████','     ██','    ██ ','   ██  ','   ██  ','       '],
+  '8': [' █████ ','██   ██',' █████ ','██   ██',' █████ ','       '],
+  '9': [' █████ ','██   ██',' ██████','     ██',' █████ ','       '],
+  '!': ['██','██','██','  ','██','  '],
+  '?': ['██████ ','     ██','  ████ ','       ','  ██   ','       '],
+  '.': ['  ','  ','  ','  ','██','  '],
+  ',': ['  ','  ','  ','  ',' █','█ '],
+  '-': ['      ','      ','██████','      ','      ','      '],
+  '+': ['      ','  ██  ','██████','  ██  ','      ','      '],
+  '=': ['      ','██████','      ','██████','      ','      '],
+  '*': ['        ','██ ██ ██',' █████  ','██ ██ ██','        ','        '],
+  '@': [' ██████ ','██ ██ ██','██ ████ ','██      ',' ██████ ','        '],
+  '#': [' ██ ██ ','███████',' ██ ██ ','███████',' ██ ██ ','       '],
+  '&': [' ███   ','██ ██  ',' ███   ','██  ██ ',' ███ ██','       '],
+  '/': ['     ██','    ██ ','   ██  ','  ██   ',' ██    ','       '],
+  ':': ['  ','██','  ','██','  ','  '],
+  ' ': ['    ','    ','    ','    ','    ','    '],
+};
+
+function makeAscii(text, addSpacing) {
+  const chars = text.toUpperCase().split('');
+  const rows = ['', '', '', '', '', ''];
+  const gap = addSpacing ? '  ' : ''; // 字母間距
+
+  chars.forEach((ch, idx) => {
+    const glyph = asciiFont[ch] || asciiFont['?'];
+    for (let r = 0; r < 6; r++) {
+      rows[r] += glyph[r];
+      if (idx < chars.length - 1) rows[r] += gap;
+    }
+  });
+  // 移除全空的底部行（第 6 行通常是空的）
+  while (rows.length > 1 && rows[rows.length - 1].trim() === '') rows.pop();
+  return rows.join('\n');
+}
+
+// ══════════════════════════════════════
+//  3. 特殊字體（Unicode 字母映射）
+// ══════════════════════════════════════
+// 用 offset 對 a-z A-Z 0-9 做映射
+function makeMapper(upperStart, lowerStart, digitStart) {
+  return (text) => {
+    let out = '';
+    for (const ch of text) {
+      const code = ch.codePointAt(0);
+      if (ch >= 'A' && ch <= 'Z' && upperStart !== null) {
+        out += String.fromCodePoint(upperStart + (code - 65));
+      } else if (ch >= 'a' && ch <= 'z' && lowerStart !== null) {
+        out += String.fromCodePoint(lowerStart + (code - 97));
+      } else if (ch >= '0' && ch <= '9' && digitStart !== null) {
+        out += String.fromCodePoint(digitStart + (code - 48));
+      } else {
+        out += ch;
+      }
+    }
+    return out;
+  };
+}
+
+// 用查表方式（有些字體不連續）
+function makeTableMapper(upperArr, lowerArr, digitArr) {
+  return (text) => {
+    let out = '';
+    for (const ch of text) {
+      if (ch >= 'A' && ch <= 'Z' && upperArr) out += upperArr[ch.charCodeAt(0) - 65];
+      else if (ch >= 'a' && ch <= 'z' && lowerArr) out += lowerArr[ch.charCodeAt(0) - 97];
+      else if (ch >= '0' && ch <= '9' && digitArr) out += digitArr[ch.charCodeAt(0) - 48];
+      else out += ch;
+    }
+    return out;
+  };
+}
+
+const fancyFonts = [
+  { name: '粗體', fn: makeMapper(0x1D400, 0x1D41A, 0x1D7CE) },
+  { name: '斜體', fn: makeMapper(0x1D434, 0x1D44E, null) },
+  { name: '粗斜體', fn: makeMapper(0x1D468, 0x1D482, null) },
+  { name: '花體', fn: makeTableMapper(
+    '𝒜ℬ𝒞𝒟ℰℱ𝒢ℋℐ𝒥𝒦ℒℳ𝒩𝒪𝒫𝒬ℛ𝒮𝒯𝒰𝒱𝒲𝒳𝒴𝒵'.match(/./gu),
+    '𝒶𝒷𝒸𝒹ℯ𝒻ℊ𝒽𝒾𝒿𝓀𝓁𝓂𝓃ℴ𝓅𝓆𝓇𝓈𝓉𝓊𝓋𝓌𝓍𝓎𝓏'.match(/./gu),
+    null) },
+  { name: '粗花體', fn: makeMapper(0x1D4D0, 0x1D4EA, null) },
+  { name: '哥德體', fn: makeTableMapper(
+    '𝔄𝔅ℭ𝔇𝔈𝔉𝔊ℌℑ𝔍𝔎𝔏𝔐𝔑𝔒𝔓𝔔ℜ𝔖𝔗𝔘𝔙𝔚𝔛𝔜ℨ'.match(/./gu),
+    '𝔞𝔟𝔠𝔡𝔢𝔣𝔤𝔥𝔦𝔧𝔨𝔩𝔪𝔫𝔬𝔭𝔮𝔯𝔰𝔱𝔲𝔳𝔴𝔵𝔶𝔷'.match(/./gu),
+    null) },
+  { name: '雙線體', fn: makeTableMapper(
+    '𝔸𝔹ℂ𝔻𝔼𝔽𝔾ℍ𝕀𝕁𝕂𝕃𝕄ℕ𝕆ℙℚℝ𝕊𝕋𝕌𝕍𝕎𝕏𝕐ℤ'.match(/./gu),
+    '𝕒𝕓𝕔𝕕𝕖𝕗𝕘𝕙𝕚𝕛𝕜𝕝𝕞𝕟𝕠𝕡𝕢𝕣𝕤𝕥𝕦𝕧𝕨𝕩𝕪𝕫'.match(/./gu),
+    '𝟘𝟙𝟚𝟛𝟜𝟝𝟞𝟟𝟠𝟡'.match(/./gu)) },
+  { name: '無襯線粗', fn: makeMapper(0x1D5D4, 0x1D5EE, 0x1D7EC) },
+  { name: '等寬體', fn: makeMapper(0x1D670, 0x1D68A, 0x1D7F6) },
+  { name: '全形', fn: makeMapper(0xFF21, 0xFF41, 0xFF10) },
+  { name: '圈圈', fn: makeTableMapper(
+    'ⒶⒷⒸⒹⒺⒻⒼⒽⒾⒿⓀⓁⓂⓃⓄⓅⓆⓇⓈⓉⓊⓋⓌⓍⓎⓏ'.split(''),
+    'ⓐⓑⓒⓓⓔⓕⓖⓗⓘⓙⓚⓛⓜⓝⓞⓟⓠⓡⓢⓣⓤⓥⓦⓧⓨⓩ'.split(''),
+    '⓪①②③④⑤⑥⑦⑧⑨'.split('')) },
+  { name: '小型大寫', fn: makeTableMapper(
+    'ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘǫʀsᴛᴜᴠᴡxʏᴢ'.split(''),
+    'ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘǫʀsᴛᴜᴠᴡxʏᴢ'.split(''),
+    null) },
+  { name: '上下顛倒', fn: (text) => {
+    const map = {'a':'ɐ','b':'q','c':'ɔ','d':'p','e':'ǝ','f':'ɟ','g':'ƃ','h':'ɥ','i':'ᴉ','j':'ɾ','k':'ʞ','l':'l','m':'ɯ','n':'u','o':'o','p':'d','q':'b','r':'ɹ','s':'s','t':'ʇ','u':'n','v':'ʌ','w':'ʍ','x':'x','y':'ʎ','z':'z','A':'∀','B':'B','C':'Ɔ','D':'D','E':'Ǝ','F':'Ⅎ','G':'פ','H':'H','I':'I','J':'ſ','K':'K','L':'˥','M':'W','N':'N','O':'O','P':'Ԁ','Q':'Q','R':'R','S':'S','T':'┴','U':'∩','V':'Λ','W':'M','X':'X','Y':'⅄','Z':'Z','0':'0','1':'Ɩ','2':'ᄅ','3':'Ɛ','4':'ㄣ','5':'ϛ','6':'9','7':'ㄥ','8':'8','9':'6','.':'˙',',':'\'','?':'¿','!':'¡'};
+    return text.split('').map(c => map[c] || c).reverse().join('');
+  } },
+];
+
+// ══════════════════════════════════════
+//  渲染
+// ══════════════════════════════════════
+function render() {
+  const text = $('textInput').value;
+  const out = $('outputArea');
+
+  if (state.tab === 'box') {
+    $('inputLabel').textContent = '輸入文字（可多行）';
+    $('inputHint').textContent = '💡 中英文都支援。對齊框需等寬字型環境';
+    $('infoNote').innerHTML = '🔲 <b>文字加框：</b><br>• <b>對齊框</b>（細線/雙線/圓角/粗線）需要等寬字型才整齊 → 適合 <b>Discord、論壇、純文字編輯器</b><br>• <b>裝飾框</b>（星星/愛心/花邊等）靠裝飾圍繞，較不挑環境<br>⚠️ <b>直播聊天室（YT/Twitch）用一般字型，框線會跑掉，不建議用框</b>';
+    out.innerHTML = `
+      <div class="result-card">
+        <div class="result-header">
+          <span class="result-title">框起來的結果</span>
+        </div>
+        <pre class="result-pre" id="boxResult"></pre>
+        <div class="result-actions">
+          <button class="btn primary" id="btnCopyBox">📋 複製</button>
+        </div>
+      </div>`;
+    const result = text.trim() ? makeBox(text, state.boxStyle) : '（請輸入文字）';
+    $('boxResult').textContent = result;
+    $('btnCopyBox').addEventListener('click', () => copyText(makeBox(text, state.boxStyle)));
+
+  } else if (state.tab === 'ascii') {
+    $('inputLabel').textContent = '輸入文字（英文數字效果最好）';
+    $('inputHint').textContent = '💡 中文沒有大字圖案，會原樣顯示；建議用英文、數字';
+    $('infoNote').innerHTML = '🅰 <b>ASCII 大字：</b>把文字變成用方塊拼出的大字。<br>✅ 適合 <b>Discord、論壇、程式碼註解、終端機 banner</b><br>⚠️ <b>直播聊天室（YT/Twitch）用一般字型，大字會擠成一團錯位，不適用</b>';
+    out.innerHTML = `
+      <div class="result-card">
+        <div class="result-header">
+          <span class="result-title">大字結果</span>
+        </div>
+        <pre class="result-pre" id="asciiResult"></pre>
+        <div class="result-actions">
+          <button class="btn primary" id="btnCopyAscii">📋 複製</button>
+        </div>
+      </div>`;
+    const result = text.trim() ? makeAscii(text, state.asciiSpacing) : '（請輸入文字）';
+    $('asciiResult').textContent = result;
+    $('btnCopyAscii').addEventListener('click', () => copyText(makeAscii(text, state.asciiSpacing)));
+
+  } else if (state.tab === 'fancy') {
+    $('inputLabel').textContent = '輸入文字（英文數字效果最好）';
+    $('inputHint').textContent = '💡 只支援英文、數字；中文會原樣保留。某些字體在舊裝置可能顯示成框框';
+    $('infoNote').innerHTML = '✨ <b>特殊字體：</b>把普通字變成花式 Unicode 字體。<br>✅ <b>這個才是聊天室、IG 簡介、限動、暱稱能用的</b>（靠字元本身變化，不靠對齊）<br>💡 點文字或右側按鈕複製整行。';
+    const list = document.createElement('div');
+    list.className = 'font-list';
+    fancyFonts.forEach(font => {
+      const converted = text.trim() ? font.fn(text) : '（請輸入文字）';
+      const item = document.createElement('div');
+      item.className = 'font-item';
+      item.innerHTML = `
+        <span class="font-name">${font.name}</span>
+        <span class="font-sample">${escapeHtml(converted)}</span>
+        <button class="font-copy">📋</button>`;
+      item.querySelector('.font-copy').addEventListener('click', () => copyText(font.fn(text)));
+      item.querySelector('.font-sample').addEventListener('click', () => copyText(font.fn(text)));
+      list.appendChild(item);
+    });
+    out.innerHTML = '';
+    out.appendChild(list);
+  }
+
+  renderOptions();
+}
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+}
+
+function renderOptions() {
+  const row = $('optionsRow');
+  row.innerHTML = '';
+  if (state.tab === 'box') {
+    const label = document.createElement('span');
+    label.className = 'opt-label';
+    label.textContent = '框線風格：';
+    row.appendChild(label);
+    Object.keys(boxStyles).forEach(key => {
+      const chip = document.createElement('div');
+      chip.className = 'opt-chip' + (state.boxStyle === key ? ' active' : '');
+      chip.textContent = boxStyles[key].name;
+      chip.addEventListener('click', () => { state.boxStyle = key; render(); });
+      row.appendChild(chip);
+    });
+  } else if (state.tab === 'ascii') {
+    const toggle = document.createElement('label');
+    toggle.className = 'spacing-toggle' + (state.asciiSpacing ? ' active' : '');
+    toggle.innerHTML = `<input type="checkbox" ${state.asciiSpacing ? 'checked' : ''}> 字母間加空白（比較好看）`;
+    toggle.querySelector('input').addEventListener('change', e => {
+      state.asciiSpacing = e.target.checked;
+      render();
+    });
+    row.appendChild(toggle);
+  }
+}
+
+// ─── 事件 ───
+$('textInput').addEventListener('input', render);
+document.querySelectorAll('.main-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    state.tab = tab.dataset.tab;
+    render();
+  });
+});
+
+render();
+</script>
+</body>
+</html>
