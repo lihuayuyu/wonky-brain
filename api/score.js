@@ -29,7 +29,7 @@ export default async function handler(req, res) {
         home: side(h), away: side(a)
       };
     });
-    res.setHeader("Cache-Control", "s-maxage=30, stale-while-revalidate=60");
+    res.setHeader("Cache-Control", "s-maxage=10, stale-while-revalidate=20");
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.status(200).json({ matches });
   } catch (e) {
