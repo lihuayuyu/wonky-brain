@@ -127,7 +127,7 @@
       <div class="pc"><h4>輸出</h4><div class="row"><button class="btn" id="bCopy">複製 OBS 網址</button></div></div>
     </div>
     <div class="foot">
-      比分每 45 秒自動更新（來源：ESPN 公開資料）。選好比賽、調好外觀 → 按「複製 OBS 網址」貼進 OBS 瀏覽器來源，混合模式用<b>正常</b>。半透明底已內建，遊戲畫面會透出來。<br>
+      比分每 20 秒自動更新（來源：ESPN 公開資料）。選好比賽、調好外觀 → 按「複製 OBS 網址」貼進 OBS 瀏覽器來源，混合模式用<b>正常</b>。半透明底已內建，遊戲畫面會透出來。<br>
       進球時數字會放大閃一下。PK 大戰會自動多顯示一行 PK 比分。
     </div>
   </div>
@@ -242,7 +242,7 @@
     .catch(function(){ normFetch(ESPN+"?_="+Date.now()).then(function(j){ matches=norm(j); done(); })
       .catch(function(e){ lastErr=String(e); setStat(true); }); });
   }
-  function done(){ picked=pick(); renderAll(); setStat(false); }
+  function done(){ picked=pick(); renderAll(); if(!clean&&typeof panelList==="function") panelList(); setStat(false); }
   function setStat(err){ var s=$("st");
     if(err){ s.textContent="⚠ 抓不到比分（"+lastErr+"），重試中"; s.classList.add("err"); s.style.display="block"; }
     else { s.classList.remove("err"); s.textContent="已更新 "+new Date().toLocaleTimeString(); s.style.display=clean?"none":"block"; } }
