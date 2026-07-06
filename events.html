@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>歪腦袋 進球事件板</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Zen+Maru+Gothic:wght@500;700;900&family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#1B1130;--pink:#FF6FBE;--pink-deep:#FF2E97;--purple:#8A5BFF;--cream:#FFF6FB;--pop:#FFD94A;--bd:3px solid var(--ink);--op:.6;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{background:#241d33;font-family:"Zen Maru Gothic","Noto Sans TC",sans-serif;color:var(--cream);overflow:hidden;}
+  body.clean{background:transparent;}
+  .stage{position:fixed;inset:0;}
+  .bug{position:absolute;display:inline-flex;flex-direction:column;gap:6px;max-width:340px;}
+  .stage[data-pos="tl"] .bug{top:26px;left:26px;}
+  .stage[data-pos="tr"] .bug{top:26px;right:26px;}
+  .stage[data-pos="bl"] .bug{bottom:26px;left:26px;}
+  .stage[data-pos="br"] .bug{bottom:26px;right:26px;}
+  .hdr{background:rgba(23,15,38,var(--op));border-radius:10px;padding:7px 14px;font-weight:900;font-size:16px;letter-spacing:.02em;}
+  .list{display:flex;flex-direction:column;gap:4px;}
+  .row{display:flex;align-items:center;gap:8px;background:rgba(23,15,38,calc(var(--op)*0.92));border-radius:8px;padding:4px 12px;font-size:14px;}
+  .row.aside2{flex-direction:row-reverse;text-align:right;}
+  .row.none{opacity:.7;font-family:"DM Mono",monospace;font-size:12px;}
+  .min{font-family:"DM Mono",monospace;color:var(--pop);min-width:34px;}
+  .row.aside2 .min{text-align:right;}
+  .ic{font-size:13px;}
+  .pl{font-weight:700;}
+  .status{position:fixed;left:26px;bottom:20px;font-family:"DM Mono",monospace;font-size:11px;color:var(--cream);background:rgba(23,15,38,.8);border-radius:6px;padding:4px 9px;display:none;}
+  .status.err{display:block!important;background:var(--pink-deep);color:#fff;}
+  body.clean .status{display:none;}
+  .panel{position:fixed;left:0;right:0;bottom:0;z-index:50;background:linear-gradient(160deg,var(--pink),var(--purple));border-top:4px solid var(--ink);padding:15px 18px;font-family:"Noto Sans TC",sans-serif;color:var(--ink);}
+  body.clean .panel{display:none;}
+  .pg{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;max-width:1100px;margin:0 auto;}
+  .pc{background:var(--cream);border:var(--bd);box-shadow:4px 4px 0 var(--ink);border-radius:6px;padding:10px 12px;}
+  .pc h4{font-family:"DM Mono",monospace;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--purple);margin-bottom:7px;}
+  .rowp{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+  label.f{display:flex;flex-direction:column;gap:3px;font-size:10px;font-weight:700;color:#6b5b86;}
+  select{font-family:"Noto Sans TC",monospace;font-size:14px;border:2.5px solid var(--ink);border-radius:4px;padding:6px 8px;background:#fff;color:var(--ink);}
+  input[type=range]{width:130px;accent-color:var(--pink-deep);}
+  .btn{font-family:"Noto Sans TC",monospace;font-weight:700;font-size:13px;border:2.5px solid var(--ink);border-radius:5px;box-shadow:3px 3px 0 var(--ink);background:#fff;color:var(--ink);padding:7px 10px;cursor:pointer;}
+  .btn:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--ink);}
+  .btn.on{background:var(--pop);}
+  .btn.live{border-color:var(--pink-deep);}
+  #mlist{display:flex;gap:6px;flex-wrap:wrap;max-width:420px;}
+  .foot{max-width:1100px;margin:10px auto 0;font-family:"DM Mono",monospace;font-size:11px;color:rgba(27,17,48,.72);line-height:1.7;}
+</style>
+</head>
+<body>
+  <div class="stage" id="stage" data-pos="tr">
+    <div class="bug">
+      <div class="hdr" id="hdr">載入中…</div>
+      <div class="list" id="list"></div>
+    </div>
+  </div>
+  <div class="status" id="st"></div>
+  <div class="panel">
+    <div class="pg">
+      <div class="pc"><h4>今天的比賽(點選)</h4><div id="mlist">載入中…</div></div>
+      <div class="pc"><h4>外觀</h4><div class="rowp">
+        <label class="f">透明度<input type="range" id="iOp" min="0.25" max="0.9" step="0.05"></label>
+        <label class="f">位置<select id="iPos">
+          <option value="tr">右上</option><option value="tl">左上</option>
+          <option value="br">右下</option><option value="bl">左下</option></select></label>
+        <label class="f" style="flex-direction:row;align-items:center;gap:5px;">顯示黃牌<input type="checkbox" id="iY"></label>
+      </div></div>
+      <div class="pc"><h4>輸出</h4><div class="rowp"><button class="btn" id="bCopy">複製 OBS 網址</button></div></div>
+    </div>
+    <div class="foot">進球/紅牌事件,每 20 秒自動更新,最新在最上面。主隊事件靠左、客隊靠右。球員名為原文不翻譯。可與 score.html 同時掛在畫面上(一個放比分、一個放事件)。</div>
+  </div>
+<script>
+
+(function(){
+  var NAMES={"MEX":"墨西哥","RSA":"南非","KOR":"南韓","CAN":"加拿大","SUI":"瑞士","QAT":"卡達","BRA":"巴西","MAR":"摩洛哥","HAI":"海地","SCO":"蘇格蘭","USA":"美國","PAR":"巴拉圭","AUS":"澳洲","GER":"德國","CUW":"古拉索","CIV":"象牙海岸","ECU":"厄瓜多","NED":"荷蘭","JPN":"日本","TUN":"突尼西亞","BEL":"比利時","EGY":"埃及","IRN":"伊朗","NZL":"紐西蘭","ESP":"西班牙","CPV":"維德角","KSA":"沙烏地","URU":"烏拉圭","FRA":"法國","SEN":"塞內加爾","NOR":"挪威","ARG":"阿根廷","ALG":"阿爾及利亞","AUT":"奧地利","JOR":"約旦","POR":"葡萄牙","COL":"哥倫比亞","UZB":"烏茲別克","ENG":"英格蘭","CRO":"克羅埃西亞","GHA":"迦納","PAN":"巴拿馬","COD":"民主剛果","BIH":"波赫","ITA":"義大利","DEN":"丹麥","TUR":"土耳其","UKR":"烏克蘭","POL":"波蘭","SVK":"斯洛伐克","CZE":"捷克","ROU":"羅馬尼亞","SWE":"瑞典","IRL":"愛爾蘭","WAL":"威爾斯","MKD":"北馬其頓","ALB":"阿爾巴尼亞","KOS":"科索沃","IRQ":"伊拉克","UAE":"阿聯","OMA":"阿曼","CGO":"剛果","CMR":"喀麥隆","NGA":"奈及利亞","GAB":"加彭","BOL":"玻利維亞","VEN":"委內瑞拉","PER":"秘魯","CHI":"智利","JAM":"牙買加","CRC":"哥斯大黎加","HON":"宏都拉斯","SLV":"薩爾瓦多","GUA":"瓜地馬拉","IDN":"印尼"};
+  var $=function(id){return document.getElementById(id);};
+  var P=new URLSearchParams(location.search);
+  var clean=P.get("clean")==="1"||/[?&#]clean/.test(location.search);
+  if(clean) document.body.classList.add("clean");
+  var opac=parseFloat(P.get("op")||"0.6"); if(isNaN(opac))opac=0.6;
+  document.documentElement.style.setProperty("--op",opac);
+  var teamPick=(P.get("team")||"").toUpperCase();
+  var showYellow=P.get("yellow")==="1";
+  var maxRows=parseInt(P.get("max")||"8",10)||8;
+  var pos=P.get("pos")||"tr";
+  $("stage").dataset.pos=pos;
+
+  var matches=[], picked=null, lastErr="";
+  function zh(abbr,fb){ return NAMES[abbr]||fb||abbr||"—"; }
+
+  function pick(){
+    if(!matches.length) return null;
+    if(teamPick){ for(var i=0;i<matches.length;i++){ var m=matches[i];
+      if(m.home.abbr===teamPick||m.away.abbr===teamPick) return m; } }
+    for(var i=0;i<matches.length;i++) if(matches[i].state==="in") return matches[i];
+    for(var i=0;i<matches.length;i++) if(matches[i].state==="pre") return matches[i];
+    return matches[matches.length-1];
+  }
+
+  function icon(e){
+    if(e.red) return "🟥";
+    if(e.yellow) return "🟨";
+    if(e.og) return "⚽(OG)";
+    if(e.pen) return "⚽(PEN)";
+    return "⚽";
+  }
+
+  function render(){
+    var m=picked, box=$("list");
+    if(!m){ $("hdr").textContent="等待比賽資料…"; box.innerHTML=""; return; }
+    $("hdr").textContent=zh(m.home.abbr,m.home.name)+"　"+m.home.score+" - "+m.away.score+"　"+zh(m.away.abbr,m.away.name);
+    var evs=(m.events||[]).filter(function(e){ return e.goal||e.red||(showYellow&&e.yellow); });
+    evs=evs.slice(-maxRows).reverse(); // 最新在上
+    box.innerHTML="";
+    if(!evs.length){ box.innerHTML='<div class="row none">尚無進球事件</div>'; return; }
+    evs.forEach(function(e){
+      var d=document.createElement("div");
+      d.className="row "+(e.side==="h"?"hside":"aside2");
+      d.innerHTML='<span class="min">'+(e.clock||"")+'</span><span class="ic">'+icon(e)+'</span><span class="pl">'+(e.player||"")+'</span>';
+      box.appendChild(d);
+    });
+  }
+
+  function normFetch(u){ return fetch(u,{cache:"no-store"}).then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); }); }
+  function tick(){
+    normFetch("/api/score?_="+Date.now()).then(function(j){ matches=j.matches||[]; done(); })
+    .catch(function(e){ lastErr=String(e); setStat(true); });
+  }
+  function done(){ picked=pick(); render(); if(!clean) panelList(); setStat(false); }
+  function setStat(err){ var s=$("st");
+    if(err){ s.textContent="⚠ 抓不到資料("+lastErr+"),重試中"; s.classList.add("err"); s.style.display="block"; }
+    else{ s.classList.remove("err"); s.textContent="已更新 "+new Date().toLocaleTimeString(); s.style.display=clean?"none":"block"; } }
+  tick(); setInterval(tick,20000);
+
+  function panelList(){
+    var box=$("mlist"); if(!box) return; box.innerHTML="";
+    if(!matches.length){ box.textContent="今天沒有比賽資料"; return; }
+    matches.forEach(function(m){
+      var b=document.createElement("button"); b.className="btn"+(m.state==="in"?" live":"");
+      b.textContent=zh(m.home.abbr,m.home.name)+" vs "+zh(m.away.abbr,m.away.name)+(m.state==="in"?"(LIVE)":m.state==="pre"?"(未開賽)":"(已結束)");
+      b.onclick=function(){ teamPick=m.home.abbr; picked=m; render(); mark(); };
+      b.dataset.abbr=m.home.abbr;
+      box.appendChild(b);
+    });
+    mark();
+  }
+  function mark(){ var bs=document.querySelectorAll("#mlist .btn"); bs.forEach(function(b){ b.classList.toggle("on", picked&&b.dataset.abbr===picked.home.abbr); }); }
+
+  if(!clean){
+    $("iOp").value=opac;
+    $("iOp").addEventListener("input",function(e){ opac=parseFloat(e.target.value); document.documentElement.style.setProperty("--op",opac); });
+    $("iPos").value=pos;
+    $("iPos").addEventListener("change",function(e){ pos=e.target.value; $("stage").dataset.pos=pos; });
+    $("iY").checked=showYellow;
+    $("iY").addEventListener("change",function(e){ showYellow=e.target.checked; render(); });
+    $("bCopy").addEventListener("click",function(e){
+      var p=new URLSearchParams(); p.set("clean","1");
+      if(teamPick)p.set("team",teamPick); p.set("pos",pos); p.set("op",String(opac));
+      if(showYellow)p.set("yellow","1");
+      var url=location.href.split("#")[0].split("?")[0]+"?"+p.toString();
+      navigator.clipboard.writeText(url).then(function(){ e.target.textContent="已複製!"; setTimeout(function(){e.target.textContent="複製 OBS 網址";},1500); })
+      .catch(function(){ window.prompt("複製這個網址貼到 OBS:",url); });
+    });
+  }
+})();
+
+</script>
+</body>
+</html>
