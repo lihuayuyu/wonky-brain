@@ -21,12 +21,20 @@ export default async function handler(req, res) {
           pk: (x.shootoutScore != null && x.shootoutScore !== "") ? String(x.shootoutScore) : null
         };
       };
+      const homeId = String((h.team && h.team.id) || h.id || "");
+      const events = (c.details || []).map(d => ({
+        clock: (d.clock && d.clock.displayValue) || "",
+        goal: !!d.scoringPlay, og: !!d.ownGoal, pen: !!d.penaltyKick,
+        red: !!d.redCard, yellow: !!d.yellowCard,
+        side: (d.team && String(d.team.id) === homeId) ? "h" : "a",
+        player: (((d.athletesInvolved || [])[0]) || {}).displayName || ""
+      })).filter(e => e.goal || e.red || e.yellow);
       return {
         id: String(ev.id || ""), date: ev.date || "",
         state: (st.type && st.type.state) || "",
         detail: (st.type && st.type.shortDetail) || (st.type && st.type.description) || "",
         clock: st.displayClock || "",
-        home: side(h), away: side(a)
+        home: side(h), away: side(a), events: events
       };
     });
     res.setHeader("Cache-Control", "s-maxage=10, stale-while-revalidate=20");
