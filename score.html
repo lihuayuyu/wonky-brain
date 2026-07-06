@@ -213,6 +213,15 @@
     $("min").style.display="none";
   }
 
+  function statZh(m,live){
+    var d=(m.detail||"").toLowerCase();
+    if(d.indexOf("half")>=0&&d.indexOf("time")>=0) return "中場休息";
+    if(d==="ft"||d.indexOf("full")>=0) return "FT 完場";
+    if(d==="aet"||d.indexOf("extra")>=0&&!live) return "AET 完場";
+    if(d.indexOf("pen")>=0&&!live) return "PK 決勝";
+    if(m.state==="pre") return "未開賽";
+    return live?(m.clock||m.detail):(m.detail||"FT");
+  }
   function render(){
     var m=picked;
     if(!m){ $("nH").textContent="等待比賽"; $("nA").textContent="資料中"; return; }
@@ -230,7 +239,7 @@
     else $("pk").style.display="none";
     var live=(m.state==="in");
     $("dot").classList.toggle("off",!live);
-    var mm= live ? (m.clock||m.detail) : (m.state==="pre"?"未開賽":m.detail||"FT");
+    var mm=statZh(m,live);
     if(showMin&&mm){ $("min").textContent=mm; $("min").style.display="inline-flex"; } else $("min").style.display="none";
   }
 

@@ -28,7 +28,7 @@
   .grp.cards{margin-top:6px;padding-top:6px;border-top:1.5px solid rgba(255,246,251,.28);}
   .row{display:flex;align-items:center;gap:7px;background:rgba(23,15,38,calc(var(--op)*0.92));border-radius:8px;padding:4px 11px;font-size:14px;white-space:nowrap;}
   .row.card{opacity:.92;}
-  .min{font-family:"DM Mono",monospace;color:var(--pop);min-width:34px;}
+  .min{font-family:"DM Mono",monospace;color:var(--pop);min-width:34px;flex:0 0 auto;}
   .ic{font-size:13px;}
   .pl{font-weight:700;}
 
@@ -139,24 +139,46 @@
     if(e.red) return "🟥"; if(e.yellow) return "🟨";
     if(e.og) return "⚽ OG"; if(e.pen) return "⚽ PEN"; return "⚽";
   }
-  function row(e){
-    var d=document.createElement("div"); d.className="row"+(e.red||e.yellow?" card":"");
-    d.innerHTML='<span class="min">'+(e.clock||"")+'</span><span class="ic">'+icon(e)+'</span><span class="pl"></span>';
-    d.querySelector(".pl").textContent=e.player||"";
+  function row(g){
+    var d=document.createElement("div"); d.className="row"+(g.card?" card":"");
+    d.innerHTML='<span class="min"></span><span class="ic"></span><span class="pl"></span>';
+    d.querySelector(".min").textContent=g.clocks.join(" ");
+    d.querySelector(".ic").textContent=g.icon;
+    d.querySelector(".pl").textContent=g.player;
     return d;
+  }
+  // 同名合併:同球員同類事件併成一行,時間全列在前
+  function merge(evs){
+    var out=[], idx={};
+    evs.forEach(function(e){
+      var ic=icon(e), key=(e.player||"?")+"|"+ic;
+      if(idx[key]!=null){ out[idx[key]].clocks.push(e.clock||""); }
+      else{ idx[key]=out.length;
+        out.push({player:e.player||"", icon:ic, clocks:[e.clock||""], card:!!(e.red||e.yellow)}); }
+    });
+    return out;
   }
   function fillWing(goalBox,cardBox,evs){
     goalBox.innerHTML=""; cardBox.innerHTML="";
-    var goals=evs.filter(function(e){return e.goal;});
-    var cards=evs.filter(function(e){return e.red||(showYellow&&e.yellow);});
-    goals.forEach(function(e){ goalBox.appendChild(row(e)); });   // 進球:由早到晚,上面一區
-    cards.forEach(function(e){ cardBox.appendChild(row(e)); });   // 牌:下面一區
+    var goals=merge(evs.filter(function(e){return e.goal;}));
+    var cards=merge(evs.filter(function(e){return e.red||(showYellow&&e.yellow);}));
+    goals.forEach(function(g){ goalBox.appendChild(row(g)); });
+    cards.forEach(function(g){ cardBox.appendChild(row(g)); });
     cardBox.style.display=cards.length?"flex":"none";
   }
 
   var lastH=null,lastA=null,lastId=null;
   function flash(el){ el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash"); }
 
+  function statZh(m,live){
+    var d=(m.detail||"").toLowerCase();
+    if(d.indexOf("half")>=0&&d.indexOf("time")>=0) return "中場休息";
+    if(d==="ft"||d.indexOf("full")>=0) return "FT 完場";
+    if(d==="aet"||d.indexOf("extra")>=0&&!live) return "AET 完場";
+    if(d.indexOf("pen")>=0&&!live) return "PK 決勝";
+    if(m.state==="pre") return "未開賽";
+    return live?(m.clock||m.detail):(m.detail||"FT");
+  }
   function render(){
     var m=picked;
     if(!m){ $("nH").textContent="等待"; $("nA").textContent="資料"; return; }
@@ -174,7 +196,7 @@
     else $("pk").style.display="none";
     var live=(m.state==="in");
     $("dot").classList.toggle("off",!live);
-    var mm= live?(m.clock||m.detail):(m.state==="pre"?"未開賽":m.detail||"FT");
+    var mm=statZh(m,live);
     if(showMin&&mm){ $("min").textContent=mm; $("min").style.display="inline-flex"; } else $("min").style.display="none";
     var evs=m.events||[];
     fillWing($("gH"),$("cH"),evs.filter(function(e){return e.side==="h";}));
