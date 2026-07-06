@@ -14,20 +14,23 @@
   body{background:#241d33;font-family:"Zen Maru Gothic","Noto Sans TC",sans-serif;color:var(--cream);overflow:hidden;}
   body.clean{background:transparent;}
   .stage{position:fixed;inset:0;}
-  .bug{position:absolute;display:inline-flex;flex-direction:column;gap:6px;max-width:340px;}
+  .bug{position:absolute;display:inline-flex;flex-direction:column;gap:6px;max-width:520px;min-width:340px;}
   .stage[data-pos="tl"] .bug{top:26px;left:26px;}
+  .stage[data-pos="tc"] .bug{top:22px;left:50%;transform:translateX(-50%);}
+  .stage[data-pos="bc"] .bug{bottom:22px;left:50%;transform:translateX(-50%);}
   .stage[data-pos="tr"] .bug{top:26px;right:26px;}
   .stage[data-pos="bl"] .bug{bottom:26px;left:26px;}
   .stage[data-pos="br"] .bug{bottom:26px;right:26px;}
-  .hdr{background:rgba(23,15,38,var(--op));border-radius:10px;padding:7px 14px;font-weight:900;font-size:16px;letter-spacing:.02em;}
-  .list{display:flex;flex-direction:column;gap:4px;}
+  .hdr{background:rgba(23,15,38,var(--op));border-radius:10px;padding:7px 14px;font-weight:900;font-size:16px;letter-spacing:.02em;text-align:center;}
+  .cols{display:flex;gap:8px;align-items:flex-start;}
+  .col{flex:1;display:flex;flex-direction:column;gap:4px;min-width:0;}
   .row{display:flex;align-items:center;gap:8px;background:rgba(23,15,38,calc(var(--op)*0.92));border-radius:8px;padding:4px 12px;font-size:14px;}
-  .row.aside2{flex-direction:row-reverse;text-align:right;}
+  .col.away .row{flex-direction:row-reverse;text-align:right;}
   .row.none{opacity:.7;font-family:"DM Mono",monospace;font-size:12px;}
   .min{font-family:"DM Mono",monospace;color:var(--pop);min-width:34px;}
-  .row.aside2 .min{text-align:right;}
+  .col.away .min{text-align:right;}
   .ic{font-size:13px;}
-  .pl{font-weight:700;}
+  .pl{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .status{position:fixed;left:26px;bottom:20px;font-family:"DM Mono",monospace;font-size:11px;color:var(--cream);background:rgba(23,15,38,.8);border-radius:6px;padding:4px 9px;display:none;}
   .status.err{display:block!important;background:var(--pink-deep);color:#fff;}
   body.clean .status{display:none;}
@@ -52,7 +55,10 @@
   <div class="stage" id="stage" data-pos="tr">
     <div class="bug">
       <div class="hdr" id="hdr">載入中…</div>
-      <div class="list" id="list"></div>
+      <div class="cols">
+        <div class="col" id="colH"></div>
+        <div class="col away" id="colA"></div>
+      </div>
     </div>
   </div>
   <div class="status" id="st"></div>
@@ -62,13 +68,13 @@
       <div class="pc"><h4>外觀</h4><div class="rowp">
         <label class="f">透明度<input type="range" id="iOp" min="0.25" max="0.9" step="0.05"></label>
         <label class="f">位置<select id="iPos">
-          <option value="tr">右上</option><option value="tl">左上</option>
-          <option value="br">右下</option><option value="bl">左下</option></select></label>
+          <option value="tc">中上</option><option value="tr">右上</option><option value="tl">左上</option>
+          <option value="bc">中下</option><option value="br">右下</option><option value="bl">左下</option></select></label>
         <label class="f" style="flex-direction:row;align-items:center;gap:5px;">顯示黃牌<input type="checkbox" id="iY"></label>
       </div></div>
       <div class="pc"><h4>輸出</h4><div class="rowp"><button class="btn" id="bCopy">複製 OBS 網址</button></div></div>
     </div>
-    <div class="foot">進球/紅牌事件,每 20 秒自動更新,最新在最上面。主隊事件靠左、客隊靠右。球員名為原文不翻譯。可與 score.html 同時掛在畫面上(一個放比分、一個放事件)。</div>
+    <div class="foot">進球/紅牌事件,每 20 秒自動更新,最新在最上面。主隊事件列在主隊那一欄、客隊在客隊欄,左右分開。球員名為原文不翻譯。可與 score.html 同時掛在畫面上(一個放比分、一個放事件)。</div>
   </div>
 <script>
 
@@ -81,9 +87,9 @@
   var opac=parseFloat(P.get("op")||"0.6"); if(isNaN(opac))opac=0.6;
   document.documentElement.style.setProperty("--op",opac);
   var teamPick=(P.get("team")||"").toUpperCase();
-  var showYellow=P.get("yellow")==="1";
+  var showYellow=P.get("yellow")!=="0";
   var maxRows=parseInt(P.get("max")||"8",10)||8;
-  var pos=P.get("pos")||"tr";
+  var pos=P.get("pos")||"tc";
   $("stage").dataset.pos=pos;
 
   var matches=[], picked=null, lastErr="";
@@ -106,20 +112,22 @@
     return "⚽";
   }
 
+  function row(e){
+    var d=document.createElement("div"); d.className="row";
+    d.innerHTML='<span class="min">'+(e.clock||"")+'</span><span class="ic">'+icon(e)+'</span><span class="pl">'+(e.player||"")+'</span>';
+    return d;
+  }
   function render(){
-    var m=picked, box=$("list");
-    if(!m){ $("hdr").textContent="等待比賽資料…"; box.innerHTML=""; return; }
+    var m=picked, cH=$("colH"), cA=$("colA");
+    if(!m){ $("hdr").textContent="等待比賽資料…"; cH.innerHTML=""; cA.innerHTML=""; return; }
     $("hdr").textContent=zh(m.home.abbr,m.home.name)+"　"+m.home.score+" - "+m.away.score+"　"+zh(m.away.abbr,m.away.name);
     var evs=(m.events||[]).filter(function(e){ return e.goal||e.red||(showYellow&&e.yellow); });
-    evs=evs.slice(-maxRows).reverse(); // 最新在上
-    box.innerHTML="";
-    if(!evs.length){ box.innerHTML='<div class="row none">尚無進球事件</div>'; return; }
-    evs.forEach(function(e){
-      var d=document.createElement("div");
-      d.className="row "+(e.side==="h"?"hside":"aside2");
-      d.innerHTML='<span class="min">'+(e.clock||"")+'</span><span class="ic">'+icon(e)+'</span><span class="pl">'+(e.player||"")+'</span>';
-      box.appendChild(d);
-    });
+    var H=evs.filter(function(e){return e.side==="h";}).slice(-maxRows).reverse();
+    var A=evs.filter(function(e){return e.side!=="h";}).slice(-maxRows).reverse();
+    cH.innerHTML=""; cA.innerHTML="";
+    if(!H.length&&!A.length){ cH.innerHTML='<div class="row none">尚無事件</div>'; return; }
+    H.forEach(function(e){ cH.appendChild(row(e)); });
+    A.forEach(function(e){ cA.appendChild(row(e)); });
   }
 
   function normFetch(u){ return fetch(u,{cache:"no-store"}).then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); }); }
@@ -157,7 +165,7 @@
     $("bCopy").addEventListener("click",function(e){
       var p=new URLSearchParams(); p.set("clean","1");
       if(teamPick)p.set("team",teamPick); p.set("pos",pos); p.set("op",String(opac));
-      if(showYellow)p.set("yellow","1");
+      if(!showYellow)p.set("yellow","0");
       var url=location.href.split("#")[0].split("?")[0]+"?"+p.toString();
       navigator.clipboard.writeText(url).then(function(){ e.target.textContent="已複製!"; setTimeout(function(){e.target.textContent="複製 OBS 網址";},1500); })
       .catch(function(){ window.prompt("複製這個網址貼到 OBS:",url); });
