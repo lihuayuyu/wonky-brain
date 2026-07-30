@@ -421,7 +421,7 @@
 <header>
   <div class="brand">
     <h1>文字轉字幕</h1>
-    <div class="sub">歪腦袋小工具 · v1.0</div>
+    <div class="sub">歪腦袋小工具 · v1.1</div>
   </div>
   <a class="donate-btn" href="https://fernfern.bobaboba.me" target="_blank" rel="noopener">
     <svg class="donate-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -537,6 +537,19 @@
     <div class="section">
       <div class="section-title">時間細節</div>
       <div class="control-group">
+        <label>逗號停頓 (秒)</label>
+        <input type="number" id="commaPause" value="0.25" min="0" max="2" step="0.05">
+      </div>
+      <div class="control-group">
+        <label>句尾停頓 (秒)</label>
+        <input type="number" id="endPause" value="0.4" min="0" max="2" step="0.05">
+      </div>
+      <div style="font-size:11px;color:var(--ink-soft);line-height:1.6;margin-bottom:4px;">
+        💡 標點會讓 AI 配音停頓，字數算不到，要補時間才不會撞<br>
+        💡 逗號類（，、：；）給短停頓；句尾類（。？！…）給長停頓<br>
+        💡 還會撞 → 兩個數字一起調大；空格太多 → 一起調小；設 0 = 關閉
+      </div>
+      <div class="control-group">
         <label>句間間隔 (秒)</label>
         <input type="number" id="gapSec" value="0.3" min="0" max="5" step="0.1">
       </div>
@@ -546,7 +559,7 @@
       </div>
       <div class="control-group">
         <label>最長一句 (秒)</label>
-        <input type="number" id="maxSec" value="7.0" min="1" max="20" step="0.5">
+        <input type="number" id="maxSec" value="10.0" min="1" max="20" step="0.5">
       </div>
       <div class="control-group">
         <label>起始延遲 (秒)</label>
@@ -704,7 +717,7 @@ document.querySelectorAll('.mode-tab[data-speed]').forEach(t => {
   });
 });
 
-['cps', 'spc', 'gapSec', 'minSec', 'maxSec', 'startDelay'].forEach(id => {
+['cps', 'spc', 'gapSec', 'minSec', 'maxSec', 'startDelay', 'commaPause', 'endPause'].forEach(id => {
   $(id).addEventListener('input', () => rebuild());
 });
 
@@ -741,9 +754,24 @@ function calcDuration(text) {
     const spc = parseFloat($('spc').value) || 0.2;
     dur = charCount * spc;
   }
+  // 加上標點停頓：AI 配音遇到標點會停頓，字數算法看不到，要另外補時間
+  dur += countPausePenalty(text);
   const minSec = parseFloat($('minSec').value) || 1.0;
-  const maxSec = parseFloat($('maxSec').value) || 7.0;
+  const maxSec = parseFloat($('maxSec').value) || 10.0;
   return Math.max(minSec, Math.min(maxSec, dur));
+}
+
+/* ─── 標點停頓：算一句裡的標點會多花多少秒 ─── */
+function countPausePenalty(text) {
+  const commaPause = parseFloat($('commaPause').value);
+  const endPause = parseFloat($('endPause').value);
+  const cp = isNaN(commaPause) ? 0 : commaPause;
+  const ep = isNaN(endPause) ? 0 : endPause;
+  // 逗號類（短停頓）：， , 、 ：: ；;
+  const commaMarks = (text.match(/[，,、：:；;]/g) || []).length;
+  // 句尾類（長停頓）：。 ？ ！ ? ! … ─ ～
+  const endMarks = (text.match(/[。？！?!]|\.{3}|…|～/g) || []).length;
+  return commaMarks * cp + endMarks * ep;
 }
 
 function countDisplayChars(text) {
